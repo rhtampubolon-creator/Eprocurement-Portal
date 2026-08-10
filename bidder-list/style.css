@@ -1,0 +1,2210 @@
+    :root {
+      --bg: #f5f7fb; --card: #ffffff; --ink: #0f172a; --muted: #64748b;
+      --line: #e2e8f0; --brand: #075985; --brand-2: #0ea5e9; --soft: #e0f2fe;
+      --warning: #fff7ed; --green: #ecfdf5; --shadow: 0 18px 45px rgba(15, 23, 42, .08);
+      --radius: 18px;
+    }
+    
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif; color: var(--ink); background: radial-gradient(circle at top left, #e0f2fe 0, transparent 28rem), var(--bg); }
+    a { color: var(--brand); text-decoration: none; }
+    .app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+    header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.92); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+    
+    .topbar{
+
+        display:grid;
+
+        grid-template-columns:260px 1fr auto;
+
+        align-items:center;
+
+        gap:20px;
+
+        padding:14px 24px;
+
+    }
+
+    .brand{
+
+        display:flex;
+
+        align-items:center;
+
+        gap:12px;
+
+    }
+
+    .title{
+
+        text-align:center;
+
+    }
+
+    .actions{
+
+        display:flex;
+
+        align-items:center;
+
+        gap:10px;
+
+    }
+
+    .actions input{
+
+        width:220px;
+
+    }
+    
+    .brand p, .brand h2 { margin: 0; }
+    .brand h2 { font-size: 15px; line-height: 1.2; }
+    .brand p { color: var(--muted); font-size: 12px; }
+
+    .title h1{
+      margin:0;
+      font-size:34px;
+      line-height:1.1;
+    }
+
+    .title p{
+      margin-top:4px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    button, .button { border: 0; border-radius: 12px; padding: 10px 14px; background: var(--brand); color: white; cursor: pointer; font-weight: 600; box-shadow: 0 8px 20px rgba(7,89,133,.18); font-family: inherit; }
+    button.secondary { background: white; color: var(--brand); border: 1px solid #bae6fd; box-shadow: none; }
+    button:hover { filter: brightness(.98); transform: translateY(-1px); }
+    main { width: min(1440px, 100%); margin: 0 auto; padding: 24px; display: grid; grid-template-columns: 280px 1fr; gap: 22px; align-items: start; }
+    aside { position: sticky; top: 100px; background: rgba(255,255,255,.94); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 16px; }
+    aside h3 { margin: 0 0 12px; font-size: 15px; }
+    .nav-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; margin: 7px 0; padding: 11px 12px; border-radius: 12px; color: var(--ink); background: transparent; box-shadow: none; border: 1px solid transparent; text-align: left; }
+    .nav-btn span { color: var(--muted); font-size: 12px; margin-left: 8px; }
+    .nav-btn.active { background: var(--soft); border-color: #bae6fd; color: #075985; }
+    .sidebar-note { margin-top: 14px; padding: 12px; border-radius: 14px; background: #f8fafc; color: var(--muted); font-size: 12px; line-height: 1.45; border: 1px dashed #cbd5e1; }
+    .content { display: grid; gap: 18px; }
+    .cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+    .card, .panel { background: rgba(255,255,255,.96); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .card { padding: 16px; }
+    .card p { margin: 0; color: var(--muted); font-size: 12px; }
+    .card strong { display: block; margin-top: 6px; font-size: 28px; }
+    .panel-header { padding: 16px 18px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .panel-header h2 { margin: 0; font-size: 20px; }
+    .panel-header p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .toolbar { display: flex; gap: 9px; flex-wrap: wrap; align-items: center; }
+    input[type="search"] { width: min(360px, 100%); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font: inherit; background: #fff; }
+    .panel-body { padding: 18px; }
+    .meta-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .meta { padding: 6px; border-radius: 10px; background: #f8fafc; border: 1px solid var(--line); min-height: 74px; }
+    .meta small { display: block; color: var(--muted); margin-bottom: 6px; }
+    .meta strong { white-space: pre-wrap; font-size: 13px; }
+    .table-wrap { width: 100%; overflow: auto; border: 1px solid var(--line); border-radius: 14px; background: white; }
+    table { border-collapse: collapse; width: 100%; min-width: 900px; }
+    th, td { border-bottom: 1px solid #e5e7eb; border-right: 1px solid #eef2f7; padding: 9px 10px; vertical-align: top; text-align: left; font-size: 13px; white-space: pre-wrap; }
+    th { position: sticky; top: 0; z-index: 2; background: #075985; color: white; font-weight: 700; }
+    tbody tr:nth-child(even) td { background: #f8fafc; }
+    tbody tr:hover td { background: #e0f2fe; }
+    td[contenteditable="true"] { outline: 2px solid transparent; background-image: linear-gradient(to right, rgba(14,165,233,.08), rgba(14,165,233,.08)); }
+    td[contenteditable="true"]:focus { outline: 2px solid #38bdf8; background: white; }
+    .section-title { margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
+    .section-title h3 { margin: 0; font-size: 17px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 999px; background: var(--soft); color: var(--brand); font-size: 12px; font-weight: 700; }
+    .notice { padding: 13px 14px; border-radius: 14px; border: 1px solid #fed7aa; background: var(--warning); color: #7c2d12; margin: 10px 0; line-height: 1.5; }
+
+    /* ===========================================
+      RFQ NOTE AREA
+    =========================================== */
+
+    .rfq-note-area{
+        width:55%;
+        min-width:520px;
+        max-width:650px;
+    }
+
+    .contact-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .contact-card { padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: #fff; }
+    .contact-card h4 { margin: 0 0 5px; }
+    .contact-card p { margin: 4px 0; color: var(--muted); font-size: 13px; white-space: pre-wrap; }
+    .category-list { display: flex; flex-wrap: wrap; gap: 8px; }
+    .category-list span { background: #ecfdf5; color: #166534; border: 1px solid #bbf7d0; padding: 8px 10px; border-radius: 999px; font-size: 13px; }
+    footer { padding: 18px 24px; text-align: center; color: var(--muted); border-top: 1px solid var(--line); background: rgba(255,255,255,.8); }
+    .empty { color: #94a3b8; font-style: italic; }
+    .raw-grid table { min-width: 1200px; }
+
+    .save-status { font-size: 12px; color: var(--muted); margin-top: 8px; }
+    .table-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 8px 0 10px; }
+    .mini-btn { border-radius: 10px; padding: 7px 10px; font-size: 12px; box-shadow: none; }
+    .danger { background: #fee2e2 !important; color: #991b1b !important; border: 1px solid #fecaca !important; }
+    .ok { background: #dcfce7 !important; color: #166534 !important; border: 1px solid #bbf7d0 !important; }
+    .edit-hint { padding: 10px 12px; border-radius: 12px; border: 1px solid #bbf7d0; background: #f0fdf4; color: #166534; margin: 0 0 12px; font-size: 13px; line-height: 1.5; }
+    .row-number { color: #64748b; font-weight: 700; background: #f8fafc !important; min-width: 54px; }
+    .action-cell { min-width: 95px; white-space: nowrap; }
+    .hidden-input { display: none; }
+
+    .vendor-tools { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px; border-radius: 14px; background: #f8fafc; border: 1px solid var(--line); margin: 0 0 14px; }
+    .vendor-tools p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+    .vendor-tools strong { color: var(--ink); }
+    .vendor-select { min-width: 200px; width: 50%; border: 1px solid #bae6fd; border-radius: 10px; padding: 8px 10px; font-family: inherit; background: #fff; color: var(--ink); }
+    .autofill-cell { background: #f0fdf4 !important; color: #166534; }
+    .vendor-missing { display: inline-block; margin-top: 6px; color: #b45309; font-size: 12px; }
+
+    /* TAMPILAN LAYAR LANDSCAPE / WIDE SCREEN */
+    body.landscape-screen main {
+      width: 100%;
+      max-width: none;
+      grid-template-columns: 220px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+    }
+    body.landscape-screen .topbar {
+      min-height: 64px;
+      padding: 10px 16px;
+      gap: 10px;
+    }
+    
+    body.landscape-screen .brand{
+      min-width:0;
+    }
+    
+    body.landscape-screen .logo { 
+      width: 42px; 
+      height: 42px; 
+      border-radius: 12px; 
+    }
+    
+    body.landscape-screen .title h1 { 
+      font-size: clamp(16px, 1.8vw, 22px); 
+    }
+    
+    body.landscape-screen .title p { 
+      font-size: 12px; 
+    }
+    
+    body.landscape-screen .actions{
+      justify-self:end;
+      display:flex;
+      align-items:center;
+      justify-content:flex-end;
+      flex-wrap:nowrap;
+      gap:8px;
+      max-width:none;
+    }
+
+    body.landscape-screen button,
+    body.landscape-screen .button {
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    body.landscape-screen aside {
+      top: 82px;
+      padding: 12px;
+      border-radius: 14px;
+    }
+
+    body.landscape-screen .nav-btn {
+      padding: 9px 10px;
+      margin: 5px 0;
+      font-size: 13px;
+    }
+
+    body.landscape-screen .sidebar-note { 
+      font-size: 11px; 
+      padding: 10px; 
+    }
+    
+    body.landscape-screen .cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+    body.landscape-screen .card { 
+      padding: 10px 12px; 
+      border-radius: 14px; 
+    }
+    
+    body.landscape-screen .card strong { 
+      font-size: 20px; 
+      margin-top: 2px; 
+    }
+
+    body.landscape-screen .panel-header {
+      padding: 10px 12px;
+      gap: 8px;
+    }
+
+    body.landscape-screen .panel-header h2 { 
+      font-size: 17px; 
+    }
+    
+    body.landscape-screen .panel-header p { 
+      font-size: 12px; 
+    }
+    
+    body.landscape-screen .toolbar { 
+      gap: 6px; 
+    }
+
+    body.landscape-screen input[type="search"] {
+      width: 240px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    
+    body.landscape-screen .panel-body { 
+      padding: 10px; 
+    }
+    
+    body.landscape-screen .meta-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    /* =========================================================
+       TAMBAHAN: ATUR BESARAN KOLOM META BIDDERLIST
+       Berlaku untuk Company, No PR, Description, Open Date, dll
+       Letakkan setelah:
+       body.landscape-screen .meta-grid { ... }
+       ========================================================= */
+    
+    body.landscape-screen .meta-grid {
+      display: grid !important;
+      grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+      gap: 6px !important;
+      align-items: stretch;
+    }
+    
+    /* Ukuran box meta agar lebih ramping */
+    body.landscape-screen .meta {
+      min-height: 50px !important;
+      padding: 7px 9px !important;
+      border-radius: 10px !important;
+    }
+    
+    /* Label kecil */
+    body.landscape-screen .meta small {
+      font-size: 10px !important;
+      margin-bottom: 3px !important;
+    }
+    
+    /* Isi data */
+    body.landscape-screen .meta strong {
+      font-size: 11px !important;
+      line-height: 1.25 !important;
+    }
+    
+    /* =========================================================
+       URUTAN META CARD DI HTML BAPAK:
+       1 Company
+       2 No PR
+       3 Description
+       4 No RFQ
+       5 Revision
+       6 Open Date
+       7 Close Date
+       8 Est. Price Total
+       9 Cost Center
+       10 Cost Center detail
+       11 Type Quotation
+       12 Previous Winner PO
+       13 Previous Vendor Quote
+       ========================================================= */
+    
+    
+    /* Baris 1 */
+    body.landscape-screen .meta-grid .meta:nth-child(1) {
+      grid-column: span 1; /* Company */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(2) {
+      grid-column: span 2; /* No PR */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(3) {
+      grid-column: span 1; /* Description dibuat paling lebar */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(4) {
+      grid-column: span 3; /* No RFQ */
+    }
+
+
+    /* Baris 2 */
+    body.landscape-screen .meta-grid .meta:nth-child(5) {
+      grid-column: span 1; /* Revision */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(6) {
+      grid-column: span 1; /* Open Date */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(7) {
+      grid-column: span 1; /* Close Date */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(8) {
+      grid-column: span 1; /* Est. Price Total */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(9) {
+      grid-column: span 1; /* Cost Center */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(10) {
+      grid-column: span 2; /* Cost Center detail */
+    }
+    
+    
+    /* Baris 3 */
+    body.landscape-screen .meta-grid .meta:nth-child(11) {
+      grid-column: span 1; /* Type Quotation */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(12) {
+      grid-column: span 2; /* Previous Winner PO */
+    }
+    
+    body.landscape-screen .meta-grid .meta:nth-child(13) {
+      grid-column: span 2; /* Previous Vendor Quote */
+    }
+
+    body.landscape-screen .meta {
+      min-height: 58px;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+    body.landscape-screen .meta small { margin-bottom: 3px; font-size: 11px; }
+    body.landscape-screen .meta strong { font-size: 12px; }
+    body.landscape-screen .vendor-tools {
+      padding: 9px 10px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+    }
+    body.landscape-screen .vendor-tools p { font-size: 11px; }
+    body.landscape-screen .table-wrap {
+      max-height: calc(100vh - 260px);
+      overflow: auto;
+      border-radius: 12px;
+    }
+    body.landscape-screen table {
+      min-width: 1320px;
+      table-layout: fixed;
+    }
+
+    /* =========================================================
+       TAMBAHAN: ATUR LEBAR KOLOM BIDDERLIST
+       Letakkan setelah:
+       body.landscape-screen table { ... }
+       ========================================================= */
+    
+    /* Lebar total tabel. Naikkan kalau kolom masih terlalu sempit */
+    body.landscape-screen #viewBody table {
+      min-width: 1650px !important;
+      table-layout: fixed !important;
+    }
+    
+    /* 1. No */
+    body.landscape-screen #viewBody table th:nth-child(1),
+    body.landscape-screen #viewBody table td:nth-child(1) {
+      width: 55px !important;
+      min-width: 55px !important;
+      max-width: 55px !important;
+      text-align: center;
+    }
+    
+    /* 2. Name of Invited Supplier */
+    body.landscape-screen #viewBody table th:nth-child(2),
+    body.landscape-screen #viewBody table td:nth-child(2) {
+      width: 240px !important;
+      min-width: 240px !important;
+    }
+    
+    /* 3. Contact Person */
+    body.landscape-screen #viewBody table th:nth-child(3),
+    body.landscape-screen #viewBody table td:nth-child(3) {
+      width: 150px !important;
+      min-width: 150px !important;
+    }
+    
+    /* 4. No Telp */
+    body.landscape-screen #viewBody table th:nth-child(4),
+    body.landscape-screen #viewBody table td:nth-child(4) {
+      width: 130px !important;
+      min-width: 130px !important;
+    }
+    
+    /* 5. Email */
+    body.landscape-screen #viewBody table th:nth-child(5),
+    body.landscape-screen #viewBody table td:nth-child(5) {
+      width: 260px !important;
+      min-width: 260px !important;
+      word-break: break-word;
+    }
+    
+    /* 6. Company Status */
+    body.landscape-screen #viewBody table th:nth-child(6),
+    body.landscape-screen #viewBody table td:nth-child(6) {
+      width: 120px !important;
+      min-width: 120px !important;
+    }
+    
+    /* 7. Register Status */
+    body.landscape-screen #viewBody table th:nth-child(7),
+    body.landscape-screen #viewBody table td:nth-child(7) {
+      width: 130px !important;
+      min-width: 130px !important;
+    }
+    
+    /* 8. Accepted Date */
+    body.landscape-screen #viewBody table th:nth-child(8),
+    body.landscape-screen #viewBody table td:nth-child(8) {
+      width: 140px !important;
+      min-width: 140px !important;
+    }
+    
+    /* 9. Time */
+    body.landscape-screen #viewBody table th:nth-child(9),
+    body.landscape-screen #viewBody table td:nth-child(9) {
+      width: 95px !important;
+      min-width: 95px !important;
+    }
+    
+    /* 10. Notes */
+    body.landscape-screen #viewBody table th:nth-child(10),
+    body.landscape-screen #viewBody table td:nth-child(10) {
+      width: 180px !important;
+      min-width: 180px !important;
+    }
+    
+    /* 11. Remarks */
+    body.landscape-screen #viewBody table th:nth-child(11),
+    body.landscape-screen #viewBody table td:nth-child(11) {
+      width: 180px !important;
+      min-width: 180px !important;
+    }
+    
+    /* Supaya dropdown supplier mengikuti lebar kolom */
+    body.landscape-screen #viewBody .vendor-select {
+      width: 100% !important;
+      min-width: 0 !important;
+      font-size: 12px;
+    }
+    
+    /* Biar isi tabel tidak terlalu tinggi */
+    body.landscape-screen #viewBody th,
+    body.landscape-screen #viewBody td {
+      vertical-align: middle !important;
+      text-align: center !important;
+      white-space: normal;
+      word-break: break-word;
+    }
+        body.landscape-screen th,
+        body.landscape-screen td {
+          font-size: 12px;
+          padding: 6px 7px;
+          line-height: 1.25;
+        }
+
+    /* =========================================================
+       TAMBAHAN: CENTER & MIDDLE ALIGN UNTUK TABEL BIDDERLIST
+       Letakkan setelah pengaturan lebar kolom
+       ========================================================= */
+    
+    /* Semua header dan isi tabel menjadi center + middle */
+    body.landscape-screen #viewBody table th,
+    body.landscape-screen #viewBody table td {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+    
+    /* Khusus kolom supplier tetap rata tengah */
+    body.landscape-screen #viewBody table th:nth-child(2),
+    body.landscape-screen #viewBody table td:nth-child(2) {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+    
+    /* Dropdown supplier ikut center */
+    body.landscape-screen #viewBody .vendor-select {
+      text-align: center !important;
+      text-align-last: center !important;
+    }
+    
+    /* Email tetap rapi saat panjang */
+    body.landscape-screen #viewBody table td:nth-child(5) {
+      text-align: center !important;
+      vertical-align: middle !important;
+      word-break: break-word;
+    }
+    
+    body.landscape-screen .vendor-select {
+      min-width: 210px;
+      padding: 7px 8px;
+      font-size: 12px;
+    }
+    
+    body.landscape-screen .notice,
+    body.landscape-screen .edit-hint { font-size: 12px; padding: 9px 10px; margin: 8px 0; }
+    body.landscape-screen footer { padding: 10px 16px; font-size: 12px; }
+    
+    @media (min-width: 1600px) {
+      body.landscape-screen main { grid-template-columns: 240px minmax(0, 1fr); }
+      body.landscape-screen table { min-width: 1450px; }
+      body.landscape-screen .table-wrap { max-height: calc(100vh - 245px); }
+    }
+    
+    
+    @media (max-width: 980px) { .topbar { align-items: flex-start; flex-direction: column; } .brand, .actions { min-width: 0; width: 100%; } .actions { justify-content: flex-start; } .title { text-align: left; } main { grid-template-columns: 1fr; padding: 16px; } aside { position: static; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .meta-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .contact-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .cards, .meta-grid { grid-template-columns: 1fr; } table { min-width: 760px; } }
+    
+    /* LANDSCAPE PRINT / SAVE AS PDF */
+      @page { size: A4 landscape; margin: 8mm; }
+    
+       
+    @media print {
+    header, aside, .toolbar, footer, .cards, .vendor-tools, .notice, .edit-hint, .table-actions, .save-status { display: none !important; }
+    html, body { width: 297mm; min-height: 210mm; background: white !important; }
+    body { margin: 0 !important; color: #000 !important; }
+    main { display: block !important; width: 100% !important; max-width: 100% !important; margin: 0 !important; padding: 0 !important; }
+      .content { display: block !important; width: 100% !important; }
+      .panel, .card { box-shadow: none !important; border: 0 !important; border-radius: 0 !important; background: white !important; }
+      .panel-header { display: block !important; padding: 0 0 6px !important; border: 0 !important; }
+      .panel-header h2 { font-size: 14px !important; margin-bottom: 2px !important; }
+      .panel-header p { font-size: 9px !important; color: #000 !important; }
+      .panel-body { padding: 0 !important; }
+      .meta-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; margin-bottom: 6px !important; }
+      .meta { min-height: 0 !important; padding: 4px !important; border: 1px solid #000 !important; border-radius: 0 !important; background: #fff !important; }
+      .meta small, .meta strong { font-size: 8px !important; color: #000 !important; }
+      .table-wrap { overflow: visible !important; border: 0 !important; border-radius: 0 !important; }
+      table { width: 100% !important; min-width: 0 !important; table-layout: fixed !important; border-collapse: collapse !important; font-size: 8px !important; }
+      th, td { border: 1px solid #000 !important; padding: 3px 4px !important; font-size: 8px !important; color: #000 !important; white-space: normal !important; word-break: break-word !important; }
+      th { position: static !important; background: #d8e4bc !important; color: #000 !important; font-weight: 700 !important; text-align: center !important; }
+      tbody tr:nth-child(even) td, tbody tr:hover td, .autofill-cell { background: #fff !important; color: #000 !important; }
+      .vendor-select { border: 0 !important; padding: 0 !important; appearance: none !important; background: transparent !important; font-size: 8px !important; width: 100% !important; }
+    }
+    
+    /* =========================================================
+       AUTO CENTER & MIDDLE SAAT EDIT / INPUT DATA
+       Berlaku untuk semua kolom BidderList, termasuk Accepted Date
+       Letakkan paling bawah sebelum tag style penutup
+       ========================================================= */
+    
+    body.landscape-screen #viewBody table th,
+    body.landscape-screen #viewBody table td {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+    
+    /* Saat cell diedit */
+    body.landscape-screen #viewBody table td[contenteditable="true"],
+    body.landscape-screen #viewBody table td[contenteditable="true"]:focus {
+      text-align: center !important;
+      vertical-align: middle !important;
+      display: table-cell !important;
+    }
+    
+    /* Saat isi masih kosong maupun sudah diisi tetap di tengah */
+    body.landscape-screen #viewBody table td:empty::before {
+      content: "\00a0";
+    }
+    
+    /* Dropdown supplier juga center */
+    body.landscape-screen #viewBody .vendor-select {
+      text-align: center !important;
+      text-align-last: center !important;
+    }
+    
+    /* Kolom Accepted Date = kolom ke-8 */
+    body.landscape-screen #viewBody table th:nth-child(8),
+    body.landscape-screen #viewBody table td:nth-child(8),
+    body.landscape-screen #viewBody table td:nth-child(8)[contenteditable="true"],
+    body.landscape-screen #viewBody table td:nth-child(8)[contenteditable="true"]:focus {
+      text-align: center !important;
+      vertical-align: middle !important;
+    }
+
+    /* TAMBAHAN: NO PR FILTER DARI PROCUREMENT ADMIN */
+    
+    .meta.no-pr-filter {
+      background: #eff6ff !important;
+      border-color: #93c5fd !important;
+    }
+    
+    .meta-select {
+      width: 100%;
+      min-height: 30px;
+      border: 1px solid #93c5fd;
+      border-radius: 8px;
+      padding: 5px 7px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      background: #fff;
+    }
+    
+    .proc-admin-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 9px 10px;
+      margin: 0 0 10px;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+    }
+    
+    .proc-admin-tools p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    
+    /* TAMBAHAN: INPUT DATE UNTUK OPEN DATE & CLOSE DATE */
+    .meta-date-input {
+      width: 100%;
+      min-height: 28px;
+      border: 1px solid #93c5fd;
+      border-radius: 8px;
+      padding: 5px 7px;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+      text-align: center;
+    }
+    
+    .meta.date-editable {
+      background: #eff6ff !important;
+      border-color: #93c5fd !important;
+    }
+    
+    /* TAMBAHAN: VENDOR TOOLS BERURUTAN KE BAWAH */
+    .vendor-tools-vertical {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+    
+    .vendor-button-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    
+    .vendor-button-list button {
+      width: 260px;
+      text-align: left;
+    }
+    
+    /* TAMBAHAN: PROCUREMENT ADMIN TOOLS BERURUTAN KE BAWAH */
+    .proc-admin-tools-vertical {
+      display: grid !important;
+      grid-template-columns: 1fr !important;
+      gap: 10px !important;
+    }
+    
+    .proc-admin-button-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    
+    .proc-admin-button-list button {
+      width: 280px;
+      text-align: left;
+    }
+    
+    /* TAMBAHAN: VENDOR & PROCUREMENT SOURCE SEBELAHAN */
+    .source-tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      align-items: stretch;
+      margin: 0 0 14px;
+    }
+    
+    /* Hilangkan margin masing-masing box saat masuk grid */
+    .source-tools-grid .proc-admin-tools,
+    .source-tools-grid .vendor-tools {
+      margin: 0 !important;
+      height: 100%;
+    }
+    
+    /* Tombol di dalam box tetap rapi */
+    .source-tools-grid .toolbar {
+      justify-content: flex-start;
+    }
+    
+    /* Responsive: kalau layar kecil jadi atas-bawah */
+    @media (max-width: 980px) {
+      .source-tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    /* TAMBAHAN: SOURCE TOOLS 3 KOLOM
+   Kiri  : Procurement Admin Source
+   Tengah: Vendor Company Source
+   Kanan : Dolar USD/IDR
+    */
+    .source-tools-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 220px;
+      gap: 12px;
+      align-items: stretch;
+      margin: 0 0 14px;
+    }
+    
+    .source-tools-grid .proc-admin-tools,
+    .source-tools-grid .vendor-tools,
+    .source-tools-grid .dollar-tools {
+      margin: 0 !important;
+      height: 100%;
+    }
+    
+    .dollar-tools {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(200,255,255,.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    
+    .dollar-tools p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    
+    .dollar-tools strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+    }
+    
+    .dollar-tools small {
+      display: block;
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+    
+    /* Responsive: layar kecil jadi atas-bawah */
+    @media (max-width: 980px) {
+      .source-tools-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+
+/* ===========================================
+   DELIVERY LOCATION
+=========================================== */
+
+.delivery-option{
+    display:flex;
+    gap:25px;
+    align-items:center;
+    margin:12px 0;
+    flex-wrap:wrap;
+}
+
+.delivery-option label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    cursor:pointer;
+    font-weight:600;
+    color:#003366;
+}
+
+.delivery-option input[type="radio"]{
+    cursor:pointer;
+}
+
+.delivery-address{
+
+    background:#fff8a6;
+
+    border:2px solid #2c4cff;
+
+    border-radius:6px;
+
+    padding:15px 18px;
+
+    white-space:pre-line;
+
+    line-height:1.7;
+
+    margin-top:8px;
+
+    font-size:14px;
+
+    color:#222;
+}
+
+.action-dropdown{
+    position:relative;
+    display:inline-block;
+}
+
+.action-btn{
+    min-width:90px;
+    height:36px;
+    padding:0 16px;
+    border-radius:10px;
+    white-space:nowrap;
+}
+
+.action-menu{
+
+    display:none;
+
+    position:absolute;
+
+    right:0;
+
+    top:calc(100% + 6px);
+
+    min-width:230px;
+
+    background:#fff;
+
+    border:1px solid #dbe3ef;
+
+    border-radius:10px;
+
+    box-shadow:0 8px 24px rgba(0,0,0,.15);
+
+    z-index:999;
+
+}
+
+.action-dropdown:hover .action-menu{
+    display:block;
+}
+
+.action-menu button{
+
+    width:100%;
+
+    padding:10px 14px;
+
+    border:none;
+
+    background:#fff;
+
+    color:#222;
+
+    text-align:left;
+
+    box-shadow:none;
+
+    border-radius:0;
+
+}
+
+.action-menu button:hover{
+
+    background:#eef6ff;
+
+}
+
+.action-menu hr{
+
+    margin:4px 0;
+
+    border:none;
+
+    border-top:1px solid #e5e7eb;
+
+}
+
+/* ==========================
+   SIDEBAR COLLAPSE
+========================== */
+
+main{
+    display:grid;
+    grid-template-columns:280px 1fr;
+    transition:grid-template-columns .3s ease;
+}
+
+aside{
+    transition:all .3s ease;
+    overflow:hidden;
+}
+
+/* sidebar mengecil */
+body.sidebar-hide main{
+    grid-template-columns:0px 1fr;
+}
+
+body.sidebar-hide aside{
+    transform:translateX(-100%);
+    opacity:0;
+    pointer-events:none;
+}
+
+#sidebarHover{
+
+    position:fixed;
+
+    left:0;
+
+    top:0;
+
+    width:10px;
+
+    height:100vh;
+
+    z-index:9999;
+
+}
+/* =========================================================
+   BIDDERLIST: KOLOM NO COMPANY + NO PR BISA DIKETIK
+   ========================================================= */
+body.landscape-screen #viewBody table {
+  min-width: 1800px !important;
+}
+
+/* 1. No */
+body.landscape-screen #viewBody table th:nth-child(1),
+body.landscape-screen #viewBody table td:nth-child(1) {
+  width: 55px !important;
+  min-width: 55px !important;
+  max-width: 55px !important;
+}
+
+/* 2. No Company (read-only dari Vendor Company) */
+body.landscape-screen #viewBody table th:nth-child(2),
+body.landscape-screen #viewBody table td:nth-child(2) {
+  width: 145px !important;
+  min-width: 145px !important;
+  max-width: 145px !important;
+  text-align: center !important;
+}
+
+/* 3. Name of Invited Supplier */
+body.landscape-screen #viewBody table th:nth-child(3),
+body.landscape-screen #viewBody table td:nth-child(3) {
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
+}
+
+/* 4. Contact Person */
+body.landscape-screen #viewBody table th:nth-child(4),
+body.landscape-screen #viewBody table td:nth-child(4) {
+  width: 150px !important;
+  min-width: 150px !important;
+}
+
+/* 5. No Telp */
+body.landscape-screen #viewBody table th:nth-child(5),
+body.landscape-screen #viewBody table td:nth-child(5) {
+  width: 130px !important;
+  min-width: 130px !important;
+}
+
+/* 6. Email */
+body.landscape-screen #viewBody table th:nth-child(6),
+body.landscape-screen #viewBody table td:nth-child(6) {
+  width: 260px !important;
+  min-width: 260px !important;
+  word-break: break-word;
+}
+
+/* 7. Company Status */
+body.landscape-screen #viewBody table th:nth-child(7),
+body.landscape-screen #viewBody table td:nth-child(7) {
+  width: 120px !important;
+  min-width: 120px !important;
+}
+
+/* 8. Register Status */
+body.landscape-screen #viewBody table th:nth-child(8),
+body.landscape-screen #viewBody table td:nth-child(8) {
+  width: 130px !important;
+  min-width: 130px !important;
+}
+
+/* 9. Accepted Date */
+body.landscape-screen #viewBody table th:nth-child(9),
+body.landscape-screen #viewBody table td:nth-child(9),
+body.landscape-screen #viewBody table td:nth-child(9)[contenteditable="true"],
+body.landscape-screen #viewBody table td:nth-child(9)[contenteditable="true"]:focus {
+  width: 140px !important;
+  min-width: 140px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* 10. Time */
+body.landscape-screen #viewBody table th:nth-child(10),
+body.landscape-screen #viewBody table td:nth-child(10) {
+  width: 95px !important;
+  min-width: 95px !important;
+}
+
+/* 11. Notes */
+body.landscape-screen #viewBody table th:nth-child(11),
+body.landscape-screen #viewBody table td:nth-child(11) {
+  width: 180px !important;
+  min-width: 180px !important;
+}
+
+/* 12. Remarks */
+body.landscape-screen #viewBody table th:nth-child(12),
+body.landscape-screen #viewBody table td:nth-child(12) {
+  width: 180px !important;
+  min-width: 180px !important;
+}
+
+.meta.no-pr-filter .meta-select {
+  cursor: text;
+}
+
+
+/* No PR editable combobox: dapat diketik manual atau dipilih dari daftar */
+.editable-select-wrap {
+  position: relative;
+  width: 100%;
+}
+.editable-select-wrap .editable-select-input {
+  width: 100%;
+  padding-right: 34px !important;
+  box-sizing: border-box;
+}
+.editable-select-toggle {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  bottom: 1px;
+  width: 32px;
+  border: 0;
+  border-left: 1px solid #bae6fd;
+  border-radius: 0 9px 9px 0;
+  background: #f0f9ff;
+  color: #075985;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+}
+.editable-select-toggle:hover { background: #e0f2fe; }
+.editable-select-toggle:focus-visible { outline: 2px solid #38bdf8; outline-offset: 1px; }
+
+/* ===== Integrated CQS workspace ===== */
+.nav-btn.is-dummy { opacity: .72; }
+.nav-btn.is-dummy span { color: #f59e0b; }
+.cqs-select-cell { text-align: center; min-width: 82px; }
+.cqs-select-cell input { width: 18px; height: 18px; cursor: pointer; }
+.cqs-status-card { border-radius: 12px; padding: 18px; margin-bottom: 16px; border: 1px solid; }
+.cqs-status-card.ready { background: #ecfdf5; border-color: #10b981; }
+.cqs-status-card.dummy { background: #fffbeb; border-color: #f59e0b; }
+.cqs-status-card h3 { margin: 0 0 6px; }
+.cqs-status-card p { margin: 0; }
+.cqs-vendor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-bottom: 16px; }
+.cqs-vendor-card { border: 1px solid #d1d5db; border-radius: 12px; padding: 14px; background: white; }
+.cqs-vendor-card small, .cqs-vendor-card strong { display: block; }
+.cqs-vendor-card strong { margin: 5px 0; }
+.cqs-vendor-card p { margin: 5px 0; white-space: pre-wrap; }
+.cqs-vendor-card pre { white-space: pre-wrap; font-family: inherit; font-size: 12px; margin: 8px 0 0; }
+.rfq-pdf-export { width: 190mm; background: #fff; color: #111; padding: 8mm; position: fixed; left: -99999px; top: 0; z-index: -1; }
+.rfq-pdf-export h1 { text-align: center; font-size: 18px; }
+.rfq-pdf-export h2 { text-align: center; font-size: 12px; font-weight: normal; margin-bottom: 12px; }
+.rfq-pdf-export .table-wrap { overflow: visible; }
+.rfq-pdf-export table { width: 100%; border-collapse: collapse; font-size: 9px; }
+.rfq-pdf-export th, .rfq-pdf-export td { border: 1px solid #777; padding: 3px; }
+.rfq-pdf-export .table-actions, .rfq-pdf-export .edit-hint, .rfq-pdf-export button, .rfq-pdf-export input, .rfq-pdf-export select { display: none !important; }
+@media (max-width: 900px) { .cqs-vendor-grid { grid-template-columns: 1fr; } }
+.nav-btn:disabled { cursor: not-allowed; opacity: .55; }
+.cqs-order-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;margin-left:6px;border-radius:999px;background:#0284c7;color:#fff;font-size:11px;font-weight:700;vertical-align:top}
+
+
+/* =========================================================
+   MANUAL COLUMN RESIZE
+   Geser garis kanan header untuk mengatur lebar kolom.
+========================================================= */
+#viewBody .manual-resizable-table {
+  table-layout: fixed !important;
+  width: max-content !important;
+  min-width: 100% !important;
+}
+#viewBody .manual-resizable-table th,
+#viewBody .manual-resizable-table td {
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+}
+#viewBody .manual-resizable-header {
+  position: relative !important;
+}
+#viewBody .column-resize-handle {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 9px;
+  height: 100%;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  z-index: 50;
+}
+#viewBody .column-resize-handle::after {
+  content: "";
+  position: absolute;
+  top: 15%;
+  bottom: 15%;
+  left: 4px;
+  width: 1px;
+  background: rgba(255,255,255,.38);
+}
+#viewBody .column-resize-handle:hover::after,
+body.is-resizing-column #viewBody .column-resize-handle::after {
+  width: 2px;
+  background: #fbbf24;
+}
+body.is-resizing-column,
+body.is-resizing-column * {
+  cursor: col-resize !important;
+  user-select: none !important;
+}
+
+
+/* Phase 1 revision: Multiple Email aktif */
+.communication-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  border: 1px solid #bae6fd;
+  border-radius: 14px;
+  background: #f0f9ff;
+}
+.communication-card h3 { margin: 0 0 5px; color: #075985; }
+.communication-card p { margin: 0; color: #475569; }
+.communication-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.multiple-email-mode-tabs {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border: 1px solid #cbd5e1;
+  border-radius: 11px;
+  background: #f8fafc;
+}
+.multiple-email-mode-tabs button {
+  min-width: 112px;
+  padding: 8px 13px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #475569;
+  font-weight: 700;
+  cursor: pointer;
+}
+.multiple-email-mode-tabs button.active {
+  background: #0f766e;
+  color: #fff;
+  box-shadow: 0 2px 7px rgba(15, 118, 110, .22);
+}
+.multiple-email-actions { margin: 14px 0 18px; }
+.multiple-email-actions table { min-width: 900px; }
+.email-readiness { display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.email-readiness.ready { color: #166534; background: #dcfce7; }
+.email-readiness.missing { color: #991b1b; background: #fee2e2; }
+.email-action-cell { display: flex; gap: 6px; min-width: 190px; }
+.email-action-cell button:disabled { cursor: not-allowed; opacity: .45; }
+.email-preview-dialog {
+  width: min(760px, calc(100vw - 36px));
+  max-height: calc(100vh - 40px);
+  border: 0;
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, .28);
+}
+.email-preview-dialog::backdrop { background: rgba(15, 23, 42, .48); }
+.email-preview-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid #e2e8f0; }
+.email-preview-header h3 { margin: 0; }
+.email-preview-meta { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; padding: 16px 18px; margin: 0; }
+.email-preview-meta dt { font-weight: 700; color: #475569; }
+.email-preview-meta dd { margin: 0; overflow-wrap: anywhere; }
+.email-preview-meta pre { margin: 0; white-space: pre-wrap; font: inherit; }
+.email-preview-body { margin: 0 18px 18px; padding: 16px; min-height: 210px; white-space: pre-wrap; border: 1px solid #e2e8f0; border-radius: 12px; background: #f8fafc; font: inherit; line-height: 1.55; }
+@media (max-width: 760px) {
+  .communication-card { align-items: stretch; flex-direction: column; }
+  .email-preview-meta { grid-template-columns: 1fr; }
+}
+
+
+/* Phase 2: RFQ Item Number reference */
+.rfq-reference-notice { margin-bottom: 10px; }
+.rfq-reference-actions { gap: 8px; align-items: center; flex-wrap: wrap; }
+.rfq-item-table td.rfq-reference-readonly {
+  background: #f4f7fb;
+  color: #344054;
+  cursor: default;
+  white-space: normal;
+  min-width: 120px;
+}
+.rfq-item-table td.item-number-cell {
+  min-width: 135px;
+  font-weight: 700;
+}
+.ws-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: #475467;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.ws-status.active { background: #dcfae6; color: #067647; }
+.ws-status.inactive { background: #fee4e2; color: #b42318; }
+.ws-status.not-found { background: #f2f4f7; color: #667085; }
+.ws-status.checking { background: #fef0c7; color: #93370d; }
+
+/* Phase 2 revision: active RFQ checklist and selectable Terms & Conditions */
+.rfq-requirement-table .rfq-check-cell {
+  width: 92px;
+  min-width: 92px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.rfq-requirement-table .rfq-check-cell input[type="checkbox"],
+.rfq-term-check input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #0b648c;
+}
+
+.rfq-requirement-table .rfq-check-cell input[type="checkbox"]:disabled,
+.rfq-term-check input[type="checkbox"]:disabled {
+  cursor: not-allowed;
+  opacity: .72;
+}
+
+.rfq-check-symbol {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.rfq-term-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.rfq-term-list {
+  display: grid;
+  gap: 8px;
+}
+
+.rfq-term-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+}
+
+.rfq-term-check {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 46px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff7ed;
+}
+
+.rfq-term-row:not(.selected) .rfq-term-text {
+  opacity: .62;
+  background: #f8fafc;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.rfq-term-text {
+  margin: 0;
+  min-height: 46px;
+}
+
+.rfq-term-text[contenteditable="true"] {
+  outline: 2px dashed transparent;
+}
+
+.rfq-term-text[contenteditable="true"]:focus {
+  outline-color: #0b648c;
+  background: #fff;
+}
+
+.rfq-terms-export .notice {
+  display: block !important;
+  margin: 5px 0;
+}
+
+.rfq-pdf-export .rfq-check-symbol {
+  display: table-cell !important;
+}
+
+
+/* Phase 2 Rev 4 */
+.bidder-template-view-btn { white-space: nowrap; }
+.bidder-template-preview-dialog {
+  width: min(1500px, calc(100vw - 30px));
+  max-width: none;
+  max-height: calc(100vh - 30px);
+  padding: 0;
+  border: 0;
+  border-radius: 14px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, .32);
+}
+.bidder-template-preview-dialog::backdrop { background: rgba(15, 23, 42, .58); }
+.bidder-preview-header {
+  position: sticky; top: 0; z-index: 2;
+  display: flex; justify-content: space-between; gap: 16px; align-items: center;
+  padding: 14px 18px; background: #fff; border-bottom: 1px solid #d0d5dd;
+}
+.bidder-preview-header h3, .bidder-preview-header p { margin: 0; }
+.bidder-preview-header p { margin-top: 3px; color: #667085; }
+.bidder-preview-body { padding: 18px; overflow: auto; background: #e5e7eb; }
+.bidder-template-sheet {
+  position: relative; min-width: 1280px; padding: 22px 24px 28px;
+  color: #111827; background: #fff; border: 1px solid #111827;
+  font-family: Arial, sans-serif;
+}
+.bidder-template-brand { font-size: 30px; font-weight: 800; color: #0b4f6c; line-height: .9; }
+.bidder-template-brand span { display: block; margin-left: 74px; font-size: 18px; color: #0d9488; }
+.bidder-template-company {
+  position: absolute; top: 26px; left: 30%; right: 25%;
+  text-align: center; font-family: Georgia, serif; font-size: 20px; font-weight: 700;
+}
+.bidder-template-doc-actions { position: absolute; top: 14px; right: 24px; display: grid; gap: 5px; }
+.bidder-template-doc-actions span {
+  min-width: 52px; padding: 6px 10px; text-align: center; color: #fff;
+  background: #477db3; border: 1px solid #17365d; border-radius: 5px;
+}
+.bidder-template-meta {
+  min-height: 28px; padding: 7px 9px; border: 1px solid #111827;
+  font-family: Georgia, serif; font-size: 13px;
+}
+.bidder-template-pr { margin-top: 28px; width: 46%; }
+.bidder-template-rfq { position: absolute; top: 86px; left: 47%; width: 28%; }
+.bidder-template-open { position: absolute; top: 86px; left: 75%; width: 12%; }
+.bidder-template-close { position: absolute; top: 86px; right: 24px; width: 12%; }
+.bidder-template-description { width: 72%; }
+.bidder-template-estimate { position: absolute; top: 115px; right: 24px; width: 26%; text-align: center; }
+.bidder-template-table-wrap { margin-top: 8px; overflow: hidden; border: 1px solid #111827; }
+.bidder-template-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 11px; }
+.bidder-template-table th, .bidder-template-table td {
+  padding: 6px 5px; border: 1px solid #111827; vertical-align: middle; overflow-wrap: anywhere;
+}
+.bidder-template-table th { background: #dce8bd; text-align: center; }
+.bidder-template-table .supplier-wide { width: 18%; }
+.bidder-template-footer-grid {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; min-height: 110px;
+  border: 1px solid #111827; border-top: 0;
+}
+.bidder-template-footer-grid > div { padding: 10px; border-right: 1px solid #111827; white-space: normal; }
+.bidder-template-footer-grid > div:last-child { border-right: 0; }
+
+.rfq-main-table { margin-bottom: 12px; }
+.rfq-main-table th { background: #d9ead3; color: #17365d; }
+.rfq-main-table td[contenteditable="true"] { background: #fff; }
+
+/* Tabel Description (kiri) dan Reference Internal Item (kanan) sebelahan. */
+.rfq-tables-row { display: flex; align-items: flex-start; gap: 16px; }
+.rfq-tables-row .rfq-main-table { flex: 0 1 30%; width: 30%; min-width: 0; margin-bottom: 0; }
+.rfq-tables-row .rfq-internal-reference { flex: 1 1 70%; width: 70%; min-width: 0; margin: 0; }
+@media (max-width: 1180px) {
+  .rfq-tables-row { flex-direction: column; }
+  .rfq-tables-row .rfq-main-table,
+  .rfq-tables-row .rfq-internal-reference { flex-basis: auto; width: 100%; }
+}
+
+/* Kolom Description mengikuti banyaknya kata (word-wrap), bukan satu baris panjang
+   yang butuh scroll horizontal. */
+#viewBody .rfq-main-table.manual-resizable-table,
+#viewBody .rfq-main-table .manual-resizable-table { width: 100% !important; min-width: 100% !important; }
+.rfq-main-table th:nth-child(1), .rfq-main-table td:nth-child(1) { width: 6%; }
+.rfq-main-table th:nth-child(2), .rfq-main-table td:nth-child(2) {
+  width: auto;
+  white-space: normal !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.rfq-main-table th:nth-child(3), .rfq-main-table td:nth-child(3) { width: 11%; }
+.rfq-main-table th:nth-child(4), .rfq-main-table td:nth-child(4) { width: 11%; }
+
+.rfq-internal-reference {
+  margin: 8px 0 18px; border: 1px solid #9ec5e5; border-radius: 12px;
+  background: #eff7fd; overflow: hidden;
+}
+.rfq-internal-reference > summary {
+  padding: 11px 14px; cursor: pointer; color: #0b4f6c; font-weight: 800; background: #dbeefd;
+}
+.rfq-reference-caption { padding: 9px 14px; color: #344054; font-size: 12px; border-bottom: 1px solid #b8d8ee; }
+.rfq-reference-table { margin: 0; border: 0; border-radius: 0; }
+.rfq-reference-table th { background: #bfdcf1; color: #17365d; }
+.rfq-item-table td.rfq-reference-input { background: #fff8dc; color: #713f12; font-weight: 600; }
+.rfq-reference-table .reference-action-header, .rfq-reference-table .reference-actions { background: #e8f1f8; }
+.rfq-reference-table .reference-actions { min-width: 155px; }
+.rfq-requirement-table th { background: #d9ead3; }
+.rfq-terms-export .notice, .rfq-requirement-table td { break-inside: avoid; }
+.save-status { max-width: 360px; }
+.rfq-pdf-export .rfq-internal-reference,
+.rfq-pdf-export .rfq-reference-actions,
+.rfq-pdf-export .reference-actions { display: none !important; }
+@media (max-width: 900px) {
+  .bidder-template-preview-dialog { width: calc(100vw - 12px); max-height: calc(100vh - 12px); }
+}
+
+/* Phase 2 Rev 5: View dokumen hasil convert pada folder Procurement */
+.procurement-document-view-group{display:inline-flex;gap:8px;align-items:center;padding:4px;border:1px solid #cfd8e3;border-radius:10px;background:#f8fafc}
+.procurement-document-action-set{display:inline-flex;align-items:stretch}
+.stored-document-view-btn{white-space:nowrap}
+.procurement-document-action-set .stored-document-view-btn{border-radius:8px 0 0 8px}
+.document-save-folder-btn{white-space:nowrap;border-left:0;border-radius:0 8px 8px 0;color:#124b7a;font-weight:700}
+.document-save-folder-btn:not(:disabled):hover{background:#dceeff;border-color:#2f6fab}
+.document-save-folder-btn:disabled{opacity:.48;cursor:not-allowed}
+.stored-document-view-btn.is-available{border-color:#2f6fab;background:#eaf4ff;color:#124b7a;font-weight:700}
+.stored-document-view-btn.is-current-view.is-available{background:#2f6fab;color:#fff}
+.stored-document-view-btn:disabled{opacity:.48;cursor:not-allowed}
+.stored-document-refresh-btn{min-width:34px;padding-inline:8px}
+.stored-document-refresh-btn.is-loading{animation:document-refresh-spin 1s linear infinite}
+@keyframes document-refresh-spin{to{transform:rotate(360deg)}}
+.stored-procurement-document-dialog{width:min(96vw,1500px);height:min(94vh,980px);padding:0;border:0;border-radius:14px;box-shadow:0 24px 80px rgba(15,23,42,.35);overflow:hidden}
+.stored-procurement-document-dialog::backdrop{background:rgba(15,23,42,.62)}
+.stored-document-viewer-header{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:12px 16px;border-bottom:1px solid #d0d5dd;background:#fff}
+.stored-document-viewer-header h3,.stored-document-viewer-header p{margin:0}.stored-document-viewer-header p{margin-top:3px;color:#667085;font-size:12px}
+.stored-document-viewer-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.stored-document-back-btn{font-weight:700;min-width:92px}.stored-document-excel-btn{border-color:#217346;color:#145c35;font-weight:700}.stored-document-excel-btn:not(:disabled):hover{background:#e8f5ee}.stored-document-save-back-btn{border-color:#2f6fab;background:#2f6fab;color:#fff;font-weight:700}.stored-document-save-back-btn:not(:disabled):hover{background:#245a8c}.stored-document-save-back-btn:disabled,.stored-document-excel-btn:disabled{opacity:.55;cursor:not-allowed}.stored-document-viewer-body{height:calc(100% - 72px);background:#eef2f6}
+.stored-document-viewer-body iframe{width:100%;height:100%;border:0;background:#fff}
+@media(max-width:900px){.procurement-document-view-group{width:100%;overflow:auto}.stored-procurement-document-dialog{width:calc(100vw - 10px);height:calc(100vh - 10px)}.stored-document-viewer-header{align-items:flex-start;flex-direction:column}.stored-document-viewer-body{height:calc(100% - 118px)}}
+
+
+/* =========================================================
+   PATCH EPROCUREMENT(4): USD SNAPSHOT ONLY + CQS EXCLUSION
+   Procurement Admin/Vendor source cards tetap sync di background
+   dan tidak lagi dirender. Hanya kartu kurs snapshot PR ditampilkan.
+========================================================= */
+.source-tools-grid.source-tools-grid-dollar-only {
+  display: grid;
+  grid-template-columns: minmax(280px, 430px);
+  justify-content: end;
+  align-items: stretch;
+  gap: 0;
+  margin: 0 0 14px;
+}
+
+.source-tools-grid-dollar-only .dollar-tools {
+  width: 100%;
+  min-height: 92px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.cqs-exclusion-cell {
+  min-width: 230px;
+  white-space: normal;
+}
+
+.cqs-exclusion-cell select {
+  width: 100%;
+  min-width: 220px;
+  padding: 7px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+}
+
+.cqs-exclusion-cell.is-selected {
+  text-align: center;
+  color: var(--muted);
+}
+
+.cqs-exclusion-cell.is-missing {
+  background: #fff4f4;
+  color: #a11616;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .source-tools-grid.source-tools-grid-dollar-only {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+}
+
+
+/* =========================================================
+   REVISION 2026-07-26 R3
+   - Source card hanya kurs USD/IDR
+   - Meta dan tabel menyesuaikan ruang secara otomatis
+   - Lebar manual tetap opsional setelah user menggeser handle
+========================================================= */
+.source-tools-grid.source-tools-grid-dollar-only {
+  display: grid !important;
+  grid-template-columns: minmax(230px, 420px) !important;
+  justify-content: start !important;
+  gap: 10px !important;
+}
+
+body.landscape-screen .meta-grid {
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)) !important;
+  align-items: stretch !important;
+}
+
+body.landscape-screen .meta-grid .meta:nth-child(n) {
+  grid-column: auto !important;
+  min-width: 0 !important;
+}
+
+#viewBody .table-wrap {
+  width: 100% !important;
+  overflow-x: auto !important;
+}
+
+body.landscape-screen #viewBody table,
+#viewBody .manual-resizable-table {
+  width: 100% !important;
+  min-width: 100% !important;
+  table-layout: auto !important;
+}
+
+body.landscape-screen #viewBody table th,
+body.landscape-screen #viewBody table td,
+body.landscape-screen #viewBody table th:nth-child(n),
+body.landscape-screen #viewBody table td:nth-child(n) {
+  width: auto !important;
+  min-width: 64px !important;
+  max-width: none !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+
+body.landscape-screen #viewBody table th:first-child,
+body.landscape-screen #viewBody table td:first-child {
+  min-width: 44px !important;
+}
+
+body.landscape-screen #viewBody .vendor-select,
+body.landscape-screen #viewBody .cqs-exclusion-cell select {
+  width: 100% !important;
+  min-width: 150px !important;
+  max-width: 100% !important;
+}
+
+#viewBody .cqs-exclusion-cell {
+  min-width: 210px !important;
+}
+
+#viewBody .cqs-exclusion-cell.is-missing select {
+  border-color: #f59e0b;
+  background: #fffbeb;
+}
+
+/* Kolom otomatis secara default; width inline hanya muncul setelah user drag. */
+#viewBody colgroup.manual-colgroup col:not([style*="width"]) {
+  width: auto !important;
+}
+
+/* PATCH R4 — Multiple Email Web + attachment picker */
+.multiple-email-editor table { min-width: 1680px; }
+.multiple-email-editor th { white-space: nowrap; }
+.multiple-email-editor td { vertical-align: top; }
+.multiple-email-editor input,
+.multiple-email-editor select,
+.multiple-email-editor textarea {
+  width: 100%;
+  min-width: 110px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: #fff;
+  font: inherit;
+}
+.multiple-email-editor textarea { min-width: 220px; min-height: 64px; resize: vertical; }
+.multiple-email-editor select { min-width: 84px; }
+.attachment-cell { display: grid; gap: 6px; min-width: 150px; }
+.attachment-cell small {
+  display: block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #64748b;
+}
+.attachment-picker-dialog { width: min(920px, 94vw); }
+.attachment-folder-select { display: grid; grid-template-columns: auto minmax(220px, 1fr); gap: 10px; align-items: center; margin: 12px 0; }
+.attachment-folder-select select { border: 1px solid #cbd5e1; border-radius: 7px; padding: 8px; background: #fff; }
+.attachment-file-list { display: grid; gap: 8px; max-height: 52vh; overflow: auto; padding: 4px; }
+.attachment-file-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  padding: 9px 10px;
+  background: #f8fafc;
+}
+.attachment-file-option span { min-width: 0; }
+.attachment-file-option strong,
+.attachment-file-option small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.attachment-file-option small { color: #64748b; margin-top: 2px; }
+.email-preview-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
+
+/* Multiple Email Internal — Release PR dan PO Proc */
+.internal-email-card { align-items: end; }
+.internal-email-type-label {
+  display: grid;
+  gap: 5px;
+  min-width: 180px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+.internal-email-type-label select,
+.internal-email-form input,
+.internal-email-form textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+}
+.internal-email-type-label select { padding: 9px 10px; }
+.internal-email-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid #bae6fd;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+.internal-email-form > label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 700;
+}
+.internal-email-form input { padding: 10px 11px; }
+.internal-email-form textarea {
+  min-height: 360px;
+  padding: 12px;
+  resize: vertical;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.internal-email-full { grid-column: 1 / -1; }
+.internal-email-attachments {
+  padding: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 11px;
+  background: #fff;
+}
+.internal-email-attachment-header,
+.internal-email-footer,
+.internal-email-attachment-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.internal-email-attachment-header > div,
+.internal-email-footer > div,
+.internal-email-attachment-item > div {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.internal-email-attachment-list { display: grid; gap: 8px; margin-top: 12px; }
+.internal-email-attachment-item {
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #f8fafc;
+}
+.internal-email-attachment-item span { min-width: 0; }
+.internal-email-attachment-item strong,
+.internal-email-attachment-item small { display: block; overflow-wrap: anywhere; }
+.internal-email-attachment-item small { margin-top: 2px; color: #64748b; }
+.internal-email-empty { margin: 12px 0 0; color: #64748b; }
+.internal-email-footer { padding-top: 2px; }
+
+@media (max-width: 760px) {
+  .multiple-email-mode-tabs { display: flex; }
+  .multiple-email-mode-tabs button { flex: 1; }
+  .internal-email-card { align-items: stretch; }
+  .internal-email-form { grid-template-columns: 1fr; }
+  .internal-email-full { grid-column: auto; }
+  .internal-email-attachment-header,
+  .internal-email-footer,
+  .internal-email-attachment-item { align-items: stretch; flex-direction: column; }
+}
+
+/* Patch R9: susunan Reference Internal Item sesuai Report/List of WS */
+.rfq-reference-table td.rfq-reference-readonly {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.35;
+}
+.rfq-reference-table .rfq-reference-group-header th,
+.rfq-reference-table .rfq-reference-sub-header th {
+  text-align: center;
+  vertical-align: middle;
+}
+.rfq-reference-table td.rfq-budget-cell {
+  min-width: 125px;
+  text-align: right;
+  white-space: nowrap;
+}
+.rfq-reference-table td[data-key="Commodity WHS"],
+.rfq-reference-table td[data-key="Previous Company"] {
+  min-width: 210px;
+  white-space: pre-wrap;
+}
+
+/* PATCH EMAIL TEMPLATE INDO/ENG + FRANCO MSW/IBT */
+.email-preview-edit-label {
+  display: grid;
+  gap: 7px;
+  margin: 0 18px 14px;
+  font-weight: 700;
+  color: #334155;
+}
+.email-preview-subject-input,
+.email-preview-body-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+}
+.email-preview-subject-input {
+  padding: 10px 12px;
+}
+.email-preview-body-input {
+  min-height: 420px;
+  padding: 14px;
+  resize: vertical;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+.email-preview-subject-input:focus,
+.email-preview-body-input:focus {
+  outline: 2px solid rgba(14, 116, 144, .18);
+  border-color: #0e7490;
+}
+
+
+/* RFQ workspace: tabel input utama 30% dan Reference Internal Item 70%.
+   Keduanya memakai array baris yang sama, sehingga + Tambah Baris menambah
+   satu baris pada kedua tabel secara serentak. */
+@media (max-width: 1180px) {
+  .rfq-tables-row .rfq-main-table,
+  .rfq-tables-row .rfq-internal-reference {
+    width: 100%;
+    flex-basis: 100%;
+  }
+}
+
+
+/* R15: selalu aktif, vendor manual, serta Mandatory/Terms 30/70 */
+.rfq-rules-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, 3fr) minmax(0, 7fr);
+  gap: 16px;
+  align-items: start;
+  margin-top: 14px;
+}
+.rfq-rule-panel {
+  min-width: 0;
+  border: 1px solid #d0d5dd;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+}
+.rfq-rule-panel .section-title { margin-top: 0; }
+.rfq-rule-panel .table-wrap { max-width: 100%; }
+
+body.landscape-screen #viewBody .bidder-field-input,
+body.landscape-screen #viewBody input.vendor-select.bidder-field-input {
+  width: 100% !important;
+  min-width: 150px;
+  box-sizing: border-box;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  padding: 7px 9px;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+}
+body.landscape-screen #viewBody .bidder-field-input:focus {
+  outline: 2px solid rgba(14, 165, 233, .22);
+  border-color: #0ea5e9;
+}
+body.landscape-screen #viewBody .bidder-readonly-input {
+  background: #f0fdf4;
+  color: #166534;
+  border-color: transparent;
+  font-weight: 700;
+  cursor: default;
+}
+
+@media (max-width: 980px) {
+  .rfq-rules-grid { grid-template-columns: 1fr; }
+}
+
+
+/* PATCH R16 — CQS workspace: alamat dan mark/contact tidak keluar dari kartu. */
+.cqs-vendor-grid { align-items: stretch; }
+.cqs-vendor-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.cqs-vendor-card strong,
+.cqs-vendor-card p,
+.cqs-vendor-card pre {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.cqs-vendor-card pre {
+  white-space: pre-wrap;
+  overflow: hidden;
+}
+
+/* R18 — CQS workspace per company */
+.cqs-company-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+.cqs-company-tab {
+  border: 1px solid #93c5fd;
+  background: #eff6ff;
+  color: #075985;
+  border-radius: 999px;
+  padding: 8px 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cqs-company-tab.active {
+  background: #0369a1;
+  border-color: #0369a1;
+  color: #fff;
+}
+.cqs-company-workspace {
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  background: #fff;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+.cqs-company-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.cqs-company-heading small,
+.cqs-company-heading h3,
+.cqs-company-heading p { margin: 0; }
+.cqs-company-heading h3 { margin-top: 3px; color: #0f172a; }
+.cqs-company-heading p { margin-top: 5px; color: #475569; }
+.cqs-selected-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 1px solid #86efac;
+  border-radius: 9px;
+  background: #f0fdf4;
+  white-space: nowrap;
+  font-weight: 700;
+}
+.cqs-commercial-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.cqs-commercial-grid label {
+  display: grid;
+  gap: 5px;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+}
+.cqs-commercial-grid input,
+.cqs-commercial-grid textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  padding: 8px;
+  background: #fff;
+  color: #0f172a;
+}
+.cqs-justification-field { grid-column: 1 / -1; }
+.cqs-justification-field textarea { min-height: 58px; resize: vertical; }
+.cqs-company-table-wrap { max-height: 560px; overflow: auto; }
+.cqs-company-table { min-width: 1180px; }
+.cqs-company-table th { position: sticky; top: 0; z-index: 2; }
+.cqs-company-table td { vertical-align: top; }
+.cqs-company-table input,
+.cqs-company-table textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 7px;
+  font: inherit;
+  background: #fff;
+}
+.cqs-company-table textarea { min-height: 54px; resize: vertical; }
+.cqs-description-cell { min-width: 360px; white-space: pre-wrap; }
+.cqs-price-input { min-width: 110px; text-align: right; }
+.cqs-total-cell { min-width: 115px; text-align: right; font-weight: 700; }
+@media (max-width: 1100px) {
+  .cqs-commercial-grid { grid-template-columns: repeat(2, minmax(150px, 1fr)); }
+}
+@media (max-width: 700px) {
+  .cqs-company-heading { flex-direction: column; }
+  .cqs-commercial-grid { grid-template-columns: 1fr; }
+  .cqs-justification-field { grid-column: auto; }
+}
+
+/* R20 — CQS: Note terpisah, tanpa input Spec, Remarks auto-grow, gambar, dan baris equivalent. */
+.cqs-justification-field,
+.cqs-note-field { grid-column: 1 / -1; }
+
+.cqs-global-fields {
+  display: grid;
+  grid-template-columns: minmax(280px, 520px);
+  gap: 12px;
+  margin: 12px 0;
+}
+
+.cqs-global-fields label {
+  display: grid;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.cqs-global-fields input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.cqs-justification-field textarea,
+.cqs-note-field textarea {
+  min-height: 58px;
+  resize: vertical;
+  overflow: hidden;
+  line-height: 1.45;
+}
+.cqs-company-table { min-width: 1240px; }
+.cqs-company-table .cqs-auto-grow {
+  overflow: hidden;
+  resize: vertical;
+  line-height: 1.4;
+}
+.cqs-remarks-cell {
+  min-width: 330px;
+  width: 32%;
+}
+.cqs-remarks-input {
+  min-height: 58px;
+  max-height: 360px;
+}
+.cqs-paste-hint {
+  display: block;
+  margin-top: 5px;
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.3;
+}
+.cqs-remark-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 7px;
+}
+.cqs-remark-image-card {
+  position: relative;
+  width: 84px;
+  height: 64px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f8fafc;
+}
+.cqs-remark-image-card a {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #0369a1;
+  text-decoration: none;
+}
+.cqs-remark-image-card img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cqs-remark-image-card button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 21px;
+  height: 21px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, .82);
+  color: #fff;
+  cursor: pointer;
+  line-height: 18px;
+  font-weight: 800;
+}
+.cqs-equivalent-row { background: #fffbea; }
+.cqs-extra-description { min-width: 330px; min-height: 58px; }
+.cqs-extra-small-input { min-width: 74px; }
+.cqs-row-action-cell {
+  min-width: 84px;
+  text-align: center;
+  vertical-align: middle !important;
+}
+.cqs-add-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  color: #475569;
+  font-size: 12px;
+}
+.cqs-price-input,
+.cqs-total-cell {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+@media (max-width: 700px) {
+  .cqs-justification-field,
+  .cqs-note-field { grid-column: auto; }
+  .cqs-add-row-actions { align-items: flex-start; flex-direction: column; }
+}
+
+/* R24: action tambah line per baris */
+.cqs-row-action-buttons{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;align-items:center}
+.cqs-row-action-cell .mini-btn{white-space:nowrap}
+
+
+/* Communication launcher: WhatsApp + Outlook */
+.app-communication-launcher {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 9998;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.app-communication-button {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .24);
+  transition: transform .16s ease, box-shadow .16s ease, filter .16s ease;
+}
+.app-communication-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, .30);
+  filter: brightness(1.03);
+}
+.app-communication-button svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+.app-communication-button.whatsapp { background: #25d366; }
+.app-communication-button.outlook { background: #0a64ad; }
+
+.whatsapp-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+}
+.whatsapp-mini-icon {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 3px;
+  border-radius: 6px;
+  background: #25d366;
+  color: #fff;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+.email-action-cell {
+  min-width: 335px;
+  align-items: center;
+}
+.multiple-email-editor td input[placeholder="08..."] {
+  min-width: 125px;
+}
+@media (max-width: 640px) {
+  .app-communication-launcher { right: 12px; bottom: 12px; gap: 8px; }
+  .app-communication-button { width: 44px; height: 44px; border-radius: 14px; }
+}
+@media print {
+  .app-communication-launcher { display: none !important; }
+}

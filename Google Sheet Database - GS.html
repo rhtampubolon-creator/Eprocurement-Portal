@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Sheet Database</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="config.js"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <main class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-lg">
+    <h1 class="text-2xl font-bold mb-2">Google Sheet Database</h1>
+    <p class="text-gray-600 mb-6">Database sudah dipisahkan berdasarkan fungsi. Klik file yang akan dibuka.</p>
+    <div class="grid gap-4 sm:grid-cols-2">
+      <a data-sheet-group="CORE" href="#" target="_blank" rel="noopener noreferrer" class="border rounded-lg p-4 hover:bg-blue-50">
+        <strong>Eprocurement Core Master</strong><div class="text-sm text-gray-600 mt-1">Admin, Company, Contract</div>
+      </a>
+      <a data-sheet-group="OPERATION" href="#" target="_blank" rel="noopener noreferrer" class="border rounded-lg p-4 hover:bg-blue-50">
+        <strong>Eprocurement Operation</strong><div class="text-sm text-gray-600 mt-1">Procurement Workspace, Vendor Requests, Rebid Requests</div>
+      </a>
+      <a data-sheet-group="ACTIVITY" href="#" target="_blank" rel="noopener noreferrer" class="border rounded-lg p-4 hover:bg-blue-50">
+        <strong>Eprocurement Activity Log</strong><div class="text-sm text-gray-600 mt-1">Audit Log, Recent Activity</div>
+      </a>
+      <a data-sheet-group="SECURITY" href="#" target="_blank" rel="noopener noreferrer" class="border rounded-lg p-4 hover:bg-blue-50">
+        <strong>Eprocurement User Security</strong><div class="text-sm text-gray-600 mt-1">Users</div>
+      </a>
+    </div>
+    <p id="configWarning" class="hidden mt-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded p-3">URL Google Sheet belum dikonfigurasi di config.js.</p>
+    <a href="index.html" class="inline-block mt-6 bg-gray-700 text-white px-5 py-2 rounded">Back to Home</a>
+  </main>
+<script>
+(function () {
+  const urls = window.APP_CONFIG && window.APP_CONFIG.GOOGLE_SHEET_URLS || {};
+  let missing = false;
+  document.querySelectorAll('[data-sheet-group]').forEach(function (link) {
+    const group = link.getAttribute('data-sheet-group');
+    const url = String(urls[group] || '').trim();
+    if (url) {
+      link.href = url;
+    } else {
+      missing = true;
+      link.addEventListener('click', function (event) { event.preventDefault(); });
+      link.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+  });
+  if (missing) document.getElementById('configWarning').classList.remove('hidden');
+})();
+</script>
+</body>
+</html>

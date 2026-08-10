@@ -1,0 +1,201 @@
+/* Agreement Tracker Form — dedicated styles only */
+.hidden {
+  display: none !important;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body,
+input,
+select,
+textarea,
+button,
+label,
+h2 {
+  font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+#formWindow {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.agreement-form-title {
+  margin-top: 0;
+}
+
+#agreementForm,
+.agreement-form-layout,
+.agreement-identity-row,
+.agreement-party-row,
+#agreementForm > * {
+  min-width: 0;
+}
+
+.agreement-form-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Work Order | Description */
+.agreement-identity-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.5fr) minmax(0, 5.5fr);
+  gap: 14px;
+  align-items: start;
+}
+
+/* Vendor | Buyer | User | Assigned To */
+.agreement-party-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+#agreementForm input,
+#agreementForm select,
+#agreementForm textarea {
+  min-width: 0;
+  max-width: 100%;
+  background: #fff;
+  color: #111827;
+  transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+#agreementForm input:hover,
+#agreementForm select:hover,
+#agreementForm textarea:hover {
+  background: #f8fbff;
+}
+
+#agreementForm input:focus,
+#agreementForm select:focus,
+#agreementForm textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, .16);
+  background: #eff6ff;
+}
+
+#agreementForm input::placeholder,
+#agreementForm textarea::placeholder {
+  text-align: center;
+}
+
+#agreementForm select {
+  cursor: pointer;
+}
+
+#manualVendorToggle {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+}
+
+.agreement-auto-textarea {
+  min-height: 42px;
+  max-height: 220px;
+  overflow-y: auto;
+  line-height: 1.35;
+}
+
+#remarks,
+#todo {
+  min-height: 72px;
+  max-height: 230px;
+  overflow-y: auto;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+input[type="date"] {
+  cursor: pointer;
+}
+
+input[type="number"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.agreement-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+  padding-bottom: 2px;
+}
+
+.agreement-form-actions button {
+  min-width: 74px;
+  transition: transform .15s ease, background .15s ease, opacity .15s ease;
+}
+
+.agreement-form-actions button:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+
+.agreement-form-actions button:not(:disabled):active {
+  transform: scale(.98);
+}
+
+.agreement-form-actions button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+}
+
+@media (max-width: 900px) {
+  .agreement-identity-row {
+    grid-template-columns: minmax(145px, 1.25fr) minmax(0, 4.75fr);
+    gap: 10px;
+  }
+
+  .agreement-party-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .agreement-form-layout {
+    gap: 12px;
+  }
+}
+
+@media (max-width: 620px) {
+  .agreement-identity-row,
+  .agreement-party-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #formWindow {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .agreement-form-actions {
+    position: sticky;
+    bottom: 0;
+    padding-top: 10px;
+    padding-bottom: 8px;
+    background: #fff;
+  }
+}
+
+
+/* Mobile/tablet V19 touch usability */
+@media (max-width: 760px), (pointer: coarse) {
+  #agreementForm input,
+  #agreementForm select,
+  #agreementForm textarea { font-size: 16px !important; min-height: 44px; }
+  .agreement-form-actions { gap: 8px; }
+  .agreement-form-actions button { flex: 1 1 0; min-height: 46px; }
+}

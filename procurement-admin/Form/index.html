@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Form Procurement Tracking</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css?v=20260806-final-unified-v10" />
+</head>
+<body class="bg-transparent p-0 m-0">
+  <div id="formWindow" class="w-full h-full px-6 py-4 overflow-y-auto">
+    <h2 id="formTitle" class="form-drag-handle text-2xl font-semibold mb-6 text-gray-800" title="Tahan dan geser untuk memindahkan form">Add Procurement Tracking</h2>
+
+    <form id="procurementForm" novalidate>
+      <div id="topProcurementSection" class="procurement-top-layout">
+        <div class="procurement-identity-row">
+          <div id="noPRWrapper">
+            <label class="block text-sm font-medium text-center" for="noPR">No PR</label>
+            <input id="noPR" type="text" class="mt-1 w-full border rounded-lg p-2 text-center" />
+          </div>
+
+          <div id="descriptionWrapper">
+            <label class="block text-sm font-medium text-center" for="Description">Description</label>
+            <textarea id="Description" rows="1" class="auto-height-textarea description-auto-height mt-1 w-full border rounded-lg p-2 text-center resize-none"></textarea>
+          </div>
+        </div>
+
+        <div class="procurement-detail-layout">
+          <div id="previousSubmitPOWrapper">
+            <label class="block text-sm font-medium text-center" for="previoussubmitpo">Previous Submit PO</label>
+            <textarea id="previoussubmitpo" rows="1" class="auto-height-textarea mt-1 w-full border rounded-lg p-2 text-center resize-none"></textarea>
+          </div>
+
+          <div class="procurement-detail-main">
+            <div class="procurement-detail-row procurement-primary-row">
+              <div id="picWrapper">
+                <label class="block text-sm font-medium text-center" for="pic">PIC</label>
+                <input id="pic" type="text" class="mt-1 w-full border rounded-lg p-2 text-center" />
+              </div>
+
+              <div id="assignDateWrapper">
+                <label class="block text-sm font-medium text-center" for="assignprdate">Assign Date</label>
+                <input id="assignprdate" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+              </div>
+
+              <div id="pengadaanWrapper">
+                <label class="block text-sm font-medium text-center" for="pengadaan">Pengadaan</label>
+                <input id="pengadaan" list="pengadaanList" class="mt-1 w-full border rounded-lg p-2 text-center" placeholder="Pengadaan" />
+                <datalist id="pengadaanList">
+                  <option value="B"></option>
+                  <option value="J"></option>
+                  <option value="B & J"></option>
+                </datalist>
+              </div>
+
+              <div id="departmentWrapper">
+                <label class="block text-sm font-medium text-center" for="departement">Departement</label>
+                <input id="departement" list="departementList" class="mt-1 w-full border rounded-lg p-2 text-center" placeholder="Code Dept" />
+                <datalist id="departementList">
+                  <option>6100DA300</option><option>6100DA301</option><option>6100DA302</option><option>6100DA303</option>
+                  <option>6100DB202</option><option>6100DB203</option><option>6100DB400</option><option>6100DB401</option>
+                  <option>6100DB402</option><option>6100DB403</option><option>6100DB404</option><option>6100DB405</option>
+                  <option>6100DB410</option><option>6100DB411</option><option>6100DB412</option><option>6100DB413</option>
+                  <option>6100DB420</option><option>6100DB421</option><option>6100DB431</option><option>6100DB432</option>
+                  <option>6100DB433</option><option>6100DB441</option><option>6100DD100</option><option>6100DD200</option>
+                  <option>6100DD201</option><option>6100DE700</option><option>6100DE710</option><option>6100DE720</option>
+                  <option>6100DI210</option><option>6100DK100</option><option>6100DK110</option><option>6100DK111</option>
+                  <option>6100DK112</option><option>6100DK120</option><option>6100DL600</option><option>6100DN730</option>
+                  <option>6100DN731</option><option>6100DN732</option><option>6100DN800</option>
+                </datalist>
+              </div>
+
+              <div id="statusPRWrapper">
+                <label class="block text-sm font-medium text-center" for="statuspr">Status PR</label>
+                <input id="statuspr" list="statusprList" class="mt-1 w-full border rounded-lg p-2 text-center" placeholder="Status PR" />
+                <datalist id="statusprList">
+                  <option>BID</option><option>IOM</option><option>CTR</option><option>TDR</option><option>PRB</option>
+                </datalist>
+              </div>
+            </div>
+
+            <div class="procurement-detail-row procurement-flow-row">
+              <div id="rfqWrapper">
+                <label class="block text-sm font-medium text-center" for="rfq">RFQ</label>
+                <input id="rfq" type="text" inputmode="numeric" class="mt-1 w-full border rounded-lg p-2 text-center" placeholder="S-0000" />
+              </div>
+
+              <div id="roundPOWrapper" class="hidden">
+                <label class="block text-sm font-medium text-red-600 text-center" for="roundpo">Round PR</label>
+                <select id="roundpo" class="mt-1 w-full border-2 border-red-500 rounded-lg p-2 text-center">
+                  <option value="R0">R0</option><option value="R1">R1</option><option value="R2">R2</option>
+                  <option value="R3">R3</option><option value="R4">R4</option><option value="R5">R5</option>
+                </select>
+              </div>
+
+              <div id="flowProcessWrapper">
+                <label class="block text-sm font-medium text-center" for="flowprocess">Flow Process</label>
+                <input id="flowprocess" list="flowprocessList" class="mt-1 w-full border rounded-lg p-2 text-center" placeholder="Find Flow Process" />
+                <datalist id="flowprocessList">
+                  <option>Create BL</option><option>Create CQS</option><option>Create PO</option><option>RFQ</option><option>RFP</option>
+                  <option>CQS</option><option>Rebid</option><option>PO Maximo</option><option>PO Contract</option><option>Sign PO PROC</option>
+                  <option>Aanwijzing</option><option>Drafting Contract</option><option>Esign Contract</option><option>Completed Contract</option>
+                  <option>Completed Sign PO</option><option>Complete Contract and Cancel PR</option><option>Completed Sign PO Contract</option>
+                  <option>CANCEL</option><option>Letter of Appointment</option><option>PO Sign Vendor</option><option>Proforma PO</option>
+                  <option>Waiting document supporting</option><option>Searching Vendor</option>
+                </datalist>
+              </div>
+            </div>
+
+            <div class="procurement-detail-row procurement-price-row">
+              <div id="estPricePRWrapper">
+                <label class="block text-sm font-medium text-center" for="estpricerp">Est. Price PR (USD)</label>
+                <input id="estpricerp" type="text" inputmode="numeric" class="mt-1 w-full border rounded-lg p-2 text-center" />
+              </div>
+
+              <div id="estPriceUSWrapper">
+                <label class="block text-sm font-medium text-center" for="estpriceus">Est. Price US - Rp</label>
+                <input id="estpriceus" type="text" readonly class="mt-1 w-full border rounded-lg p-2 bg-gray-100 text-center" />
+              </div>
+
+              <div id="usdRateWrapper">
+                <label class="block text-sm font-medium text-center" for="usdRateDisplay">Dolar USD/IDR</label>
+                <div class="mt-1 flex items-stretch gap-2">
+                  <input id="usdRateDisplay" type="text" readonly class="min-w-0 flex-1 border rounded-lg p-2 bg-gray-100 text-center font-medium" placeholder="Belum sync" />
+                  <button id="syncUsdRateBtn" type="button" class="shrink-0 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-400 text-white font-medium px-4 py-2 rounded-lg">Sync Kurs</button>
+                </div>
+                <p id="usdRateStatus" class="mt-1 min-h-[1.25rem] text-xs text-center text-gray-500" aria-live="polite">Kurs akan disinkronkan ketika Add PR dibuka.</p>
+              </div>
+
+              <div id="statusRebidWrapper" class="hidden">
+                <label class="block text-sm font-medium text-center" for="statusrebidDisplay">Status Rebid</label>
+                <textarea id="statusrebidDisplay" rows="3" readonly class="mt-1 w-full border rounded-lg p-2 bg-gray-100 text-center resize-none status-rebid-display"></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div id="workflowEditNotice" class="hidden mt-3 rounded-lg border px-4 py-3 text-sm text-center" role="status" aria-live="polite"></div>
+
+      <section id="extendedRebidSection" class="hidden mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4">
+        <div class="flex flex-col gap-1 mb-3">
+          <h3 class="font-semibold text-amber-900">Extended Rebid R3 dan seterusnya</h3>
+          <p class="text-sm text-amber-800">Mulai R3, upload bukti permintaan user terlebih dahulu. File disimpan di folder 01. PR Approval dengan penanda round sumber.</p>
+        </div>
+        <div class="grid grid-cols-12 gap-4 items-end">
+          <div class="col-span-12 md:col-span-7">
+            <label class="block text-sm font-medium" for="extendedRebidReason">Alasan / Permintaan Rebid</label>
+            <textarea id="extendedRebidReason" rows="2" class="mt-1 w-full border rounded-lg p-2 resize-y" placeholder="Contoh: User meminta perubahan scope dan dilakukan rebid R3"></textarea>
+          </div>
+          <div class="col-span-12 md:col-span-5">
+            <label class="block text-sm font-medium" for="extendedRebidFile">Backup Permintaan User</label>
+            <input id="extendedRebidFile" type="file" class="mt-1 w-full border rounded-lg p-2 bg-white" accept=".pdf,.msg,.eml,.doc,.docx,.xls,.xlsx,.xlsm,.jpg,.jpeg,.png" />
+          </div>
+          <div class="col-span-12 flex flex-wrap items-center justify-between gap-3">
+            <div id="extendedRebidStatus" class="text-sm text-amber-900">Backup belum diunggah.</div>
+            <div class="flex gap-2">
+              <a id="extendedRebidLink" class="hidden px-3 py-2 rounded-lg bg-emerald-100 text-emerald-800 text-sm" target="_blank" rel="noopener">Lihat Backup</a>
+              <button id="uploadExtendedRebidBtn" type="button" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg">Upload Backup</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div id="editOnlySection" class="hidden">
+        <hr class="border-dashed border-t-2 border-gray-400 my-6" />
+
+        <div class="grid grid-cols-12 gap-4 items-start">
+          <div id="invitationVendorWrapper" class="col-span-4">
+            <label class="block text-sm font-medium text-center">List Invitation Vendor</label>
+            <div id="invitationVendorList" class="vendor-box mt-1" aria-live="polite"></div>
+          </div>
+
+          <div id="submitQuoteVendorWrapper" class="col-span-4">
+            <label class="block text-sm font-medium text-center">Submit Quote Vendor</label>
+            <div id="submitQuoteVendorList" class="vendor-box vendor-checklist mt-1" aria-live="polite"></div>
+          </div>
+        </div>
+
+        <div id="procurementMilestoneLayout" class="procurement-milestone-layout mt-4">
+          <div id="cqsCreateDateWrapper" class="hidden milestone-field">
+            <label class="block text-sm font-medium text-center" for="cqscreatedate">CQS Create Date</label>
+            <input id="cqscreatedate" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+          </div>
+
+          <div id="cqsApprovalDateWrapper" class="hidden milestone-field">
+            <label class="block text-sm font-medium text-center" for="cqsapprovaldate">CQS Approval Date</label>
+            <input id="cqsapprovaldate" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+          </div>
+
+          <div id="poCreateDateWrapper" class="hidden">
+            <div class="milestone-field">
+              <label class="block text-sm font-medium text-center" for="pocreatedate">PO Create Date</label>
+              <input id="pocreatedate" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+            </div>
+
+            <div class="milestone-field">
+              <label class="block text-sm font-medium text-center" for="podeldate">PO Del. Date</label>
+              <input id="podeldate" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+            </div>
+
+            <div class="milestone-field actual-release-field">
+              <label class="block text-sm font-medium text-center" for="actualporeleasedate">Actual PO Rel. Date</label>
+              <input id="actualporeleasedate" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+            </div>
+
+            <div class="milestone-field actual-delivery-field">
+              <label class="block text-sm font-medium text-center" for="actualpodeldate">Actual PO Del. Date</label>
+              <input id="actualpodeldate" type="date" data-formatted-date data-date-readonly="true" readonly class="mt-1 w-full border rounded-lg p-2 bg-gray-100 text-center" />
+            </div>
+
+            <div class="winner-po-field">
+              <label class="block text-sm font-medium text-center" for="winnerpo">Winner PO</label>
+              <select id="winnerpo" class="mt-1 w-full border rounded-lg p-2 text-center">
+                <option value="">-- Select submitted vendor --</option>
+              </select>
+            </div>
+
+            <div class="winner-email-field">
+              <label class="block text-sm font-medium text-center" for="emailwinnerpo">Email</label>
+              <textarea id="emailwinnerpo" rows="1" readonly class="auto-height-textarea mt-1 w-full border rounded-lg p-2 bg-gray-100 text-center resize-none"></textarea>
+            </div>
+
+            <div class="no-po-field">
+              <label class="block text-sm font-medium text-center" for="nopo">No PO</label>
+              <input id="nopo" type="text" class="mt-1 w-full border rounded-lg p-2 text-center" />
+            </div>
+
+            <div class="price-po-field">
+              <label class="block text-sm font-medium text-center" for="pricerp">Price (Rp) Excl. PPn</label>
+              <input id="pricerp" type="text" inputmode="numeric" class="mt-1 w-full border rounded-lg p-2 text-center" />
+            </div>
+
+            <div class="grn-date-field">
+              <label class="block text-sm font-medium text-center" for="actualreceivedpo">GRN Date</label>
+              <input id="actualreceivedpo" type="date" data-formatted-date class="mt-1 w-full border rounded-lg p-2 text-center" />
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-8">
+          <label class="block text-sm font-medium" for="note">Note</label>
+          <textarea id="note" rows="4" class="mt-1 w-full border rounded-lg p-2" placeholder="Masukkan catatan..."></textarea>
+        </div>
+      </div>
+
+      <section id="folderManagerSection" class="hidden mt-8 rounded-xl border border-blue-200 bg-blue-50/60 p-4">
+        <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 class="font-semibold text-blue-900">Procurement Document Folder</h3>
+            <p id="folderManagerStatus" class="text-sm text-slate-600">Memeriksa folder...</p>
+          </div>
+          <button type="button" id="ensureFolderBtn" class="folder-action-button bg-indigo-600 hover:bg-indigo-700 text-white">
+            Create / Refresh Folder
+          </button>
+        </div>
+
+        <div class="grid grid-cols-12 gap-4 mt-4 items-end">
+          <div class="col-span-12 md:col-span-5">
+            <label class="block text-sm font-medium text-center" for="documentFolderType">Document Location</label>
+            <select id="documentFolderType" class="mt-1 w-full border rounded-lg p-2 text-center bg-white">
+              <option value="01. PR Approval">01. PR Approval</option>
+              <option value="02. Bidderlist">02. Bidderlist</option>
+              <option value="03. CQS">03. CQS</option>
+              <option value="04. PO">04. PO</option>
+              <option value="05. Contract">05. Contract</option>
+            </select>
+          </div>
+          <div id="documentRoundWrapper" class="hidden col-span-12 md:col-span-2">
+            <label class="block text-sm font-medium text-center" for="documentRound">Round</label>
+            <select id="documentRound" class="mt-1 w-full border rounded-lg p-2 text-center bg-white">
+              <option value="R0">R0</option><option value="R1">R1</option><option value="R2">R2</option>
+              <option value="R3">R3</option><option value="R4">R4</option><option value="R5">R5</option>
+            </select>
+          </div>
+          <div class="col-span-12 md:col-span-5">
+            <div id="folderTargetPath" class="folder-target-path">01. PR Approval</div>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap justify-end gap-2 mt-4">
+          <button type="button" id="openTargetFolderBtn" class="folder-action-button bg-emerald-600 hover:bg-emerald-700 text-white">Open Folder</button>
+          <button type="button" id="uploadFilesBtn" class="folder-action-button bg-sky-600 hover:bg-sky-700 text-white">Upload File(s)</button>
+          <button type="button" id="uploadDirectoryBtn" class="folder-action-button bg-violet-600 hover:bg-violet-700 text-white">Upload Folder</button>
+          <input id="folderFileInput" type="file" multiple class="hidden" />
+          <input id="folderDirectoryInput" type="file" webkitdirectory directory multiple class="hidden" />
+        </div>
+        <div id="folderUploadProgress" class="hidden mt-4">
+          <div class="flex justify-between text-xs text-slate-600 mb-1">
+            <span id="folderUploadLabel">Uploading...</span><span id="folderUploadPercent">0%</span>
+          </div>
+          <div class="h-2 overflow-hidden rounded-full bg-slate-200">
+            <div id="folderUploadBar" class="h-full bg-blue-600 transition-all" style="width:0%"></div>
+          </div>
+        </div>
+        <div id="folderFileBrowser" class="hidden mt-4 rounded-lg border border-blue-200 bg-white p-3">
+          <div class="flex items-center justify-between gap-2 mb-2">
+            <strong id="folderFileBrowserTitle" class="text-sm text-blue-900">Files</strong>
+            <button type="button" id="refreshFolderFilesBtn" class="folder-action-button bg-slate-600 hover:bg-slate-700 text-white">Refresh Files</button>
+          </div>
+          <div id="folderFileBrowserList" class="folder-file-browser-list"></div>
+        </div>
+      </section>
+
+      <div id="informationNote" class="mt-10 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
+        <h3 class="font-semibold text-yellow-800 mb-2">Note</h3>
+        <ul class="list-disc list-inside text-sm text-gray-700 space-y-1">
+          <li>Pastikan seluruh data benar sebelum disimpan.</li>
+          <li>List Invitation Vendor mengikuti Bidderlist pada round aktif.</li>
+          <li>Winner PO hanya dapat dipilih dari vendor yang men-submit quote.</li>
+        </ul>
+      </div>
+
+      <div class="flex flex-wrap justify-end gap-3 mt-6">
+        <button type="button" id="cancelBtn" class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium px-4 py-2 rounded-lg">Cancel</button>
+        <button type="button" id="saveCreateFolderBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-4 py-2 rounded-lg">Save & Create Folder</button>
+        <button type="submit" id="submitBtn" class="bg-sky-400 hover:bg-sky-500 text-white font-medium px-4 py-2 rounded-lg">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="popup" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-xl p-6 w-80 text-center">
+      <h3 id="popupTitle" class="text-xl font-semibold mb-2"></h3>
+      <p id="popupMessage" class="text-gray-600 mb-5"></p>
+      <div class="w-full bg-gray-200 rounded-full h-3 mt-4 overflow-hidden">
+        <div id="progressBar" class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width:0%"></div>
+      </div>
+      <p id="progressPercent" class="text-center text-sm text-gray-600 mt-2">0%</p>
+      <button id="popupOk" type="button" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 mt-4">OK</button>
+    </div>
+  </div>
+
+  <script src="../../config.js?v=20260806-final-unified-v10"></script>
+<script src="../../common.js?v=20260806-final-unified-v10"></script>
+<script src="script.js?v=20260806-final-unified-v10"></script>
+</body>
+</html>

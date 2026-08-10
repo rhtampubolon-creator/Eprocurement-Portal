@@ -1,0 +1,492 @@
+/* ==========================================================
+   GLOBAL
+========================================================== */
+
+body{
+    font-family:'Palatino Linotype','Book Antiqua',Palatino,serif;
+}
+
+/* ==========================================================
+   TABLE
+========================================================== */
+
+.company-table{
+    width:max-content;
+    min-width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    table-layout:fixed;
+}
+
+/* ==========================================================
+   CELL
+========================================================== */
+
+.company-table th,
+.company-table td{
+
+    border:1px solid #d1d5db;
+
+    padding:6px 8px;
+
+    text-align:center;
+    vertical-align:middle;
+
+    white-space:normal;
+    word-break:break-word;
+    overflow-wrap:break-word;
+
+    background:#fff;
+
+    box-sizing:border-box;
+
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.company-table thead th{
+
+    position:sticky;
+    top:0;
+
+    background:#1e293b;
+    color:#fff;
+
+    font-weight:bold;
+
+    z-index:100;
+
+}
+
+/* ==========================================================
+   EDIT MODE
+========================================================== */
+
+td[contenteditable="true"]{
+
+    background:#fff9e6;
+    outline:2px solid #facc15;
+
+}
+
+/* ==========================================================
+   STATUS
+========================================================== */
+
+.status-active{
+
+    color:#16a34a;
+    font-weight:600;
+
+}
+
+.status-expired{
+
+    color:#dc2626;
+    font-weight:600;
+
+}
+
+/* ==========================================================
+   COLUMN WIDTH
+========================================================== */
+
+.company-table th:nth-child(1),
+.company-table td:nth-child(1){
+
+    width:100px;
+    min-width:100px;
+
+}
+
+.company-table th:nth-child(2),
+.company-table td:nth-child(2){
+
+    width:200px;
+    min-width:150px;
+
+}
+
+.company-table th:nth-child(3),
+.company-table td:nth-child(3){
+
+    width:400px;
+    min-width:300px;
+
+}
+
+.company-table th:nth-child(4),
+.company-table td:nth-child(4){
+
+    width:500px;
+    min-width:300px;
+
+}
+
+.company-table th:nth-child(5),
+.company-table td:nth-child(5){
+
+    width:300px;
+    min-width:200px;
+
+}
+
+.company-table th:nth-child(6),
+.company-table td:nth-child(6){
+
+    width:200px;
+    min-width:200px;
+
+}
+
+.company-table th:nth-child(7),
+.company-table td:nth-child(7){
+
+    width:400px;
+    min-width:400px;
+
+}
+
+/* ==========================================================
+   FREEZE COLUMN
+========================================================== */
+
+.company-table th:nth-child(1),
+.company-table td:nth-child(1){
+
+    position:sticky;
+    left:0;
+    z-index:110;
+    background:#fff;
+
+}
+
+.company-table th:nth-child(2),
+.company-table td:nth-child(2){
+
+    position:sticky;
+    left:100px;
+    z-index:110;
+    background:#fff;
+
+}
+
+.company-table th:nth-child(3),
+.company-table td:nth-child(3){
+
+    position:sticky;
+    left:300px;
+    z-index:110;
+    background:#fff;
+
+}
+
+.company-table th:nth-child(4),
+.company-table td:nth-child(4){
+
+    position:sticky;
+    left:700px;
+    z-index:110;
+    background:#fff;
+
+}
+
+.company-table th:nth-child(5),
+.company-table td:nth-child(5){
+
+    position:sticky;
+    left:1200px;
+    z-index:110;
+    background:#fff;
+
+}
+
+.company-table th:nth-child(6),
+.company-table td:nth-child(6){
+
+    position:sticky;
+    left:1500px;
+    z-index:110;
+    background:#fff;
+
+}
+
+/* ==========================================================
+   HEADER STICKY COLOR
+========================================================== */
+
+.company-table thead th{
+
+    background:#1e293b;
+    color:#fff;
+    z-index:200;
+
+}
+
+/* Header freeze tetap warna gelap DAN harus di atas body saat scroll */
+
+.company-table thead th:nth-child(-n+6){
+
+    background:#1e293b;
+    color:#fff;
+    z-index:210;
+
+}
+
+/* ==========================================================
+   SEPARATOR
+========================================================== */
+
+.company-table th:nth-child(6)::after,
+.company-table td:nth-child(6)::after{
+
+    content:"";
+
+    position:absolute;
+
+    right:-1px;
+    top:0;
+
+    width:6px;
+    height:100%;
+
+    background:linear-gradient(
+        to right,
+        rgba(0,0,0,.18),
+        transparent
+    );
+
+    pointer-events:none;
+
+}
+
+/* ==========================================================
+   HOVER
+========================================================== */
+
+.company-table tbody tr:hover{
+
+    background:#f8fafc;
+
+}
+
+/* ========== FILTER PER KOLOM ========== */
+#columnFilterRow th.column-filter-cell {
+  position: sticky;
+  top: 34px;
+  z-index: 95;
+  padding: 3px !important;
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+  height: 34px;
+}
+#columnFilterRow input[data-column-filter] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 27px;
+  padding: 3px 6px;
+  border: 1px solid #94a3b8;
+  border-radius: 5px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 11px;
+  line-height: 1.2;
+  outline: none;
+}
+#columnFilterRow input[data-column-filter]:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
+/* Filter langsung di dalam header kolom */
+#theadRow th.header-filter-cell{padding:5px!important;vertical-align:top!important}
+.header-filter-wrap{display:flex;flex-direction:column;gap:5px;min-height:54px}
+.header-filter-label{font-weight:600;line-height:1.15;text-align:center;white-space:normal}
+.header-column-filter{width:100%;height:25px;padding:3px 7px;border:1px solid rgba(255,255,255,.65);border-radius:5px;background:#fff;color:#111827;font-size:12px;line-height:1;outline:none}
+.header-column-filter:focus{border-color:#fbbf24;box-shadow:0 0 0 2px rgba(251,191,36,.35)}
+#theadRow th.has-column-filter{background-color:#075985!important}
+/* =========================================================
+   FILTER KOLOM MODEL EXCEL — dropdown di dalam kotak header
+   ========================================================= */
+#theadRow th.header-filter-cell{padding:5px 6px!important;vertical-align:middle!important;overflow:visible!important}
+.excel-filter-header{display:grid;grid-template-columns:minmax(0,1fr) 24px;align-items:center;gap:4px;min-height:30px;width:100%}
+.excel-filter-header-label{min-width:0;font-weight:600;line-height:1.2;text-align:center;white-space:normal;overflow-wrap:anywhere}
+.excel-filter-button{width:23px;height:23px;display:inline-flex;align-items:center;justify-content:center;padding:0;border:1px solid rgba(255,255,255,.42);border-radius:4px;background:rgba(255,255,255,.10);color:#fff;cursor:pointer}
+.excel-filter-button:hover,.excel-filter-button:focus-visible{background:rgba(255,255,255,.24);border-color:rgba(255,255,255,.85);outline:none}
+.excel-filter-button svg{width:14px;height:14px;fill:currentColor;pointer-events:none}
+.excel-filter-button.is-active{background:#fbbf24;border-color:#f59e0b;color:#1f2937}
+#theadRow th.has-column-filter{background-color:#075985!important}
+.excel-column-filter-menu{position:fixed;z-index:200000;display:flex;flex-direction:column;gap:8px;max-height:min(460px,calc(100vh - 16px));padding:10px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#111827;box-shadow:0 18px 45px rgba(15,23,42,.25);font-family:Arial,sans-serif;font-size:13px;text-align:left}
+.excel-filter-menu-title{font-weight:700;line-height:1.3;color:#0f172a}
+.excel-filter-search{width:100%;height:32px;padding:5px 9px;border:1px solid #94a3b8;border-radius:5px;background:#fff;color:#111827;outline:none}
+.excel-filter-search:focus{border-color:#2563eb;box-shadow:0 0 0 2px rgba(37,99,235,.16)}
+.excel-filter-select-all,.excel-filter-value{display:grid;grid-template-columns:18px minmax(0,1fr);align-items:center;gap:7px;margin:0;cursor:pointer;user-select:none}
+.excel-filter-select-all{padding:6px 5px;border-bottom:1px solid #e2e8f0;font-weight:600}
+.excel-filter-values{min-height:42px;max-height:250px;overflow:auto;padding:2px;border:1px solid #e2e8f0;border-radius:5px}
+.excel-filter-value{padding:5px 6px;border-radius:4px}
+.excel-filter-value:hover{background:#f1f5f9}
+.excel-filter-value span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.excel-filter-empty{padding:12px 6px;text-align:center;color:#64748b;font-style:italic}
+.excel-filter-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:2px}
+.excel-filter-footer-right{display:flex;gap:6px}
+.excel-filter-footer button{height:30px;padding:4px 10px;border:1px solid #cbd5e1;border-radius:5px;background:#fff;color:#1e293b;cursor:pointer;font-size:12px}
+.excel-filter-footer button:hover:not(:disabled){background:#f1f5f9}
+.excel-filter-footer button:disabled{opacity:.45;cursor:not-allowed}
+.excel-filter-footer .excel-filter-apply{border-color:#1d4ed8;background:#2563eb;color:#fff}
+.excel-filter-footer .excel-filter-apply:hover:not(:disabled){background:#1d4ed8}
+.excel-filter-footer .excel-filter-clear{color:#b91c1c}
+
+
+/* Filter Excel: ikon di sudut kanan bawah kotak header */
+.excel-filter-header{
+  position:relative!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:42px!important;
+  padding:4px 22px 12px 4px!important;
+  width:100%!important;
+}
+.excel-filter-header-label{
+  width:100%!important;
+  text-align:center!important;
+}
+.excel-filter-button{
+  position:absolute!important;
+  right:2px!important;
+  bottom:2px!important;
+  width:18px!important;
+  height:18px!important;
+  border-radius:3px!important;
+}
+.excel-filter-button svg{
+  width:11px!important;
+  height:11px!important;
+}
+
+
+/* =========================================================
+   ACTION DROPDOWN — disamakan dengan BidderList
+   Hover untuk desktop, klik untuk touch/keyboard.
+   ========================================================= */
+.action-dropdown {
+  position: relative;
+  display: inline-block;
+  z-index: 10000;
+}
+
+.action-btn {
+  min-width: 90px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid #bae6fd;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #075985;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+  transition: background-color .15s ease, border-color .15s ease, transform .15s ease;
+}
+
+.action-btn:hover,
+.action-btn:focus-visible {
+  background: #f0f9ff;
+  border-color: #7dd3fc;
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.action-menu {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  min-width: 230px;
+  padding: 0;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #dbe3ef;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.15);
+  z-index: 10001;
+}
+
+.action-dropdown:hover .action-menu,
+.action-dropdown:focus-within .action-menu,
+.action-dropdown.open .action-menu {
+  display: block;
+}
+
+.action-menu button,
+.action-menu .action-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 0;
+  background: #ffffff;
+  color: #222222;
+  font: inherit;
+  font-weight: 500;
+  text-align: left;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.action-menu button:hover,
+.action-menu .action-menu-item:hover,
+.action-menu button:focus-visible,
+.action-menu .action-menu-item:focus-within {
+  background: #eef6ff;
+  outline: none;
+  transform: none;
+}
+
+.action-menu .danger {
+  color: #b91c1c;
+}
+
+.action-menu hr {
+  margin: 4px 0;
+  border: 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Buyer: judul modul berada tepat di tengah baris putih. */
+@media (min-width: 768px) {
+  body.msw-buyer-centered-module #moduleHeader {
+    grid-template-columns: minmax(220px, 1fr) auto minmax(220px, 1fr) !important;
+  }
+
+  body.msw-buyer-centered-module #buyerCenteredTitle {
+    justify-self: center;
+    text-align: center;
+  }
+
+  body.msw-buyer-centered-module #moduleHeader > :last-child {
+    justify-self: end;
+    justify-content: flex-end;
+    width: 100%;
+  }
+
+  body.msw-buyer-centered-module #searchInput {
+    margin-left: auto;
+  }
+}
+
+/* Buyer: penuhkan wadah halaman, tanpa mengubah ukuran kolom tabel. */
+body.msw-buyer-centered-module > .flex.flex-col.h-full,
+body.msw-buyer-centered-module #moduleHeader,
+body.msw-buyer-centered-module #tableContainer {
+  width: 100%;
+  max-width: none;
+}

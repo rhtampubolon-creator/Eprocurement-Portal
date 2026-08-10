@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Procurement Workspace</title>
+  <link rel="stylesheet" href="style.css?v=20260806-final-unified-v10">
+</head>
+<body>
+  <div class="workspace-shell">
+    <header class="workspace-header">
+      <div>
+        <strong>Procurement Workspace</strong>
+        <span id="workspacePr">-</span>
+      </div>
+      <nav aria-label="Procurement tabs">
+        <button class="tab-button active" data-tab="Procurement">Procurement</button>
+        <button id="workspaceBidderTab" class="tab-button" data-tab="BidderList" title="BidderList, RFQ, CQS, dan Multiple Email berada di dalam modul ini">BidderList</button>
+      </nav>
+    </header>
+    <main>
+      <iframe id="procurementFrame" class="workspace-frame" title="Procurement form"></iframe>
+      <iframe id="bidderWorkspaceFrame" class="workspace-frame is-hidden" title="BidderList, RFQ, dan CQS"></iframe>
+    </main>
+  </div>
+  <script src="script.js?v=20260806-final-unified-v10"></script>
+</body>
+</html>

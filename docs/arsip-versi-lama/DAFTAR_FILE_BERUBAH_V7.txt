@@ -1,0 +1,12 @@
+V7 - Procurement Year & Super Admin Workspace
+
+File berubah:
+1. index.html
+2. style.css
+3. script.js
+
+File dokumentasi baru:
+4. PERBAIKAN_PROCUREMENT_YEAR_SUPER_ADMIN_V7.md
+5. DAFTAR_FILE_BERUBAH_V7.txt
+
+Backend/codegs.js: tidak berubah.

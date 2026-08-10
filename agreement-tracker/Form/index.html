@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="id">
+<head><meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Agreement Tracker Form</title><script src="https://cdn.tailwindcss.com"></script><link rel="stylesheet" href="style.css?v=20260809-agreement-clean-form-v17"></head>
+<body class="bg-transparent p-0 m-0">
+<div id="formWindow" class="w-full h-full px-6 py-4 overflow-y-auto">
+  <h2 id="formTitle" class="agreement-form-title text-2xl font-semibold mb-6 text-gray-800">Add Agreement Tracker</h2>
+  <form id="agreementForm" novalidate>
+    <div class="agreement-form-layout">
+      <div class="agreement-identity-row">
+        <div><label class="block text-sm font-medium text-center" for="workOrder">Work Order</label><input id="workOrder" type="text" class="mt-1 w-full border rounded-lg p-2 text-center"></div>
+        <div><label class="block text-sm font-medium text-center" for="description">Description</label><textarea id="description" rows="1" class="agreement-auto-textarea mt-1 w-full border rounded-lg p-2 text-center resize-none"></textarea></div>
+      </div>
+      <div class="agreement-party-row">
+        <div><label class="block text-sm font-medium text-center" for="vendorSelect">Vendor</label><select id="vendorSelect" class="mt-1 w-full border rounded-lg p-2 text-center"><option value="">-- Select Vendor --</option></select><label class="mt-2 flex items-center gap-2 text-sm"><input id="manualVendorToggle" type="checkbox"> Manual Input Vendor</label><input id="manualVendor" type="text" class="mt-1 w-full border rounded-lg p-2 text-center hidden" placeholder="Vendor name"></div>
+        <div><label class="block text-sm font-medium text-center" for="buyerSelect">Buyer</label><select id="buyerSelect" class="mt-1 w-full border rounded-lg p-2 text-center"><option value="">-- Select Buyer --</option></select></div>
+        <div><label class="block text-sm font-medium text-center" for="userSelect">User</label><select id="userSelect" class="mt-1 w-full border rounded-lg p-2 text-center"><option value="">-- Select User --</option></select></div>
+        <div><label class="block text-sm font-medium text-center" for="assignedSelect">Assigned To</label><select id="assignedSelect" class="mt-1 w-full border rounded-lg p-2 text-center"><option value="">-- Select Assigned To --</option></select></div>
+      </div>
+      <div class="grid grid-cols-12 gap-4 mt-6">
+        <div class="col-span-12 md:col-span-3"><label class="block text-sm font-medium text-center" for="startDate">Start Date</label><input id="startDate" type="date" class="mt-1 w-full border rounded-lg p-2 text-center"></div>
+        <div class="col-span-12 md:col-span-3"><label class="block text-sm font-medium text-center" for="dueDate">Due Date</label><input id="dueDate" type="date" class="mt-1 w-full border rounded-lg p-2 text-center"></div>
+        <div class="col-span-12 md:col-span-3"><label class="block text-sm font-medium text-center" for="progress">% Complete</label><input id="progress" type="number" min="0" max="100" value="0" class="mt-1 w-full border rounded-lg p-2 text-center"></div>
+        <div class="col-span-12 md:col-span-3"><label class="block text-sm font-medium text-center" for="status">Status</label><select id="status" class="mt-1 w-full border rounded-lg p-2 text-center"><option>To Do</option><option>In Progress</option><option>Completed</option><option>Pending Review</option><option>Overdue</option><option>On Hold</option></select></div>
+      </div>
+      <div class="mt-6"><label class="block text-sm font-medium" for="remarks">Remarks</label><textarea id="remarks" rows="3" class="mt-1 w-full border rounded-lg p-2"></textarea></div>
+      <div class="mt-6"><label class="block text-sm font-medium" for="todo">To Do</label><textarea id="todo" rows="3" class="mt-1 w-full border rounded-lg p-2"></textarea></div>
+    </div>
+    <div class="agreement-form-actions"><button type="button" id="cancelBtn" class="px-4 py-2 border rounded-lg">Cancel</button><button type="submit" id="saveBtn" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">Save</button></div>
+  </form>
+</div>
+<script src="../../config.js?v=20260809-agreement-clean-form-v17"></script><script src="script.js?v=20260809-agreement-clean-form-v17"></script>
+</body></html>

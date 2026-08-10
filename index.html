@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+
+<html lang="id">
+<head>
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>E-Procurement | PT Makmur Sejahtera Wisesa</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link href="style.css?v=20260810-admin-sidebar-v27" rel="stylesheet"/><link href="ui-reference.css?v=20260810-admin-sidebar-v27" rel="stylesheet"/>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900 flex flex-col app-locked" data-msw-page="main-menu" data-workspace-panel="dashboard">
+<div aria-labelledby="accessGateTitle" aria-modal="true" class="access-gate" id="accessGate" role="dialog">
+<div class="auth-shell">
+<section class="auth-visual">
+<div class="auth-brand"><img alt="AlamTri Geo" src="MSW.png"/><div><strong>Procurement Division</strong><span>PT Makmur Sejahtera Wisesa</span></div></div>
+<div class="auth-visual-copy"><h2>Manage Procurement<br/>smarter, faster &amp; integrated</h2><p>One platform for procurement, vendor, evaluation, contract, and reporting with transparency and accountability.</p></div>
+<div aria-hidden="true" class="auth-illustration"><i data-lucide="store"></i><i data-lucide="file-check-2"></i><i data-lucide="laptop"></i><i data-lucide="bar-chart-3"></i></div>
+</section>
+<section class="auth-panel">
+<div class="auth-tabs" role="tablist"><button class="is-active" id="signInTab" type="button">Sign In</button><button id="signUpTab" type="button">Sign Up</button></div>
+<form class="auth-form" id="signInForm">
+<div class="auth-heading"><p>PROCUREMENT MANAGEMENT SYSTEM</p><h1 id="accessGateTitle">Welcome back!</h1><span>Sign in to access your account.</span></div>
+<label>Email<div class="auth-input"><i data-lucide="mail"></i><input autocomplete="email" id="signInEmail" placeholder="name@company.co.id" required="" type="email"/></div></label>
+<label>Password<div class="auth-input"><i data-lucide="lock-keyhole"></i><input autocomplete="current-password" id="signInPassword" placeholder="Enter your password" required="" type="password"/><button class="password-toggle" data-password-target="signInPassword" type="button"><i data-lucide="eye"></i></button></div></label>
+<div class="auth-options"><label><input id="rememberMe" type="checkbox"/> Remember me</label><button class="auth-link" type="button">Forgot password?</button></div>
+<button class="auth-primary" id="signInButton" type="submit">Sign In</button>
+<p class="access-gate-status" id="accessGateStatus">Use an approved company account.</p>
+</form>
+<form class="auth-form" hidden="" id="signUpForm">
+<div class="auth-heading"><p>PROCUREMENT MANAGEMENT SYSTEM</p><h1>Create a new account</h1><span>Your registration will be reviewed by Super Admin.</span></div>
+<div class="auth-grid"><label>Full Name<div class="auth-input"><i data-lucide="user"></i><input autocomplete="name" id="signUpName" placeholder="Enter your full name" required="" type="text"/></div></label><label>Mobile Number<div class="auth-input"><i data-lucide="phone"></i><input autocomplete="tel" id="signUpPhone" placeholder="08xxxxxxxxxx" required="" type="tel"/></div></label></div>
+<label>Email<div class="auth-input"><i data-lucide="mail"></i><input autocomplete="email" id="signUpEmail" placeholder="name@company.co.id" required="" type="email"/></div></label>
+<div class="auth-grid"><label>Password<div class="auth-input"><i data-lucide="lock-keyhole"></i><input autocomplete="new-password" id="signUpPassword" minlength="8" placeholder="Create a password" required="" type="password"/></div></label><label>Confirm Password<div class="auth-input"><i data-lucide="lock-keyhole"></i><input autocomplete="new-password" id="signUpConfirm" minlength="8" placeholder="Confirm your password" required="" type="password"/></div></label></div>
+<button class="auth-primary" id="signUpButton" type="submit">Sign Up</button>
+<p class="access-gate-status" id="signUpStatus">Access is granted only after Super Admin approval.</p>
+</form>
+</section>
+</div>
+</div>
+<header class="sticky top-0 z-50 bg-gradient-to-r from-sky-200 to-blue-600 shadow-md">
+<div class="w-full px-4 sm:px-6 lg:px-8">
+<div class="flex items-center justify-between h-16">
+<div class="flex items-center gap-3"><button aria-expanded="false" aria-label="Open workspace menu" class="mobile-sidebar-toggle" id="mobileSidebarToggle" type="button"><i data-lucide="menu"></i></button>
+<img alt="AlamTri Geo" class="h-10 w-auto object-contain" src="MSW.png"/>
+<div>
+<p class="font-semibold text-sm tracking-wide">
+                      Procurement Division
+                  </p>
+<p class="text-xs text-gray-700">
+                      PT Makmur Sejahtera Wisesa
+                  </p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a class="text-sm font-semibold flex items-center gap-2" href="#"><i class="w-4 h-4" data-lucide="book-open"></i> Guidelines</a>
+<div class="account-menu-wrapper" id="accountMenuWrapper">
+<button aria-expanded="false" aria-haspopup="menu" class="account-menu-button" id="openLoginModal" type="button">
+<span class="account-avatar"><i data-lucide="user-round"></i></span>
+<span class="account-button-copy"><strong id="accountName">Account</strong><small id="accountRole">ROLE</small></span>
+<i class="account-chevron" data-lucide="chevron-down"></i>
+</button>
+<div class="account-dropdown hidden" id="accountMenu" role="menu">
+<button class="account-menu-item" id="myProfileButton" type="button"><i data-lucide="user-round"></i><span>My Profile</span></button>
+<button class="account-menu-item" id="settingsButton" type="button"><i data-lucide="settings"></i><span>Settings</span></button>
+<div class="admin-tools-section" hidden="" id="adminToolsSection">
+<div class="account-menu-divider"></div>
+<p class="account-menu-label">ADMIN TOOLS</p>
+<button class="account-menu-item" id="userApprovalsButton" type="button"><i data-lucide="user-check"></i><span>User Approvals</span><strong class="approval-badge" hidden="" id="pendingUserBadge">0</strong></button>
+</div>
+<div class="account-menu-divider"></div>
+<button class="account-menu-item account-signout" id="signOutButton" type="button"><i data-lucide="log-out"></i><span>Sign Out</span></button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header><button aria-label="Close workspace menu" class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop" type="button"></button>
+<main class="flex-1">
+<div class="hidden fixed left-0 top-0 w-3 h-screen z-40" id="sidebarTrigger">
+</div>
+<div class="w-full px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6 items-start" id="mainLayout">
+<!-- QUICK LINKS -->
+<div class="space-y-6 transition-all duration-300" id="leftSidebar">
+<div aria-label="Workspace navigation" class="workspace-navigation-card">
+<p class="workspace-navigation-kicker">WORKSPACE</p>
+<nav class="workspace-navigation-list">
+<button class="workspace-navigation-item is-active" id="workspaceDashboard" type="button"><i data-lucide="layout-dashboard"></i><span>Dashboard</span></button>
+<button class="workspace-navigation-item" data-module="procurementAdmin" id="workspaceProcurement" type="button"><i data-lucide="clipboard-list"></i><span>Procurement</span></button>
+<button class="workspace-navigation-item" data-module="vendorCompany" id="workspaceVendor" type="button"><i data-lucide="building-2"></i><span>Vendor Management</span></button>
+<button class="workspace-navigation-item" data-module="vendorRequests" id="workspaceVendorRequests" type="button"><i data-lucide="inbox"></i><span>Vendor Requests</span><strong class="approval-badge" hidden id="vendorRequestBadge">0</strong></button>
+<button class="workspace-navigation-item" data-module="detailContract" id="workspaceContract" type="button"><i data-lucide="file-text"></i><span>Contract Management</span></button>
+<button class="workspace-navigation-item" data-module="agreementTracker" id="workspaceAgreementTracker" type="button"><i data-lucide="clipboard-check"></i><span>Agreement Tracker</span></button>
+<div class="workspace-navigation-divider" aria-hidden="true"></div>
+<button class="workspace-navigation-item" id="workspaceProcurementReview" type="button"><i data-lucide="list-checks"></i><span>Procurement Review</span></button>
+<button class="workspace-navigation-item" id="workspaceOverdue" type="button"><i data-lucide="clock-alert"></i><span>Overdue</span></button>
+<button class="workspace-navigation-item" id="workspaceRecentActivity" type="button"><i data-lucide="history"></i><span>Recent Activity</span></button>
+<button class="workspace-navigation-item" id="workspaceAiReminder" type="button"><i data-lucide="sparkles"></i><span>AI Procurement Reminder</span></button>
+<button aria-disabled="true" class="workspace-navigation-item is-disabled" id="workspaceReporting" type="button"><i data-lucide="bar-chart-3"></i><span>Reporting</span><small>SOON</small></button>
+</nav>
+</div>
+<!-- CARD SYSTEM -->
+<div class="border rounded-2xl shadow p-5 sidebar-system-card">
+<h3 class="text-sm font-bold uppercase tracking-wider text-gray-600 mb-4">
+                      System Information
+                  </h3>
+<div class="space-y-4 text-sm">
+<!-- Environment -->
+<div>
+<div class="text-gray-400">
+                        Environment
+                      </div>
+<div class="font-semibold" id="appEnvironment">
+</div>
+</div>
+<!-- Version -->
+<div>
+<div class="text-gray-400">
+                          Version
+                      </div>
+<div class="font-semibold" id="appVersion">
+</div>
+</div>
+<!-- Date -->
+<div>
+<div class="text-gray-400">
+                        Date &amp; Time
+                      </div>
+<div class="font-semibold" id="currentDateTime">
+</div>
+</div>
+<!-- Latest Update -->
+<div>
+<div class="text-gray-400">
+                          Latest Update
+                      </div>
+<div class="font-semibold" id="latestUpdate">
+</div>
+</div>
+<!-- Status -->
+<div>
+<div class="text-gray-400">
+                          Status
+                      </div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full" id="statusDot">
+</span>
+<span class="font-semibold" id="statusText">
+</span>
+</div>
+</div>
+</div>
+</div>
+<div class="dashboard-announcement-card"><div class="dashboard-announcement-icon"><i data-lucide="megaphone"></i></div>
+<h3 class="font-bold text-lg">
+                          Announcement
+                      </h3>
+<ul class="mt-3 text-sm text-gray-500 space-y-2">
+<li>Welcome to MSW E-Procurement.</li>
+<li>System under development.</li>
+<li>Please report bugs to Procurement Division.</li>
+</ul>
+</div></div>
+<section>
+<!-- DASHBOARD -->
+<div id="dashboardPage">
+<!-- Welcome -->
+<div class="relative bg-gradient-to-r from-sky-700 to-blue-500 rounded-2xl p-8 text-white shadow-lg">
+<div class="role-dashboard-badge" id="roleDashboardBadge"><i data-lucide="shield-check"></i><span>Workspace</span></div>
+<h2 class="text-4xl font-extrabold tracking-wide" id="dashboardHeroTitle">
+
+                  MSW E-PROCUREMENT PORTAL
+
+                  </h2>
+<p class="mt-3 text-blue-100 text-lg" id="dashboardHeroSubtitle">
+
+                  Integrated Procurement Management System
+
+                  </p>
+<p class="mt-5 text-blue-100" id="dashboardHeroDescription">
+
+                  Manage Procurement, Vendor, Contract and Bidder
+                  through one integrated platform.
+
+                  </p>
+</div>
+<section class="procurement-dashboard-workspace" id="procurementDashboardWorkspace" aria-label="Procurement Dashboard">
+  <iframe id="procurementDashboardFrame" title="Procurement Dashboard" src="about:blank" data-src="dashboard/index.html?embedded=1"></iframe>
+</section>
+<!-- Quick Access: dipertahankan untuk kompatibilitas kode lama, tetapi tidak ditampilkan.
+     Seluruh modul tersedia melalui Workspace sidebar. -->
+<div class="mt-8" id="quickAccessSection" hidden>
+<h2 class="text-xl font-bold mb-4">
+                      Quick Access
+                  </h2>
+<div class="quick-access-grid grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Detail Contract -->
+
+<!-- Vendor Company -->
+
+<!-- Procurement -->
+
+<!-- Smart Procurement Reminder (menggantikan Quick Access BidderList) -->
+<a class="group bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-l-4 border-amber-500 p-6" data-module="procurementAdmin" href="#" id="procurementCard">
+<i class="w-10 h-10 text-sky-600" data-lucide="clipboard-list">
+</i>
+<h3 class="mt-4 text-lg font-bold">Procurement</h3>
+<p class="text-sm text-gray-500 mt-2" id="procurementCardDescription">Manage procurement administration and tracking.</p>
+<span class="role-access-label" id="procurementAccessLabel">Full Access</span>
+<div class="mt-6 space-y-2">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full module-dot"></span>
+<span class="text-sm module-status"></span>
+</div>
+<div>
+<p class="text-xs text-gray-400">
+                                    Updated
+                                </p>
+<p class="text-sm font-semibold module-updated"></p>
+</div>
+</div>
+<button aria-label="View Procurement update history" class="module-history-button" data-module-history="procurementAdmin" type="button"><i class="w-4 h-4" data-lucide="history"></i> Update History</button></a><a class="group bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-l-4 border-sky-600 p-6" data-module="vendorCompany" href="#" id="vendorCard">
+<i class="w-10 h-10 text-green-600" data-lucide="building-2">
+</i>
+<h3 class="mt-4 text-lg font-bold">Vendor Management</h3>
+<p class="text-sm text-gray-500 mt-2" id="vendorCardDescription">Manage vendor information, qualification, and contacts.</p>
+<span class="role-access-label" id="vendorAccessLabel">Full Access</span>
+<div class="mt-6 space-y-2">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full module-dot"></span>
+<span class="text-sm module-status"></span>
+</div>
+<div>
+<p class="text-xs text-gray-400">
+                                    Updated
+                                </p>
+<p class="text-sm font-semibold module-updated"></p>
+</div>
+</div>
+<button aria-label="View Vendor Management update history" class="module-history-button" data-module-history="vendorCompany" type="button"><i class="w-4 h-4" data-lucide="history"></i> Update History</button></a><a class="group bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-l-4 border-green-600 p-6" data-module="detailContract" href="#" id="contractCard">
+<i class="w-10 h-10 text-violet-600" data-lucide="file-text">
+</i>
+<h3 class="mt-4 text-lg font-bold">
+                              Contract Management
+                          </h3>
+<p class="text-sm text-gray-500 mt-2" id="contractCardDescription">Manage contract database, status, and monitoring.</p>
+<span class="role-access-label" id="contractAccessLabel">Full Access</span>
+<div class="mt-6 space-y-2">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full module-dot"></span>
+<span class="text-sm module-status"></span>
+</div>
+<div>
+<p class="text-xs text-gray-400">
+                                    Updated
+                                </p>
+<p class="text-sm font-semibold module-updated"></p>
+</div>
+</div>
+<button aria-label="View Contract Management update history" class="module-history-button" data-module-history="detailContract" type="button"><i class="w-4 h-4" data-lucide="history"></i> Update History</button></a><a class="group bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-l-4 border-cyan-600 p-6" data-module="vendorRequests" href="#" id="vendorRequestsCard"><i class="w-10 h-10 text-cyan-700" data-lucide="inbox"></i><h3 class="mt-4 text-lg font-bold" id="vendorRequestsCardTitle">Vendor Requests</h3><p class="text-sm text-gray-500 mt-2" id="vendorRequestsCardDescription">Review and monitor vendor addition requests.</p><span class="role-access-label" id="vendorRequestsAccessLabel">Process Requests</span><button class="vendor-request-primary-action" id="vendorRequestPrimaryAction" type="button">Open Vendor Requests</button></a></div>
+</div>
+<!-- Procurement Admin: ringkasan global seluruh procurement Buyer (view only). -->
+<section aria-labelledby="procurementOverviewTitle" class="procurement-overview" hidden id="procurementAdminOverview">
+<div class="procurement-overview-heading"><div><h2 id="procurementOverviewTitle">Procurement Overview</h2><p id="procurementOverviewDescription">Ringkasan seluruh procurement Buyer. Informasi ini hanya dapat dilihat.</p></div><span class="procurement-view-only-badge"><i data-lucide="eye"></i> View Only</span></div>
+<div class="procurement-overview-year-panel" aria-label="Filter Procurement Year">
+  <div class="procurement-overview-year-label"><i data-lucide="calendar-days"></i><div><strong>Procurement Year</strong><small id="procurementOverviewYearCaption">All Years</small></div></div>
+  <div class="procurement-overview-year-buttons" id="procurementOverviewYearButtons"><button class="is-active" type="button" data-procurement-overview-year="ALL">All</button></div>
+</div>
+<div class="procurement-overview-buyer-panel" id="procurementOverviewBuyerPanel" aria-label="Filter Buyer">
+  <label for="procurementOverviewBuyerSelect"><i data-lucide="user-round-search"></i><span><strong>Buyer</strong><small id="procurementOverviewBuyerCaption">All Buyers</small></span></label>
+  <select id="procurementOverviewBuyerSelect"><option value="ALL">All Buyers</option></select>
+</div>
+<div class="procurement-summary-grid" id="procurementOverviewSummary"><article><span>Total Procurement</span><strong id="overviewTotal">0</strong></article><article><span>Ongoing</span><strong id="overviewOngoing">0</strong></article><article><span>Completed</span><strong id="overviewCompleted">0</strong></article><article><span>Closing Soon</span><strong id="overviewClosingSoon">0</strong><small>7–0 days</small></article><article><span>Overdue</span><strong id="overviewOverdue">0</strong></article></div>
+<div id="procurementReviewPanel"><h3 class="procurement-review-title">Procurement Review</h3>
+<div class="procurement-overview-table-wrap"><table class="procurement-overview-table"><thead><tr><th><span>No PR</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="0" aria-label="Filter No PR" title="Filter No PR"><i data-lucide="filter"></i></button></th><th><span>Procurement</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="1" aria-label="Filter Procurement" title="Filter Procurement"><i data-lucide="filter"></i></button></th><th><span>Buyer</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="2" aria-label="Filter Buyer" title="Filter Buyer"><i data-lucide="filter"></i></button></th><th><span>Requestor</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="3" aria-label="Filter Requestor" title="Filter Requestor"><i data-lucide="filter"></i></button></th><th><span>Status</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="4" aria-label="Filter Status" title="Filter Status"><i data-lucide="filter"></i></button></th><th><span>Flow Process</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="5" aria-label="Filter Flow Process" title="Filter Flow Process"><i data-lucide="filter"></i></button></th><th><span>Finish Date</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="6" aria-label="Filter Finish Date" title="Filter Finish Date"><i data-lucide="filter"></i></button></th><th><span>Requirement Date</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="7" aria-label="Filter Requirement Date" title="Filter Requirement Date"><i data-lucide="filter"></i></button></th><th><span>Note</span><button type="button" class="procurement-header-filter" data-procurement-filter-button="8" aria-label="Filter Note" title="Filter Note"><i data-lucide="filter"></i></button></th></tr></thead><tbody id="procurementOverviewRows"><tr><td colspan="9" class="procurement-overview-state">Memuat ringkasan procurement…</td></tr></tbody></table></div>
+<div class="procurement-review-footer"><span id="procurementReviewInfo">Showing 0 to 0 of 0 entries</span><nav aria-label="Procurement Review pages" id="procurementReviewPagination"></nav></div>
+</div><section class="procurement-overdue-section" id="procurementOverduePanel"><div class="procurement-overdue-heading"><div><h3>Overdue</h3><p>Procurement yang telah melewati Actual PO Del. Date.</p></div></div><div class="procurement-overview-table-wrap"><table class="procurement-overview-table procurement-overdue-table"><thead><tr><th>No PR</th><th>Procurement</th><th>No PO</th><th>Company</th><th>Actual PO Del. Date</th><th>Overdue</th></tr></thead><tbody id="procurementOverdueRows"><tr><td colspan="6" class="procurement-overview-state">Memuat data overdue…</td></tr></tbody></table></div><div class="procurement-review-footer"><span id="procurementOverdueInfo">Showing 0 to 0 of 0 entries</span><nav aria-label="Overdue pages" id="procurementOverduePagination"></nav></div></section>
+<p class="procurement-overview-updated" id="procurementOverviewUpdated"></p>
+</section>
+<!-- Smart Alert Detail Modal -->
+<section aria-label="Dashboard activity and priorities" class="dashboard-priority-grid" id="workspaceActivityPanels"><div class="dashboard-priority-main" id="recentActivityPanel"><div class="recent-activity-card bg-white rounded-2xl shadow p-5">
+<div class="flex items-start justify-between gap-4">
+<div>
+<h3 class="font-bold text-lg">
+                                  Recent Activity
+                              </h3>
+<p class="text-xs text-gray-500 mt-1">
+                                  Pekerjaan BidderList, RFQ, dan CQS yang terakhir disimpan.
+                              </p>
+</div>
+<button aria-label="Refresh activity" class="recent-activity-refresh" id="recentActivityRefresh" title="Refresh activity" type="button">
+<i class="w-4 h-4" data-lucide="refresh-cw"></i>
+</button>
+</div>
+<div aria-live="polite" class="recent-activity-list" id="recentActivityList">
+<div class="recent-activity-loading">
+<span class="smart-alert-spinner"></span>
+                              Membaca aktivitas terbaru...
+                          </div>
+</div>
+<p class="text-xs text-gray-400 mt-3" id="recentActivityUpdated"></p>
+</div></div><aside class="dashboard-priority-side" id="aiReminderPanel"><section aria-labelledby="smartAlertTitle" class="smart-alert-card bg-white rounded-2xl shadow-md border-l-4 border-violet-600 p-6" id="smartAlertCard">
+<div class="flex items-start justify-between gap-4">
+<div class="flex items-start gap-3">
+<div class="smart-alert-icon">
+<i class="w-6 h-6" data-lucide="sparkles"></i>
+</div>
+<div>
+<div class="flex flex-wrap items-center gap-2">
+<h3 class="text-lg font-bold" id="smartAlertTitle">
+                                              AI Procurement Reminder
+                                          </h3>
+<span class="smart-alert-live">AUTO</span>
+</div>
+<p class="text-sm text-gray-500 mt-1">
+                                          Prioritas RFQ/CQS/Rebid, PO Sign Vendor, dan kontrak berdasarkan tanggal terbaru.
+                                      </p>
+</div>
+</div>
+<button aria-label="Refresh reminder" class="smart-alert-refresh" id="smartAlertRefresh" title="Refresh reminder" type="button">
+<i class="w-4 h-4" data-lucide="refresh-cw"></i>
+</button>
+</div>
+<div aria-label="Ringkasan reminder" class="smart-alert-counts">
+<button class="smart-alert-count smart-alert-count-cqs" data-smart-filter="cqs" type="button">
+<span class="smart-alert-count-number" id="smartCqsCount">0</span>
+<span>CQS ≥ 23 hari</span>
+</button>
+<button class="smart-alert-count smart-alert-count-rfq" data-smart-filter="rfq" type="button">
+<span class="smart-alert-count-number" id="smartRfqCount">0</span>
+<span>RFQ ≤ 7 hari</span>
+</button>
+<button class="smart-alert-count smart-alert-count-po" data-smart-filter="po" type="button">
+<span class="smart-alert-count-number" id="smartPoCount">0</span>
+<span>PO Sign +1 hari</span>
+</button>
+<button class="smart-alert-count smart-alert-count-contract" data-smart-filter="contract" type="button">
+<span class="smart-alert-count-number" id="smartContractCount">0</span>
+<span>Contract ≤ 3 bulan</span>
+</button>
+</div>
+<div aria-live="polite" class="smart-alert-preview" id="smartAlertPreview">
+<div class="smart-alert-loading">
+<span class="smart-alert-spinner"></span>
+                                  Membaca data terbaru...
+                              </div>
+</div>
+<div class="smart-alert-footer">
+<span class="text-xs text-gray-400" id="smartAlertUpdated">Belum diperbarui</span>
+<button class="smart-alert-view-all" id="smartAlertViewAll" type="button">
+                                  Lihat semua
+                                  <i class="w-4 h-4" data-lucide="arrow-right"></i>
+</button>
+</div>
+</section></aside></section><div aria-labelledby="smartAlertModalTitle" aria-modal="true" class="smart-alert-modal hidden" id="smartAlertModal" role="dialog">
+<div class="smart-alert-modal-backdrop" data-smart-close=""></div>
+<div class="smart-alert-modal-panel">
+<div class="smart-alert-modal-header">
+<div>
+<div class="flex items-center gap-2">
+<i class="w-5 h-5 text-violet-600" data-lucide="sparkles"></i>
+<h3 class="text-xl font-bold" id="smartAlertModalTitle">AI Procurement Reminder</h3>
+</div>
+<p class="text-sm text-gray-500 mt-1" id="smartAlertModalUpdated"></p>
+</div>
+<button aria-label="Tutup" class="smart-alert-modal-close" data-smart-close="" type="button">
+<i class="w-5 h-5" data-lucide="x"></i>
+</button>
+</div>
+<div class="smart-alert-filters" id="smartAlertFilters">
+<button class="is-active" data-alert-modal-filter="all" type="button">Semua <span id="smartAllModalCount">0</span></button>
+<button data-alert-modal-filter="cqs" type="button">CQS <span id="smartCqsModalCount">0</span></button>
+<button data-alert-modal-filter="rfq" type="button">RFQ/Rebid <span id="smartRfqModalCount">0</span></button>
+<button data-alert-modal-filter="po" type="button">PO Sign Vendor <span id="smartPoModalCount">0</span></button>
+<button data-alert-modal-filter="contract" type="button">Contract <span id="smartContractModalCount">0</span></button>
+</div>
+<div class="smart-alert-modal-list" id="smartAlertModalList"></div>
+</div>
+</div>
+<!-- Bottom -->
+</div>
+<!-- MODULE -->
+<div class="hidden" id="modulePage">
+<div class="module-page-header flex items-center justify-between mb-4" id="modulePageHeader">
+<button class="bg-sky-700 text-white px-4 py-2 rounded-lg" id="btnBackDashboard">
+
+                      ← Dashboard
+
+                  </button>
+<h2 class="font-bold text-xl" id="moduleTitle">
+</h2>
+</div>
+<iframe class="w-full h-[82vh] rounded-xl border" id="moduleFrame">
+</iframe>
+</div>
+</section>
+</div>
+</main>
+<div aria-labelledby="userApprovalsTitle" aria-modal="true" class="account-modal hidden" id="userApprovalsModal" role="dialog">
+<div class="account-modal-backdrop" data-close-user-approvals=""></div>
+<section class="account-modal-card approval-modal-card">
+<header class="account-modal-header"><div><p class="account-modal-kicker">SUPER ADMIN</p><h2 id="userApprovalsTitle">User Approvals</h2></div><button aria-label="Close user approvals" class="account-modal-close" data-close-user-approvals="" type="button"><i data-lucide="x"></i></button></header>
+<p class="account-modal-note" id="userApprovalsStatus">Loading pending registrations...</p>
+<div class="approval-list" id="pendingUsersList"></div>
+</section>
+</div>
+<div aria-labelledby="moduleHistoryTitle" aria-modal="true" class="account-modal hidden" id="moduleHistoryModal" role="dialog">
+<div class="account-modal-backdrop" data-close-module-history=""></div>
+<section class="account-modal-card module-history-modal-card">
+<header class="account-modal-header">
+<div>
+<p class="account-modal-kicker">QUICK ACCESS</p>
+<h2 id="moduleHistoryTitle">Update History</h2>
+</div>
+<button aria-label="Close update history" class="account-modal-close" data-close-module-history="" type="button"><i data-lucide="x"></i></button>
+</header>
+<div class="module-history-list" id="moduleHistoryList"></div>
+</section>
+</div><div aria-labelledby="profileModalTitle" aria-modal="true" class="account-modal hidden" id="profileModal" role="dialog">
+<div class="account-modal-backdrop" data-close-account-modal=""></div>
+<section class="account-modal-card">
+<header class="account-modal-header">
+<div>
+<p class="account-modal-kicker">ACCOUNT</p>
+<h2 id="profileModalTitle">My Profile</h2>
+</div>
+<button aria-label="Close profile" class="account-modal-close" data-close-account-modal="" type="button"><i data-lucide="x"></i></button>
+</header>
+<div class="profile-summary">
+<div class="profile-summary-avatar"><i data-lucide="user-round"></i></div>
+<div><strong id="profileModalName">-</strong><span id="profileModalRole">-</span></div>
+</div>
+<dl class="profile-details">
+<div><dt>Email</dt><dd id="profileModalEmail">-</dd></div>
+<div><dt>Mobile Number</dt><dd id="profileModalPhone">-</dd></div>
+<div><dt>Company ID</dt><dd id="profileModalCompany">-</dd></div>
+<div><dt>Account Status</dt><dd id="profileModalStatus">-</dd></div>
+</dl>
+<p class="account-modal-note">Profile data is managed in the Users sheet. Contact the Super Admin to update protected account information.</p>
+</section>
+</div>
+<div aria-labelledby="settingsModalTitle" aria-modal="true" class="account-modal hidden" id="settingsModal" role="dialog">
+<div class="account-modal-backdrop" data-close-account-modal=""></div>
+<section class="account-modal-card">
+<header class="account-modal-header">
+<div>
+<p class="account-modal-kicker">PREFERENCES</p>
+<h2 id="settingsModalTitle">Settings</h2>
+</div>
+<button aria-label="Close settings" class="account-modal-close" data-close-account-modal="" type="button"><i data-lucide="x"></i></button>
+</header>
+<div class="settings-list">
+<label class="settings-row">
+<span><strong>Compact dashboard</strong><small>Reduce card spacing and fit more information on screen.</small></span>
+<input id="compactDashboardSetting" type="checkbox"/>
+</label>
+<label class="settings-row">
+<span><strong>Reduce motion</strong><small>Disable smooth scrolling and nonessential transitions.</small></span>
+<input id="reduceMotionSetting" type="checkbox"/>
+</label>
+<label class="settings-row">
+<span><strong>Open admin tools in a new tab</strong><small>Applies to Google Sheet and Apps Script links.</small></span>
+<input id="adminToolsNewTabSetting" type="checkbox"/>
+</label>
+</div>
+<div class="account-modal-actions">
+<button class="account-modal-primary" id="saveSettingsButton" type="button">Save Settings</button>
+</div>
+</section>
+</div>
+<footer class="bg-white border-t">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-sm text-gray-500 text-center" id="footerCopyright">
+</div>
+</footer>
+<script src="config.js?v=20260810-admin-sidebar-v27"></script>
+<script src="shared-modules.js?v=20260810-admin-sidebar-v27"></script>
+<script src="common.js?v=20260810-admin-sidebar-v27"></script>
+<script src="script.js?v=20260810-admin-sidebar-v27"></script><script src="ui-responsive.js?v=20260810-admin-sidebar-v27"></script>
+</body>
+</html>

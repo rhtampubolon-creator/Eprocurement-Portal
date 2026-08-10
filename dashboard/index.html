@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+    <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Procurement Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    
+    <link rel="stylesheet"
+          href="style.css?v=20260810-admin-sidebar-v27">
+
+</head>
+
+<body class="bg-slate-100">
+
+<div class="min-h-screen p-5">
+
+    <!-- ==========================
+            HEADER
+    =========================== -->
+
+    <header id="dashboardHeader"
+            class="bg-white rounded-xl shadow p-5 mb-5">
+
+        <div class="flex justify-between items-center">
+
+            <div>
+
+                <h1 class="text-2xl font-bold">
+
+                    Procurement Dashboard
+
+                </h1>
+
+                <p class="text-gray-500">
+
+                    PT Makmur Sejahtera Wisesa
+
+                </p>
+
+            </div>
+
+            <div class="text-right text-sm">
+
+                <div>
+
+                    Last Sync
+
+                </div>
+
+                <div id="lastSync">
+
+                    -
+
+                </div>
+
+                <button id="btnDetail">
+
+                    Detail Procurement
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </header>
+
+    <!-- ==========================
+        PROCUREMENT SUMMARY
+    =========================== -->
+
+    <section class="bg-white rounded-xl shadow p-5 mb-5">
+
+        <div class="grid grid-cols-12 gap-5">
+
+            <!-- LEFT -->
+
+            <div class="col-span-2">
+
+                <div class="section-title mb-4">
+
+                    <i data-lucide="calendar-days"></i>
+
+                    <span>Procurement Year</span>
+
+                </div>
+
+                <div id="yearButtons"
+                    class="flex flex-col gap-2">
+
+                </div>
+
+                <div id="buyerFilterPanel" class="mt-5">
+                    <div class="section-title mb-2">
+                        <i data-lucide="user-round-search"></i>
+                        <span>Buyer</span>
+                    </div>
+                    <select id="buyerFilter" class="dashboard-buyer-filter">
+                        <option value="ALL">All Buyers</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <!-- RIGHT -->
+
+            <div class="col-span-10">
+
+                <div id="summaryCards"
+                    class="grid grid-cols-5 gap-4 mb-4">
+
+                    <div id="cardTotalPR"></div>
+
+                    <div id="cardTotalPO"></div>
+
+                    <div id="cardEstimate"></div>
+
+                    <div id="cardPOPrice"></div>
+
+                    <div id="cardComparison"></div>
+
+                </div>
+
+                <div class="grid grid-cols-4 gap-4">
+
+                    <div id="cardBid"></div>
+
+                    <div id="cardTdr"></div>
+
+                    <div id="cardIom"></div>
+
+                    <div id="cardCtr"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    
+
+    <!-- ==========================
+        PO RELEASE INFORMATION
+    =========================== -->
+
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-5 mb-5">
+        
+        <section
+            class="bg-white rounded-xl shadow p-5 mb-5">
+
+            <div class="section-title mb-4">
+
+                <i data-lucide="package-search"></i>
+
+                <span>PO Release Information</span>
+
+            </div>
+
+            <div id="poRelease">
+
+            </div>
+
+        </section>
+    
+
+        <!-- ==========================
+            ROUND DISTRIBUTION
+        =========================== -->
+
+        <section
+            class="bg-white rounded-xl shadow p-5 mb-5">
+
+            <div class="section-title mb-4">
+
+                <i data-lucide="bar-chart-3"></i>
+
+                <span>Round Distribution</span>
+
+            </div>
+
+            <div id="roundDistribution">
+
+            </div>
+
+        </section>
+
+        <!-- ==========================
+            Target Buyer
+        =========================== -->
+
+        <section class="bg-white rounded-xl shadow p-5">
+
+            <div class="section-title mb-4">
+
+                <i data-lucide="users"></i>
+
+                <span>Target Buyer by Monthly</span>
+
+            </div>
+
+            <canvas id="buyerTargetChart"></canvas>
+
+
+        </section>
+
+        <!-- ==========================
+            Assign PR
+        =========================== -->
+
+        <section class="bg-white rounded-xl shadow p-5">
+
+            <div class="section-title mb-4">
+
+                <i data-lucide="bar-chart-3"></i>
+
+                <span>Assign PR by Monthly</span>
+
+            </div>
+
+            <canvas id="assignChart"></canvas>
+
+        </section>
+
+    </div>
+
+    <!-- ==========================
+    TOP PROCUREMENT VALUE
+    =========================== -->
+
+    <section class="bg-white rounded-xl shadow p-5 mb-5">
+
+        <div class="section-title mb-4">
+
+            <i data-lucide="trophy"></i>
+
+            <span>Top Procurement Value</span>
+
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+
+            <div id="topBidVendor"></div>
+
+            <div id="topCtrVendor"></div>
+
+            <div id="topIomVendor"></div>
+
+            <div id="topTdrVendor"></div>
+
+        </div>
+
+    </section>
+
+ 
+
+</div>
+
+<script src="../config.js?v=20260810-admin-sidebar-v27"></script>
+<script src="../shared-modules.js?v=20260810-admin-sidebar-v27"></script>
+<script src="../common.js?v=20260810-admin-sidebar-v27"></script>
+
+<script src="script.js?v=20260810-admin-sidebar-v27"></script>
+
+<script>
+
+lucide.createIcons();
+
+</script>
+
+</body>
+
+</html>

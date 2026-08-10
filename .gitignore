@@ -1,0 +1,27 @@
+# Local runtime configuration
+config.js
+config.local.js
+.env
+.env.*
+!.env.example
+
+# Google Apps Script / clasp local credentials
+.clasp.json
+.clasprc.json
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+.DS_Store
+Thumbs.db
+
+# Exported files and local data
+exports/
+backups/
+local-data/
+*.csv.local
+
+# Office lock files
+~$*.xlsx
+~$*.xlsm

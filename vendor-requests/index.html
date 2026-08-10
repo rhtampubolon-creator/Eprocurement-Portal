@@ -1,0 +1,23 @@
+<!doctype html><html lang="id"><head>
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://open.er-api.com https://api.frankfurter.app; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vendor Requests</title><link rel="stylesheet" href="style.css?v=20260810-admin-sidebar-v27"></head><body>
+<header><div><h1>Vendor Requests</h1><p id="roleInfo">Permintaan penambahan vendor</p></div><a href="../index.html">← Main Menu</a></header>
+<main>
+  <section id="buyerFormCard" class="card hidden"><h2>Request Add Vendor</h2><p>Buyer hanya mengirim data awal. Admin akan menghubungi vendor untuk melengkapi dokumen.</p>
+    <form id="vendorRequestForm"><div class="grid">
+      <label>Nama perusahaan<input name="companyName" required minlength="3"></label>
+      <label>Nama PIC<input name="picName" required minlength="3"></label>
+      <label>Email vendor<input name="vendorEmail" type="email" required></label>
+      <label>Nomor kontak<input name="vendorContact" required minlength="8"></label>
+      <label>Kategori barang/jasa<input name="category" placeholder="Contoh: Mechanical"></label>
+      <label>Prioritas<select name="priority"><option>NORMAL</option><option>URGENT</option></select></label>
+    </div><label>Alasan/kebutuhan<textarea name="reason" rows="3" required></textarea></label>
+    <button type="submit">Kirim Permintaan</button></form>
+  </section>
+  <section class="card"><div class="title-row"><div><h2 id="listTitle">My Vendor Requests</h2><p id="summary">Memuat data…</p></div><button id="refreshBtn" class="secondary">Refresh</button></div>
+    <div class="table-wrap"><table><thead><tr><th>ID</th><th>Perusahaan</th><th>PIC / Kontak</th><th>Buyer</th><th>Status</th><th>Prioritas</th><th>Catatan Admin</th><th>Update</th><th id="adminActionHead">Aksi Admin</th></tr></thead><tbody id="requestRows"></tbody></table></div>
+  </section>
+</main><div id="toast"></div><script src="../config.js?v=20260810-admin-sidebar-v27"></script><script src="../shared-modules.js?v=20260810-admin-sidebar-v27"></script>
+<script src="../common.js?v=20260810-admin-sidebar-v27"></script><script src="script.js?v=20260810-admin-sidebar-v27"></script></body></html>

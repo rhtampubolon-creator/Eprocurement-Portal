@@ -1,0 +1,115 @@
+REVISI STABILITAS EPROCUREMENT
+
+File yang diperbaiki:
+1. bidder-list/script.js
+   - Bidder List mempertahankan minimal 10 baris.
+   - Final Vendor List disimpan bersama Company Name dan tanggal.
+   - Data pending dicoba sinkron ulang otomatis saat aplikasi dibuka/koneksi kembali.
+2. codegs.js
+   - Route BidderList lama disamakan ke kolom Rn Company dan Final Vendor List.
+3. script.js
+4. Apps Script Status - GS.html
+   - URL deployment Apps Script disamakan.
+
+Tidak diubah:
+- Desain/tampilan dan CSS.
+- Template Excel, formula, format, dan external link.
+- Modul lain yang sudah berjalan baik.
+
+UPDATE KOMUNIKASI WHATSAPP & OUTLOOK
+- common.js: ikon cepat WhatsApp dan Outlook pada halaman utama/modul.
+- bidder-list/index.html + style.css: ikon cepat WhatsApp dan Outlook pada Bidder List.
+- bidder-list/script.js: nomor WhatsApp tersinkron dari BidderList ke Multiple Email,
+  tombol WhatsApp per vendor, dan pesan RFQ otomatis Indo/English.
+- Tidak ada perubahan pada codegs.js, template Excel, atau alur penyimpanan backend.
+
+UPDATE 2026-08-03 - COMMUNICATION ICON MAIN MENU ONLY
+- Ikon cepat WhatsApp dan Outlook hanya tampil pada halaman menu utama.
+- Ikon mengambang di Dashboard, Procurement Admin, Vendor Company, Detail Contract, dan Bidder List dihapus.
+- Tombol WhatsApp per vendor dan Outlook Draft di Multiple Email tetap dipertahankan.
+- Tidak ada perubahan pada codegs.js atau fungsi backend.
+
+UPDATE 2026-08-03 - TOP PROCUREMENT FORM LAYOUT
+- procurement-admin/Form/index.html: hanya menambahkan penanda wrapper field untuk pengaturan posisi.
+- procurement-admin/Form/style.css: menata ulang posisi field bagian atas sesuai permintaan.
+- Description ditempatkan di sebelah No PR dan tetap auto-height.
+- Previous Submit PO dibuat sedikit lebih lebar dan tetap auto-height.
+- Status PR di bawah PIC; Est. Price PR di bawah Status PR; Round PO di bawah Est. Price PR.
+- Flow Process di bawah Assign Date dan melebar sampai area Pengadaan.
+- Est. Price US - Rp di bawah Flow Process; Dolar USD/IDR di sebelah kanannya.
+- RFQ ditempatkan di bawah Departement.
+- Status Rebid tetap di sebelah kanan Round PO dengan lebar lebih kecil.
+- Tidak ada perubahan pada JavaScript, data binding, tombol, backend, atau template Excel.
+
+REVISION 2026-08-03 R10 - COMPACT PROCUREMENT FORM LAYOUT
+Files changed:
+- procurement-admin/Form/index.html
+- procurement-admin/Form/style.css
+
+Scope:
+- Restores compact form spacing.
+- Keeps Description beside No PR.
+- Places Status PR below PIC.
+- Places Flow Process below Assign Date through Pengadaan.
+- Places RFQ below Department.
+- Keeps Previous Submit PO wider and auto-height.
+- No JavaScript, backend, calculations, filters, or templates changed.
+
+UPDATE 2026-08-04 - V2 FOUNDATION / GO-LIVE PREPARATION
+- codegs.js: Script Properties, role/permission backend, Procurement ID migration,
+  PR Year dari Assign PR Date, record ownership, audit log, payload/upload limits,
+  whitelist sheet, lock khusus operasi mutasi, dan workspace key berbasis ID.
+- config.js + config.example.js: konfigurasi URL/environment terpusat tanpa data produksi.
+- index.html + script.js + style.css: access gate dan visibilitas menu berdasarkan role.
+- procurement-admin/script.js + Form/script.js: Smart Import preview, skip unchanged,
+  proteksi nilai kosong/metadata, dan edit/hapus berbasis Procurement ID.
+- bidder-list/index.html + script.js: pilihan PR lintas tahun, workspace ID, dan sanitasi
+  data vendor/kontak produksi yang tertanam.
+- dashboard, detail-contract, vendor-company: endpoint dipindahkan ke runtime config.
+- Dokumentasi GitHub/deployment/security/test ditambahkan.
+- package.json + tools/validate-project.mjs: validasi source dengan npm test.
+
+REFERENCE UI CORRECTION 2.3:
+- index.html
+- ui-reference.css (new)
+- ui-responsive.js (new)
+- UI_REFERENCE_FIX.md (new)
+- CHANGELOG.md
+
+- ui-reference.css: containment, equal height, and internal scrolling for Recent Activity and AI Reminder.
+- RECENT_ACTIVITY_LAYOUT_FIX.md: documentation for layout fix 2.3.
+- common.js: menambahkan MSW.auth dan aturan BUYER view-only untuk Vendor/Contract.
+- vendor-company/script.js: memblokir serta menyembunyikan seluruh aksi perubahan bagi BUYER.
+- vendor-company/index.html: cache-buster asset Buyer view-only.
+- detail-contract/index.html: cache-buster asset Buyer view-only.
+- codegs.js: permission contract.manage dan otorisasi REPLACE_CONTRACTS.
+- PERUBAHAN_BUYER_VIEW_ONLY.md: ringkasan perubahan dan deployment.
+REVISI BUYER FULL VIEW-ONLY (4 Agustus 2026)
+- vendor-company/script.js: blokir seluruh mutasi, termasuk dblclick sel dan klik kanan.
+- vendor-company/index.html: cache-buster revisi penguncian Buyer.
+- detail-contract/script.js: blokir seluruh mutasi dan event baris pada capture phase.
+- detail-contract/index.html: cache-buster revisi penguncian Buyer.
+- PERUBAHAN_BUYER_VIEW_ONLY.md: dokumentasi aturan akses final.
+UPDATE VENDOR REQUESTS & BUYER VIEW ONLY (2026-08-04)
+=====================================================
+- codegs.js: backend Vendor Requests, role enforcement, notifikasi, aktivasi vendor.
+- index.html / script.js: menu Vendor Requests dan badge notifikasi.
+- vendor-company/index.html: tautan Vendor Requests dan cache version.
+- detail-contract/index.html: cache version Buyer read-only.
+- vendor-requests/: halaman baru untuk Buyer dan Admin.
+- PERUBAHAN_VENDOR_REQUESTS.md: dokumentasi implementasi dan deployment.
+PEMBEDAAN DASHBOARD BERDASARKAN ROLE (2026-08-04)
+- index.html: penanda modul sidebar, kartu Vendor Requests, dan elemen dashboard dinamis.
+- script.js: konfigurasi tampilan SUPER_ADMIN, PROCUREMENT_ADMIN, dan BUYER.
+- style.css: badge akses, tombol Vendor Request, dan warna dashboard per role.
+PEMBARUAN HEADER KHUSUS BUYER (2026-08-04)
+- vendor-company/index.html
+- vendor-company/script.js
+- vendor-company/style.css
+- detail-contract/index.html
+- detail-contract/script.js
+- detail-contract/style.css
+- procurement-admin/index.html
+- procurement-admin/script.js
+- procurement-admin/style.css
+- PERUBAHAN_HEADER_BUYER.md (baru)

@@ -1,0 +1,15 @@
+{
+  "name": "msw-eprocurement",
+  "version": "3.4.4-admin-sidebar-v27",
+  "private": true,
+  "description": "MSW E-Procurement V13 berdasarkan V12, dengan routing empat Google Spreadsheet dan role Contract.",
+  "scripts": {
+    "test": "node tools/validate-project.mjs",
+    "validate": "node tools/validate-project.mjs",
+    "security-audit": "node tools/security-audit.mjs",
+    "mobile-role-audit": "node tools/mobile-role-audit.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
