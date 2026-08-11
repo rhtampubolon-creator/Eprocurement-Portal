@@ -1,6 +1,6 @@
 {
   "name": "msw-eprocurement",
-  "version": "3.4.4-admin-sidebar-v27",
+  "version": "3.5.0-contract-dashboard-v28",
   "private": true,
   "description": "MSW E-Procurement V13 berdasarkan V12, dengan routing empat Google Spreadsheet dan role Contract.",
   "scripts": {

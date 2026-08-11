@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="referrer" content="no-referrer" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; frame-src 'self' https://script.google.com https://docs.google.com; worker-src 'self' blob:; form-action 'self'; upgrade-insecure-requests" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agreement Tracker Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.js"></script>
+  <link rel="stylesheet" href="style.css?v=20260810-contract-dashboard-v28" />
+</head>
+<body>
+  <main class="dashboard-shell">
+    <header class="dashboard-header">
+      <div>
+        <p class="eyebrow">CONTRACT WORKSPACE</p>
+        <h1>Agreement Tracker Dashboard</h1>
+        <p>Monitoring progress, due date, status, dan pekerjaan Agreement Tracker.</p>
+      </div>
+      <div class="header-actions">
+        <span id="lastSync" class="sync-label">Last Sync: -</span>
+        <button id="refreshBtn" class="secondary-btn" type="button"><i data-lucide="refresh-cw"></i><span>Refresh</span></button>
+        <button id="openTrackerBtn" class="primary-btn" type="button"><i data-lucide="clipboard-check"></i><span>Open Agreement Tracker</span></button>
+      </div>
+    </header>
+
+    <section class="filter-bar" aria-label="Dashboard filters">
+      <label><span>Buyer</span><select id="buyerFilter"><option value="ALL">All Buyer</option></select></label>
+      <label><span>Assigned To</span><select id="assignedFilter"><option value="ALL">All Assigned To</option></select></label>
+      <label><span>Status</span><select id="statusFilter"><option value="ALL">All Status</option></select></label>
+      <label><span>Due Month</span><select id="monthFilter"><option value="ALL">All Month</option></select></label>
+      <button id="resetFilterBtn" class="reset-btn" type="button"><i data-lucide="rotate-ccw"></i><span>Reset</span></button>
+    </section>
+
+    <section class="kpi-grid" aria-label="Agreement summary">
+      <article class="kpi-card"><div class="kpi-icon"><i data-lucide="files"></i></div><div><span>Total Agreement</span><strong id="kpiTotal">0</strong></div></article>
+      <article class="kpi-card"><div class="kpi-icon"><i data-lucide="circle-check-big"></i></div><div><span>Complete</span><strong id="kpiComplete">0</strong></div></article>
+      <article class="kpi-card"><div class="kpi-icon"><i data-lucide="loader-circle"></i></div><div><span>In Progress</span><strong id="kpiProgress">0</strong></div></article>
+      <article class="kpi-card"><div class="kpi-icon"><i data-lucide="circle-dashed"></i></div><div><span>To Do / Not Started</span><strong id="kpiTodo">0</strong></div></article>
+      <article class="kpi-card critical"><div class="kpi-icon"><i data-lucide="triangle-alert"></i></div><div><span>Overdue</span><strong id="kpiOverdue">0</strong></div></article>
+      <article class="kpi-card warning"><div class="kpi-icon"><i data-lucide="clock-3"></i></div><div><span>Due Soon ≤ 7 Days</span><strong id="kpiDueSoon">0</strong></div></article>
+    </section>
+
+    <section class="dashboard-grid two-column">
+      <article class="panel">
+        <div class="panel-heading"><div><p class="panel-kicker">STATUS</p><h2>Agreement Status</h2></div><span id="statusTotal" class="panel-badge">0 agreements</span></div>
+        <div class="status-layout">
+          <div id="statusDonut" class="status-donut" aria-label="Agreement status chart"><div><strong id="donutTotal">0</strong><span>Total</span></div></div>
+          <div id="statusLegend" class="legend-list"></div>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><p class="panel-kicker">PROGRESS</p><h2>Agreement Progress</h2></div></div>
+        <div id="progressBars" class="bar-list"></div>
+      </article>
+    </section>
+
+    <section class="dashboard-grid two-column">
+      <article class="panel">
+        <div class="panel-heading"><div><p class="panel-kicker">WORKLOAD</p><h2>Agreement by Assigned To</h2></div></div>
+        <div id="assignedBars" class="bar-list"></div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-heading"><div><p class="panel-kicker">DEADLINE</p><h2>Upcoming Due Date</h2></div><span class="panel-badge">Next 14 days</span></div>
+        <div id="dueList" class="due-list"></div>
+      </article>
+    </section>
+
+    <section class="panel attention-panel">
+      <div class="panel-heading">
+        <div><p class="panel-kicker">PRIORITY</p><h2>Agreement Attention Required</h2><p>Overdue ditampilkan terlebih dahulu, kemudian Due Soon dan pekerjaan dengan progress rendah.</p></div>
+        <span id="attentionCount" class="panel-badge">0 items</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Work Order</th><th>Description</th><th>Vendor</th><th>Assigned To</th><th>Due Date</th><th>Progress</th><th>Status</th><th>To Do</th></tr></thead>
+          <tbody id="attentionBody"></tbody>
+        </table>
+      </div>
+      <div class="table-footer">Maksimal 10 agreement prioritas ditampilkan.</div>
+    </section>
+
+    <div id="emptyState" class="empty-state hidden"><i data-lucide="database-zap"></i><strong>Data Agreement Tracker belum tersedia.</strong><span>Pastikan spreadsheet Agreement Tracker dapat diakses dan session login masih aktif.</span></div>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="../config.js?v=20260810-contract-dashboard-v28"></script>
+  <script src="../shared-modules.js?v=20260810-contract-dashboard-v28"></script>
+  <script src="../common.js?v=20260810-contract-dashboard-v28"></script>
+  <script src="script.js?v=20260810-contract-dashboard-v28"></script>
+</body>
+</html>

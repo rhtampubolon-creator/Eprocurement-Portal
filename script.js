@@ -208,7 +208,7 @@ function roleAllowedModules(role) {
   const map = {
     PROCUREMENT_ADMIN: ["vendorCompany", "vendorRequests", "workspaceAiReminder"],
     BUYER: ["procurementAdmin", "vendorCompany", "vendorRequests", "detailContract"],
-    CONTRACT: ["detailContract", "agreementTracker"],
+    CONTRACT: ["agreementDashboard", "detailContract", "agreementTracker"],
     VENDOR: ["vendorCompany"]
   };
   return map[normalized] || [];
@@ -310,19 +310,24 @@ function applyFrontendRole(profile) {
   // Role Contract berfokus pada Contract Management dan Recent Activity miliknya.
   // Menu lain disembunyikan agar akses sesuai bidang dan tidak membingungkan.
   const contractHiddenNavigationIds = [
-    "workspaceDashboard",
     "workspaceProcurement",
     "workspaceVendor",
     "workspaceVendorRequests",
     "workspaceProcurementReview",
     "workspaceOverdue",
-    "workspaceAiReminder",
     "workspaceReporting"
   ];
   contractHiddenNavigationIds.forEach(id => {
     const element = document.getElementById(id);
     if (element) element.hidden = role === "CONTRACT";
   });
+
+  // Sidebar Contract dibuat khusus: Dashboard Agreement, Contract Management,
+  // Agreement Tracker, Recent Activity, dan AI Contract Reminder.
+  const workspaceKicker = document.querySelector(".workspace-navigation-kicker");
+  if (workspaceKicker) workspaceKicker.textContent = role === "CONTRACT" ? "CONTRACT WORKSPACE" : "WORKSPACE";
+  const aiReminderLabel = document.querySelector("#workspaceAiReminder span");
+  if (aiReminderLabel) aiReminderLabel.textContent = role === "CONTRACT" ? "AI Contract Reminder" : "AI Procurement Reminder";
 
   const accountName = document.getElementById("accountName");
   const accountRole = document.getElementById("accountRole");
@@ -389,7 +394,7 @@ function applyFrontendRole(profile) {
       const modulePage = document.getElementById("modulePage");
       const stillOnDashboard = (document.body.dataset.workspacePanel || "dashboard") === "dashboard";
       if (stillOnDashboard && modulePage?.classList.contains("hidden")) {
-        document.getElementById("workspaceContract")?.click();
+        document.getElementById("workspaceDashboard")?.click();
       }
     });
   }
@@ -1941,7 +1946,7 @@ function openSmartAlertRecord(alertId){
     try {
         if (alert.search) localStorage.setItem("procurementAdminSearchText", alert.search);
     } catch (_) {}
-    openModule("procurementAdmin", "Admin Procurement", "procurement-admin/index.html?v=20260810-admin-sidebar-v27");
+    openModule("procurementAdmin", "Admin Procurement", "procurement-admin/index.html?v=20260810-contract-dashboard-v28");
 }
 
 async function smartFetchSheet(sheetName){
@@ -2291,7 +2296,7 @@ function initRecentActivity(){
         }
         if (!noPR) return;
         try { localStorage.setItem("procurementAdminSearchText", noPR); } catch (_) {}
-        openModule("procurementAdmin", "Admin Procurement", "procurement-admin/index.html?v=20260810-admin-sidebar-v27");
+        openModule("procurementAdmin", "Admin Procurement", "procurement-admin/index.html?v=20260810-contract-dashboard-v28");
     });
 
     window.addEventListener("MSW_RECENT_ACTIVITY_UPDATED", () => loadRecentActivity({ silent: true }));
@@ -2495,6 +2500,7 @@ function openModule(moduleName, title, url){
     currentModule = moduleName;
 
     const workspaceMap = {
+        agreementDashboard: "workspaceDashboard",
         procurementAdmin: "workspaceProcurement",
         vendorCompany: "workspaceVendor",
         vendorRequests: "workspaceVendorRequests",
@@ -2517,7 +2523,7 @@ function openModule(moduleName, title, url){
 
     // Tata letak yang ditandai pengguna berada pada header pembungkus modul
     // (di halaman utama), bukan pada header di dalam iframe.
-    const usesInnerModuleHeader = ["procurementAdmin", "vendorCompany", "detailContract", "vendorRequests", "agreementTracker"].includes(moduleName);
+    const usesInnerModuleHeader = ["agreementDashboard", "procurementAdmin", "vendorCompany", "detailContract", "vendorRequests", "agreementTracker"].includes(moduleName);
     const modulePageHeader = document.getElementById("modulePageHeader");
     if (modulePageHeader) {
         modulePageHeader.classList.toggle("buyer-module-header", usesInnerModuleHeader);
@@ -2641,7 +2647,7 @@ if (procurementCard) {
         openModule(
             "procurementAdmin",
             "Admin Procurement",
-            "procurement-admin/index.html?v=20260810-admin-sidebar-v27"
+            "procurement-admin/index.html?v=20260810-contract-dashboard-v28"
         );
 
     });
@@ -2876,7 +2882,14 @@ function setWorkspaceNavigationActive(targetId = "workspaceDashboard") {
 
 function initializeWorkspaceNavigation() {
     const bindings = [
-        ["workspaceDashboard", () => { showMainWorkspacePanel("dashboard"); setWorkspaceNavigationActive("workspaceDashboard"); }],
+        ["workspaceDashboard", () => {
+            if (normalizedFrontendRole(ACTIVE_PROFILE?.role) === "CONTRACT") {
+                openModule("agreementDashboard", "Agreement Tracker Dashboard", "agreement-dashboard/index.html?v=20260810-contract-dashboard-v28");
+            } else {
+                showMainWorkspacePanel("dashboard");
+                setWorkspaceNavigationActive("workspaceDashboard");
+            }
+        }],
         ["workspaceProcurement", () => { procurementCard?.click(); setWorkspaceNavigationActive("workspaceProcurement"); }],
         ["workspaceVendor", () => { vendorCard?.click(); setWorkspaceNavigationActive("workspaceVendor"); }],
         ["workspaceVendorRequests", () => { openModule("vendorRequests", "Vendor Requests", "vendor-requests/index.html"); }],
@@ -2893,6 +2906,15 @@ function initializeWorkspaceNavigation() {
         if (element) element.title = "Reporting module is under development.";
     });
 }
+
+window.addEventListener("message", event => {
+    const payload = event?.data || {};
+    if (payload.type !== "MSW_OPEN_MODULE") return;
+    if (payload.module === "agreementTracker") {
+        openModule("agreementTracker", "Agreement Tracker", "agreement-tracker/index.html?v=20260810-contract-dashboard-v28");
+        setWorkspaceNavigationActive("workspaceAgreementTracker");
+    }
+});
 
 initializeWorkspaceNavigation();
 

@@ -12,7 +12,7 @@
       navId: "workspaceProcurement",
       label: "Procurement",
       icon: "clipboard-list",
-      url: "procurement-admin/index.html?v=20260810-admin-sidebar-v27",
+      url: "procurement-admin/index.html?v=20260810-contract-dashboard-v28",
       roles: ["SUPER_ADMIN", "BUYER"]
     },
     {
@@ -32,6 +32,14 @@
       url: "vendor-requests/index.html",
       roles: ["PROCUREMENT_ADMIN"],
       viewOnlyRoles: ["BUYER"]
+    },
+    {
+      id: "agreementDashboard",
+      navId: "workspaceDashboard",
+      label: "Agreement Dashboard",
+      icon: "layout-dashboard",
+      url: "agreement-dashboard/index.html",
+      roles: ["CONTRACT"]
     },
     {
       id: "detailContract",
