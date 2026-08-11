@@ -1,5 +1,4 @@
 # Local runtime configuration
-config.js
 config.local.js
 .env
 .env.*
