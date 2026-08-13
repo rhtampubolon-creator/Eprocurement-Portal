@@ -4,7 +4,7 @@ const SHEET_NAME = "Agreement Tracker";
 const DATA_HEADERS = ["Work Order","Description","Vendor","Buyer","User","Assigned To","Start Date","Due Date","% Complete","Status","Remarks","To Do"];
 const HEADERS = ["No", ...DATA_HEADERS];
 const AGREEMENT_CACHE_KEY = "MSW_AGREEMENT_TRACKER_CACHE_V1";
-let agreementData=[]; let filteredData=[]; let agreementRevision=0; let currentPage=1; const PAGE_SIZE=10; let editingIndex=-1; let editingOriginalRow=null; let contextIndex=-1; let users=[]; let vendors=[];
+let agreementData=[]; let filteredData=[]; let agreementRevision=0; let currentPage=1; const PAGE_SIZE=20; let editingIndex=-1; let editingOriginalRow=null; let contextIndex=-1; let users=[]; let vendors=[];
 const byId=id=>document.getElementById(id);
 function esc(v){return String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));}
 function token(){return localStorage.getItem("MSW_AUTH_TOKEN")||sessionStorage.getItem("MSW_AUTH_TOKEN")||"";}
