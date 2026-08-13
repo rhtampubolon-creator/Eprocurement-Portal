@@ -1,0 +1,46 @@
+name: Build Web Performance Assets
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'package.json'
+      - 'tailwind.config.js'
+      - 'assets/tailwind-input.css'
+      - '.github/workflows/build-web-assets.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build local production assets
+        run: npm run build:assets
+
+      - name: Commit generated assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/tailwind.min.css assets/lucide.min.js assets/xlsx.full.min.js package-lock.json
+          if git diff --cached --quiet; then
+            echo "No generated asset changes."
+            exit 0
+          fi
+          git commit -m "Build local web performance assets"
+          git push
