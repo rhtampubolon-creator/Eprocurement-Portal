@@ -55,7 +55,7 @@
       navId: "workspaceAgreementTracker",
       label: "Agreement Tracker",
       icon: "clipboard-check",
-      url: "agreement-tracker/index.html",
+      url: "agreement-tracker/index.html?v=20260813-page20-v131",
       roles: ["SUPER_ADMIN", "CONTRACT"]
     }
   ];
