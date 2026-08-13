@@ -1,13 +1,23 @@
 {
   "name": "msw-eprocurement",
-  "version": "3.5.0-contract-dashboard-v28",
+  "version": "3.5.1-performance-cache",
   "private": true,
-  "description": "MSW E-Procurement V13 berdasarkan V12, dengan routing empat Google Spreadsheet dan role Contract.",
+  "description": "MSW E-Procurement Web master with local production assets and cache-first loading.",
   "scripts": {
     "test": "node tools/validate-project.mjs",
     "validate": "node tools/validate-project.mjs",
     "security-audit": "node tools/security-audit.mjs",
-    "mobile-role-audit": "node tools/mobile-role-audit.mjs"
+    "mobile-role-audit": "node tools/mobile-role-audit.mjs",
+    "build:tailwind": "tailwindcss -i ./assets/tailwind-input.css -o ./assets/tailwind.min.css --minify",
+    "build:lucide": "terser ./node_modules/lucide/dist/umd/lucide.js -c -m -o ./assets/lucide.min.js",
+    "build:xlsx": "node -e \"require('fs').copyFileSync('./node_modules/xlsx/dist/xlsx.full.min.js','./assets/xlsx.full.min.js')\"",
+    "build:assets": "npm run build:tailwind && npm run build:lucide && npm run build:xlsx"
+  },
+  "devDependencies": {
+    "lucide": "0.453.0",
+    "tailwindcss": "3.4.17",
+    "terser": "5.44.0",
+    "xlsx": "0.18.5"
   },
   "engines": {
     "node": ">=18"
