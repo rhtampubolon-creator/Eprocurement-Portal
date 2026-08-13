@@ -13,9 +13,7 @@
   if (isTouchDevice) document.body.classList.add('touch-device');
 
   function useDrawerMode() { return isAndroidApp || isTouchDevice || window.innerWidth <= 860; }
-  function isLandscape() {
-    return !!(window.matchMedia && window.matchMedia('(orientation: landscape)').matches);
-  }
+  function isLandscape() { return !!(window.matchMedia && window.matchMedia('(orientation: landscape)').matches); }
   function clearDesktopHiddenState() {
     sidebar.classList.remove('overlay', 'sidebar-hidden');
     if (mainLayout) mainLayout.classList.remove('sidebar-collapsed');
@@ -35,10 +33,8 @@
     const landscape = isLandscape();
     document.documentElement.classList.toggle('eproc-landscape', landscape);
     document.body.classList.toggle('eproc-landscape', landscape);
-
     if (landscape) setOpen(false);
-    if (useDrawerMode()) clearDesktopHiddenState();
-    else setOpen(false);
+    if (useDrawerMode()) clearDesktopHiddenState(); else setOpen(false);
   }
 
   toggle.addEventListener('click', () => setOpen(!document.body.classList.contains('mobile-sidebar-open')));
@@ -50,4 +46,33 @@
 
   if (useDrawerMode()) { clearDesktopHiddenState(); setOpen(false); }
   syncOrientationState();
+})();
+
+(function(){
+  if(window.__MSW_RESPONSIVE_ASSET_LOADER__) return;
+  window.__MSW_RESPONSIVE_ASSET_LOADER__=true;
+
+  if(!document.querySelector('link[data-eproc-responsive-device]')){
+    const responsive=document.createElement('link');
+    responsive.rel='stylesheet';
+    responsive.href='responsive-device.css?v=20260813-v130';
+    responsive.setAttribute('data-eproc-responsive-device','1');
+    document.head.appendChild(responsive);
+  }
+
+  if(!document.querySelector('link[data-eproc-mobile-fit-css]')){
+    const fitCss=document.createElement('link');
+    fitCss.rel='stylesheet';
+    fitCss.href='mobile-table-fit.css?v=20260813-v130';
+    fitCss.setAttribute('data-eproc-mobile-fit-css','1');
+    document.head.appendChild(fitCss);
+  }
+
+  if(!document.querySelector('script[data-eproc-mobile-fit-js]')){
+    const fitJs=document.createElement('script');
+    fitJs.src='mobile-table-fit.js?v=20260813-v130';
+    fitJs.defer=true;
+    fitJs.setAttribute('data-eproc-mobile-fit-js','1');
+    document.body.appendChild(fitJs);
+  }
 })();
