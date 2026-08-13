@@ -1,0 +1,183 @@
+/* MSW E-Procurement responsive device layer v1.3.0
+   Shared by Web and Android WebView.
+   Keeps desktop layout intact while adapting search/action/table controls on phones/tablets. */
+
+@media (max-width: 1024px), (pointer: coarse) {
+  html, body {
+    max-width: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  input[type="search"],
+  #searchInput,
+  .search-input,
+  [data-search-input] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #moduleHeader {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #moduleHeader > div,
+  .module-toolbar,
+  .table-toolbar,
+  .search-container {
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .action-dropdown {
+    flex: 0 0 auto !important;
+    max-width: 100% !important;
+  }
+
+  .action-btn,
+  #menuBtn,
+  [data-action-button] {
+    min-width: 78px !important;
+    min-height: 38px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    white-space: nowrap !important;
+  }
+
+  .action-menu,
+  .row-context-menu,
+  .excel-column-filter-menu {
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .table-container,
+  .table-wrap,
+  .table-responsive,
+  .responsive-table,
+  [class*="table-container"],
+  [class*="table-wrap"] {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  iframe {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 620px) and (orientation: portrait) {
+  #moduleHeader {
+    gap: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  #moduleHeader > div:last-child,
+  .module-toolbar,
+  .table-toolbar,
+  .search-container {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+
+  .action-dropdown {
+    width: 100% !important;
+  }
+
+  .action-btn,
+  #menuBtn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .action-menu {
+    left: 0 !important;
+    right: auto !important;
+    width: min(280px, calc(100vw - 24px)) !important;
+  }
+
+  th, td {
+    padding-left: 5px !important;
+    padding-right: 5px !important;
+  }
+}
+
+@media (min-width: 621px) and (max-width: 1024px) {
+  #moduleHeader > div:last-child,
+  .module-toolbar,
+  .table-toolbar {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  #searchInput,
+  input[type="search"],
+  .search-input {
+    width: min(360px, 60vw) !important;
+    flex: 1 1 260px !important;
+  }
+
+  .action-dropdown {
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (orientation: landscape) and (max-width: 1180px) {
+  html,
+  body,
+  body.h-screen,
+  body.min-h-screen {
+    height: auto !important;
+    min-height: 100dvh !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+  }
+
+  body.overflow-hidden:not(.app-locked):not(.smart-alert-modal-open):not(.mobile-sidebar-open) {
+    overflow-y: auto !important;
+  }
+
+  #moduleHeader {
+    position: relative !important;
+    top: auto !important;
+  }
+
+  .table-container {
+    min-height: 48dvh !important;
+    max-height: none !important;
+    overflow: auto !important;
+  }
+
+  #moduleFrame,
+  #procurementDashboardFrame {
+    min-height: 72dvh !important;
+  }
+
+  .procurement-form-window {
+    max-height: calc(100dvh - 12px) !important;
+  }
+}
+
+@media (pointer: coarse) {
+  button,
+  input,
+  select {
+    touch-action: manipulation;
+  }
+
+  .action-menu button,
+  .action-menu-item,
+  .row-context-menu button {
+    min-height: 38px !important;
+  }
+}
