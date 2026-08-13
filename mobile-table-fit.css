@@ -1,0 +1,72 @@
+/* EprocMSW Mobile Table Fit v1.2.2
+   Mobile/tablet only. Desktop/laptop is intentionally unchanged. */
+
+.mobile-table-tools { display:none; }
+
+@media (max-width: 1024px), (pointer: coarse) {
+  html, body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  .table-wrap,
+  .procurement-overview-table-wrap,
+  .table-responsive,
+  .responsive-table,
+  [class*="table-wrap"],
+  [class*="table-container"] {
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+
+  .mobile-table-tools {
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-wrap:wrap;
+    margin:7px 0 6px;
+    padding:6px;
+    border:1px solid #d9e2ec;
+    border-radius:9px;
+    background:#f8fafc;
+    position:sticky;
+    left:0;
+    z-index:6;
+    width:max-content;
+    max-width:100%;
+  }
+
+  .mobile-table-tools button {
+    border:1px solid #cbd5e1;
+    background:#fff;
+    color:#334155;
+    min-height:32px;
+    padding:5px 9px;
+    border-radius:7px;
+    font-size:11px;
+    font-weight:700;
+    cursor:pointer;
+    touch-action:manipulation;
+  }
+
+  .mobile-table-tools button:active { transform:scale(.97); }
+  .mobile-table-tools .mobile-table-scale {
+    min-width:46px;
+    text-align:center;
+    font-size:10px;
+    font-weight:800;
+    color:#475569;
+  }
+
+  table.mobile-fit-table {
+    transform-origin:top left;
+    transition:transform .12s ease;
+  }
+
+  body.mobile-table-fit-active {
+    overflow-x:hidden !important;
+  }
+}
