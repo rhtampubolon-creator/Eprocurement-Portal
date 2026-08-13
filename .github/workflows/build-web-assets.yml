@@ -7,6 +7,7 @@ on:
       - 'package.json'
       - 'tailwind.config.js'
       - 'assets/tailwind-input.css'
+      - 'tools/apply-performance-assets.mjs'
       - '.github/workflows/build-web-assets.yml'
   workflow_dispatch:
 
@@ -31,14 +32,17 @@ jobs:
       - name: Build local production assets
         run: npm run build:assets
 
-      - name: Commit generated assets
+      - name: Apply local assets and performance cache to HTML
+        run: node tools/apply-performance-assets.mjs
+
+      - name: Commit generated performance changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/tailwind.min.css assets/lucide.min.js assets/xlsx.full.min.js package-lock.json
+          git add assets/tailwind.min.css assets/lucide.min.js assets/xlsx.full.min.js package-lock.json '*.html' '**/*.html'
           if git diff --cached --quiet; then
-            echo "No generated asset changes."
+            echo "No generated performance changes."
             exit 0
           fi
-          git commit -m "Build local web performance assets"
+          git commit -m "Apply local web assets and cache-first startup"
           git push
