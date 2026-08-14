@@ -3,8 +3,10 @@
 
   const DB_NAME = 'MSW_PROCUREMENT_LOCAL_FS';
   const DB_STORE = 'handles';
-  const ROOT_HANDLE_KEY = 'prRoot';
-  const LOCAL_ID_PREFIX = 'localpr|';
+  const PR_ROOT_KEY = 'prRoot';
+  const TC_ROOT_KEY = 'tcRoot';
+  const LOCAL_PR_ID_PREFIX = 'localpr|';
+  const LOCAL_TC_ID_PREFIX = 'localtc|';
   const PROJECT_FOLDER_TYPES = new Set([
     '01. PR Approval',
     '02. Bidderlist',
@@ -18,6 +20,7 @@
   let startupLazyGuard = true;
   let overridesInstalled = false;
   let allowExplicitDocumentRefresh = false;
+  let storageSetupReady = false;
 
   const nativeFetch = window.fetch.bind(window);
   const nativeWarn = console.warn.bind(console);
@@ -44,12 +47,12 @@
 
   console.warn = function (...args) {
     if (startupLazyGuard) {
-      const text = args.map(arg => {
+      const value = args.map(arg => {
         if (arg instanceof Error) return `${arg.message || ''} ${arg.stack || ''}`;
         try { return typeof arg === 'string' ? arg : JSON.stringify(arg); }
         catch (_) { return String(arg || ''); }
       }).join(' ');
-      if (/MSW_LAZY_TEMPLATE_STARTUP|Master\s+(?:Bidderlist|RFQ|CQS)|Fallback master lokal|Google Drive.*gagal dimuat/i.test(text)) {
+      if (/MSW_LAZY_TEMPLATE_STARTUP|Master\s+(?:Bidderlist|RFQ|CQS)|Fallback master lokal|Google Drive.*gagal dimuat/i.test(value)) {
         return;
       }
     }
@@ -71,12 +74,12 @@
     });
   }
 
-  async function loadRootHandle() {
+  async function loadHandle(key) {
     const db = await openDb();
     try {
       return await new Promise((resolve, reject) => {
         const tx = db.transaction(DB_STORE, 'readonly');
-        const request = tx.objectStore(DB_STORE).get(ROOT_HANDLE_KEY);
+        const request = tx.objectStore(DB_STORE).get(key);
         request.onsuccess = () => resolve(request.result || null);
         request.onerror = () => reject(request.error);
       });
@@ -85,25 +88,252 @@
     }
   }
 
+  async function saveHandle(key, handle) {
+    const db = await openDb();
+    try {
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, 'readwrite');
+        tx.objectStore(DB_STORE).put(handle, key);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error || new Error('Penyimpanan akses folder dibatalkan.'));
+      });
+    } finally {
+      db.close();
+    }
+  }
+
+  async function permissionState(handle) {
+    if (!handle || typeof handle.queryPermission !== 'function') return 'prompt';
+    try { return await handle.queryPermission({ mode: 'readwrite' }); }
+    catch (_) { return 'prompt'; }
+  }
+
   async function ensurePermission(handle, requestPermission) {
     if (!handle) return false;
     const options = { mode: 'readwrite' };
-    if ((await handle.queryPermission(options)) === 'granted') return true;
-    return Boolean(requestPermission && (await handle.requestPermission(options)) === 'granted');
+    try {
+      if ((await handle.queryPermission(options)) === 'granted') return true;
+      return Boolean(requestPermission && (await handle.requestPermission(options)) === 'granted');
+    } catch (_) {
+      return false;
+    }
   }
 
-  async function getConnectedPrRoot(requestPermission = true) {
-    const root = await loadRootHandle();
-    if (!root) {
-      throw new Error('Folder PR belum terhubung. Buka tab Procurement lalu klik Connect Folder PR.');
+  function validateSelectedFolder(handle, expectedName, label) {
+    const actual = asText(handle?.name);
+    if (actual.toUpperCase() !== expectedName.toUpperCase()) {
+      throw new Error(`${label} harus memilih folder bernama "${expectedName}". Folder terpilih: ${actual || '-'}`);
     }
-    if (asText(root.name).toUpperCase() !== 'PR') {
-      throw new Error(`Root lokal harus folder PR. Folder tersimpan saat ini: ${root.name || '-'}`);
+  }
+
+  async function chooseStorageFolder(key, expectedName, label) {
+    if (typeof window.showDirectoryPicker !== 'function' || !window.isSecureContext) {
+      throw new Error('Pemilihan folder lokal membutuhkan Microsoft Edge/Google Chrome desktop melalui HTTPS.');
     }
+    const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+    validateSelectedFolder(handle, expectedName, label);
+    await saveHandle(key, handle);
+    return handle;
+  }
+
+  async function getConnectedRoot(key, expectedName, label, requestPermission = true) {
+    const root = await loadHandle(key);
+    if (!root) throw new Error(`${label} belum dipilih pada Storage Setup.`);
+    validateSelectedFolder(root, expectedName, label);
     if (!(await ensurePermission(root, requestPermission))) {
-      throw new Error('Izin akses folder PR belum diberikan. Klik Connect Folder PR kembali dari tab Procurement.');
+      throw new Error(`Izin akses ${label} belum aktif. Buka Storage Setup dan klik Aktifkan.`);
     }
     return root;
+  }
+
+  function getConnectedPrRoot(requestPermission = true) {
+    return getConnectedRoot(PR_ROOT_KEY, 'PR', 'Folder PR / Log Book', requestPermission);
+  }
+
+  function getConnectedTcRoot(requestPermission = true) {
+    return getConnectedRoot(TC_ROOT_KEY, 'Original TC', 'Folder Master TC', requestPermission);
+  }
+
+  function setupStyle() {
+    if (document.getElementById('mswStorageSetupStyle')) return;
+    const style = document.createElement('style');
+    style.id = 'mswStorageSetupStyle';
+    style.textContent = `
+      body.msw-storage-locked { overflow: hidden !important; }
+      #mswStorageSetupGate { position: fixed; inset: 0; z-index: 2147483000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(15, 23, 42, .72); backdrop-filter: blur(5px); }
+      #mswStorageSetupGate[hidden] { display: none !important; }
+      .msw-storage-card { width: min(760px, 96vw); max-height: 94vh; overflow: auto; background: #fff; border-radius: 18px; box-shadow: 0 24px 80px rgba(15,23,42,.35); border: 1px solid #e2e8f0; }
+      .msw-storage-head { padding: 22px 24px 16px; border-bottom: 1px solid #e2e8f0; }
+      .msw-storage-head h2 { margin: 0 0 6px; color: #0f172a; font-size: 22px; }
+      .msw-storage-head p { margin: 0; color: #64748b; font-size: 13px; line-height: 1.55; }
+      .msw-storage-body { padding: 20px 24px; display: grid; gap: 14px; }
+      .msw-storage-row { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 16px; border: 1px solid #e2e8f0; border-radius: 14px; background: #f8fafc; }
+      .msw-storage-row h3 { margin: 0 0 5px; color: #0f172a; font-size: 15px; }
+      .msw-storage-path { margin: 0 0 5px; color: #334155; font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+      .msw-storage-status { margin: 0; font-size: 12px; }
+      .msw-storage-status.ok { color: #047857; }
+      .msw-storage-status.warn { color: #b45309; }
+      .msw-storage-status.bad { color: #b91c1c; }
+      .msw-storage-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+      .msw-storage-btn { border: 1px solid #cbd5e1; border-radius: 9px; background: #fff; color: #0f172a; padding: 9px 12px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+      .msw-storage-btn:hover { background: #f1f5f9; }
+      .msw-storage-btn:disabled { opacity: .48; cursor: not-allowed; }
+      .msw-storage-footer { padding: 0 24px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+      .msw-storage-note { color: #64748b; font-size: 12px; line-height: 1.45; }
+      #mswEnterWorkspaceBtn { border: 0; border-radius: 10px; background: #0f172a; color: #fff; padding: 11px 18px; font-weight: 800; cursor: pointer; white-space: nowrap; }
+      #mswEnterWorkspaceBtn:disabled { background: #94a3b8; cursor: not-allowed; }
+      @media (max-width: 720px) { .msw-storage-row { grid-template-columns: 1fr; } .msw-storage-actions { justify-content: flex-start; } .msw-storage-footer { align-items: stretch; flex-direction: column; } #mswEnterWorkspaceBtn { width: 100%; } }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function buildStorageSetupGate() {
+    if (document.getElementById('mswStorageSetupGate')) return document.getElementById('mswStorageSetupGate');
+    setupStyle();
+    const gate = document.createElement('div');
+    gate.id = 'mswStorageSetupGate';
+    gate.innerHTML = `
+      <div class="msw-storage-card" role="dialog" aria-modal="true" aria-labelledby="mswStorageSetupTitle">
+        <div class="msw-storage-head">
+          <h2 id="mswStorageSetupTitle">Procurement Storage Setup</h2>
+          <p>Tentukan lokasi file sebelum masuk Procurement Workspace. Lokasi boleh OneDrive atau drive lain; portal hanya menyimpan izin folder pada browser ini dan tidak menyimpan path Windows lengkap.</p>
+        </div>
+        <div class="msw-storage-body">
+          <div class="msw-storage-row">
+            <div>
+              <h3>Folder Log Book / PR</h3>
+              <p class="msw-storage-path" id="mswPrFolderName">Belum dipilih</p>
+              <p class="msw-storage-status warn" id="mswPrFolderStatus">Pilih folder kerja bernama PR.</p>
+            </div>
+            <div class="msw-storage-actions">
+              <button type="button" class="msw-storage-btn" id="mswActivatePrBtn">Aktifkan</button>
+              <button type="button" class="msw-storage-btn" id="mswChoosePrBtn">Pilih / Ganti Folder</button>
+            </div>
+          </div>
+          <div class="msw-storage-row">
+            <div>
+              <h3>Folder Master TC</h3>
+              <p class="msw-storage-path" id="mswTcFolderName">Belum dipilih</p>
+              <p class="msw-storage-status warn" id="mswTcFolderStatus">Pilih folder bernama Original TC.</p>
+            </div>
+            <div class="msw-storage-actions">
+              <button type="button" class="msw-storage-btn" id="mswActivateTcBtn">Aktifkan</button>
+              <button type="button" class="msw-storage-btn" id="mswChooseTcBtn">Pilih / Ganti Folder</button>
+            </div>
+          </div>
+        </div>
+        <div class="msw-storage-footer">
+          <div class="msw-storage-note" id="mswStorageSetupNote">Kedua folder harus siap sebelum workspace dibuka.</div>
+          <button type="button" id="mswEnterWorkspaceBtn" disabled>Masuk Procurement Workspace</button>
+        </div>
+      </div>`;
+    document.body.appendChild(gate);
+    document.body.classList.add('msw-storage-locked');
+    return gate;
+  }
+
+  function setSetupStatus(prefix, handle, state, errorMessage = '') {
+    const nameEl = document.getElementById(`msw${prefix}FolderName`);
+    const statusEl = document.getElementById(`msw${prefix}FolderStatus`);
+    const activateBtn = document.getElementById(`mswActivate${prefix}Btn`);
+    if (!nameEl || !statusEl || !activateBtn) return;
+
+    nameEl.textContent = handle?.name || 'Belum dipilih';
+    statusEl.className = 'msw-storage-status';
+    if (errorMessage) {
+      statusEl.textContent = errorMessage;
+      statusEl.classList.add('bad');
+      activateBtn.disabled = !handle;
+      return;
+    }
+    if (!handle) {
+      statusEl.textContent = prefix === 'Pr' ? 'Pilih folder kerja bernama PR.' : 'Pilih folder bernama Original TC.';
+      statusEl.classList.add('warn');
+      activateBtn.disabled = true;
+      return;
+    }
+    if (state === 'granted') {
+      statusEl.textContent = '✓ Terhubung dan izin aktif';
+      statusEl.classList.add('ok');
+      activateBtn.disabled = true;
+    } else {
+      statusEl.textContent = 'Folder tersimpan. Klik Aktifkan untuk memberikan izin akses sesi ini.';
+      statusEl.classList.add('warn');
+      activateBtn.disabled = false;
+    }
+  }
+
+  async function refreshStorageSetup() {
+    const enterBtn = document.getElementById('mswEnterWorkspaceBtn');
+    const note = document.getElementById('mswStorageSetupNote');
+    let prReady = false;
+    let tcReady = false;
+
+    try {
+      const pr = await loadHandle(PR_ROOT_KEY);
+      if (pr) validateSelectedFolder(pr, 'PR', 'Folder PR / Log Book');
+      const state = pr ? await permissionState(pr) : 'prompt';
+      prReady = Boolean(pr && state === 'granted');
+      setSetupStatus('Pr', pr, state);
+    } catch (error) {
+      setSetupStatus('Pr', await loadHandle(PR_ROOT_KEY).catch(() => null), 'prompt', error?.message || String(error));
+    }
+
+    try {
+      const tc = await loadHandle(TC_ROOT_KEY);
+      if (tc) validateSelectedFolder(tc, 'Original TC', 'Folder Master TC');
+      const state = tc ? await permissionState(tc) : 'prompt';
+      tcReady = Boolean(tc && state === 'granted');
+      setSetupStatus('Tc', tc, state);
+    } catch (error) {
+      setSetupStatus('Tc', await loadHandle(TC_ROOT_KEY).catch(() => null), 'prompt', error?.message || String(error));
+    }
+
+    storageSetupReady = prReady && tcReady;
+    if (enterBtn) enterBtn.disabled = !storageSetupReady;
+    if (note) note.textContent = storageSetupReady
+      ? 'Storage siap. File project akan mengikuti PR aktif; Attachment TC membaca Original TC.'
+      : 'Kedua folder harus siap sebelum workspace dibuka.';
+    return storageSetupReady;
+  }
+
+  async function activateStoredFolder(key, expectedName, label) {
+    const handle = await loadHandle(key);
+    if (!handle) throw new Error(`${label} belum dipilih.`);
+    validateSelectedFolder(handle, expectedName, label);
+    if (!(await ensurePermission(handle, true))) throw new Error(`Izin ${label} tidak diberikan.`);
+    return handle;
+  }
+
+  function wireStorageSetup() {
+    const gate = buildStorageSetupGate();
+    if (gate.dataset.wired === 'true') return;
+    gate.dataset.wired = 'true';
+
+    const run = async action => {
+      const note = document.getElementById('mswStorageSetupNote');
+      try {
+        if (note) note.textContent = 'Memproses akses folder...';
+        await action();
+      } catch (error) {
+        if (error?.name !== 'AbortError' && note) note.textContent = error?.message || String(error);
+      } finally {
+        await refreshStorageSetup();
+      }
+    };
+
+    document.getElementById('mswChoosePrBtn')?.addEventListener('click', () => run(() => chooseStorageFolder(PR_ROOT_KEY, 'PR', 'Folder PR / Log Book')));
+    document.getElementById('mswChooseTcBtn')?.addEventListener('click', () => run(() => chooseStorageFolder(TC_ROOT_KEY, 'Original TC', 'Folder Master TC')));
+    document.getElementById('mswActivatePrBtn')?.addEventListener('click', () => run(() => activateStoredFolder(PR_ROOT_KEY, 'PR', 'Folder PR / Log Book')));
+    document.getElementById('mswActivateTcBtn')?.addEventListener('click', () => run(() => activateStoredFolder(TC_ROOT_KEY, 'Original TC', 'Folder Master TC')));
+    document.getElementById('mswEnterWorkspaceBtn')?.addEventListener('click', async () => {
+      if (!(await refreshStorageSetup())) return;
+      gate.hidden = true;
+      document.body.classList.remove('msw-storage-locked');
+    });
+
+    refreshStorageSetup().catch(() => null);
   }
 
   function normalizeBasePr(value) {
@@ -122,7 +352,7 @@
     if (!upperName.startsWith(upperBase)) return false;
     if (upperName.length === upperBase.length) return true;
     const boundary = name.charAt(base.length);
-    return !boundary || /[\s\-_([]/.test(boundary);
+    return !boundary || /[\s\-_(]/.test(boundary);
   }
 
   async function findExistingPrFolder(root, noPr) {
@@ -176,12 +406,9 @@
         directory = await directory.getDirectoryHandle(context.round, { create: false });
       }
     } catch (error) {
-      if (error?.name === 'NotFoundError') {
-        return { directory: null, prFolder, context, sourceType };
-      }
+      if (error?.name === 'NotFoundError') return { directory: null, prFolder, context, sourceType };
       throw error;
     }
-
     return { directory, prFolder, context, sourceType };
   }
 
@@ -206,31 +433,40 @@
     })[ext] || 'application/octet-stream';
   }
 
-  function createLocalFileId(prFolderName, sourceType, round, fileName) {
-    return [
-      'localpr',
-      encodeURIComponent(prFolderName),
-      encodeURIComponent(sourceType),
-      encodeURIComponent(round || ''),
-      encodeURIComponent(fileName)
-    ].join('|');
+  function createLocalPrFileId(prFolderName, sourceType, round, fileName) {
+    return ['localpr', encodeURIComponent(prFolderName), encodeURIComponent(sourceType), encodeURIComponent(round || ''), encodeURIComponent(fileName)].join('|');
   }
 
-  function parseLocalFileId(fileId) {
+  function createLocalTcFileId(fileName) {
+    return `localtc|${encodeURIComponent(fileName)}`;
+  }
+
+  function parseLocalPrFileId(fileId) {
     const raw = asText(fileId);
-    if (!raw.startsWith(LOCAL_ID_PREFIX)) return null;
+    if (!raw.startsWith(LOCAL_PR_ID_PREFIX)) return null;
     const parts = raw.split('|');
     if (parts.length !== 5) return null;
     try {
       return {
+        kind: 'pr',
         prFolderName: decodeURIComponent(parts[1]),
         sourceType: decodeURIComponent(parts[2]),
         round: decodeURIComponent(parts[3]),
         fileName: decodeURIComponent(parts[4])
       };
-    } catch (_) {
-      return null;
-    }
+    } catch (_) { return null; }
+  }
+
+  function parseLocalTcFileId(fileId) {
+    const raw = asText(fileId);
+    if (!raw.startsWith(LOCAL_TC_ID_PREFIX)) return null;
+    try {
+      return { kind: 'tc', fileName: decodeURIComponent(raw.slice(LOCAL_TC_ID_PREFIX.length)) };
+    } catch (_) { return null; }
+  }
+
+  function parseLocalFileId(fileId) {
+    return parseLocalPrFileId(fileId) || parseLocalTcFileId(fileId);
   }
 
   async function listLocalProjectFiles(sourceType) {
@@ -241,12 +477,7 @@
       if (handle.kind !== 'file') continue;
       const file = await handle.getFile();
       files.push({
-        fileId: createLocalFileId(
-          target.prFolder.name,
-          sourceType,
-          ROUND_FOLDER_TYPES.has(sourceType) ? target.context.round : '',
-          name
-        ),
+        fileId: createLocalPrFileId(target.prFolder.name, sourceType, ROUND_FOLDER_TYPES.has(sourceType) ? target.context.round : '', name),
         fileName: name,
         fileUrl: '',
         downloadUrl: '',
@@ -261,25 +492,53 @@
     return files.sort((a, b) => a.fileName.localeCompare(b.fileName, 'id', { numeric: true }));
   }
 
+  async function listLocalTcFiles() {
+    const root = await getConnectedTcRoot(true);
+    const files = [];
+    for await (const [name, handle] of root.entries()) {
+      if (handle.kind !== 'file') continue;
+      const file = await handle.getFile();
+      files.push({
+        fileId: createLocalTcFileId(name),
+        fileName: name,
+        fileUrl: '',
+        downloadUrl: '',
+        previewUrl: '',
+        mimeType: mimeFromName(name, file.type),
+        size: Number(file.size || 0),
+        folderType: 'TC_MASTER',
+        folderName: root.name,
+        source: 'LOCAL_TC'
+      });
+    }
+    return files.sort((a, b) => a.fileName.localeCompare(b.fileName, 'id', { numeric: true }));
+  }
+
   async function resolveLocalFile(fileOrId) {
     const fileId = typeof fileOrId === 'string' ? fileOrId : fileOrId?.fileId;
     const parsed = parseLocalFileId(fileId);
     if (!parsed) throw new Error('Referensi file lokal tidak valid.');
 
-    const root = await getConnectedPrRoot(true);
-    let directory;
-    try {
-      directory = await root.getDirectoryHandle(parsed.prFolderName, { create: false });
-      directory = await directory.getDirectoryHandle(parsed.sourceType, { create: false });
-      if (parsed.round && ROUND_FOLDER_TYPES.has(parsed.sourceType)) {
-        directory = await directory.getDirectoryHandle(parsed.round, { create: false });
+    if (parsed.kind === 'tc') {
+      const root = await getConnectedTcRoot(true);
+      try {
+        const handle = await root.getFileHandle(parsed.fileName, { create: false });
+        return await handle.getFile();
+      } catch (error) {
+        if (error?.name === 'NotFoundError') throw new Error(`TC ${parsed.fileName} tidak ditemukan lagi pada folder Original TC.`);
+        throw error;
       }
+    }
+
+    const root = await getConnectedPrRoot(true);
+    try {
+      let directory = await root.getDirectoryHandle(parsed.prFolderName, { create: false });
+      directory = await directory.getDirectoryHandle(parsed.sourceType, { create: false });
+      if (parsed.round && ROUND_FOLDER_TYPES.has(parsed.sourceType)) directory = await directory.getDirectoryHandle(parsed.round, { create: false });
       const handle = await directory.getFileHandle(parsed.fileName, { create: false });
       return await handle.getFile();
     } catch (error) {
-      if (error?.name === 'NotFoundError') {
-        throw new Error(`File ${parsed.fileName} tidak ditemukan lagi pada folder OneDrive lokal.`);
-      }
+      if (error?.name === 'NotFoundError') throw new Error(`File ${parsed.fileName} tidak ditemukan lagi pada folder PR lokal.`);
       throw error;
     }
   }
@@ -311,21 +570,17 @@
       const originalLoadMultipleEmailFolderFiles = loadMultipleEmailFolderFiles;
       window.loadMultipleEmailFolderFiles = async function (folderType) {
         const sourceType = asText(folderType || '01. PR Approval');
-        if (!PROJECT_FOLDER_TYPES.has(sourceType)) {
+        let files;
+        if (PROJECT_FOLDER_TYPES.has(sourceType)) {
+          files = await listLocalProjectFiles(sourceType);
+        } else if (sourceType === 'TC_MASTER') {
+          files = await listLocalTcFiles();
+        } else {
           return originalLoadMultipleEmailFolderFiles(sourceType);
         }
-
-        const files = await listLocalProjectFiles(sourceType);
         MULTIPLE_EMAIL_FOLDER_FILES = files;
-        if (typeof renderMultipleEmailAttachmentFileList === 'function') {
-          renderMultipleEmailAttachmentFileList();
-        }
-        return {
-          success: true,
-          source: 'LOCAL_PR',
-          folderType: sourceType,
-          files
-        };
+        if (typeof renderMultipleEmailAttachmentFileList === 'function') renderMultipleEmailAttachmentFileList();
+        return { success: true, source: sourceType === 'TC_MASTER' ? 'LOCAL_TC' : 'LOCAL_PR', folderType: sourceType, files };
       };
     }
 
@@ -370,25 +625,16 @@
           if (localBytes > MAX_INLINE_ATTACHMENT_BYTES) {
             throw new Error('Total attachment lokal melebihi 20 MB. Kurangi jumlah/ukuran file sebelum membuat Outlook Draft.');
           }
-          inlineAttachments.push({
-            fileName: file.name,
-            mimeType: mimeFromName(file.name, file.type),
-            base64: await fileToBase64(file)
-          });
+          inlineAttachments.push({ fileName: file.name, mimeType: mimeFromName(file.name, file.type), base64: await fileToBase64(file) });
         }
 
-        return originalRequestOutlookDraftEml({
-          ...payload,
-          attachmentFileIds: backendIds,
-          attachments: inlineAttachments
-        });
+        return originalRequestOutlookDraftEml({ ...payload, attachmentFileIds: backendIds, attachments: inlineAttachments });
       };
     }
 
     if (typeof scheduleNativeDocumentSync === 'function') {
       window.scheduleNativeDocumentSync = function () {
-        // Dokumen native tidak lagi dibuat/di-sync hanya karena autosave workspace.
-        // Template baru dimuat ketika user memilih View/Save/Export BidderList, RFQ, atau CQS.
+        // Dokumen native tidak dibuat/di-sync hanya karena autosave workspace.
       };
     }
 
@@ -398,12 +644,8 @@
         if (!allowExplicitDocumentRefresh) {
           try {
             if (typeof updateProcurementDocumentViewButtons === 'function') updateProcurementDocumentViewButtons();
-            return typeof PROCUREMENT_DOCUMENT_STATE !== 'undefined'
-              ? (PROCUREMENT_DOCUMENT_STATE.documents || {})
-              : {};
-          } catch (_) {
-            return {};
-          }
+            return typeof PROCUREMENT_DOCUMENT_STATE !== 'undefined' ? (PROCUREMENT_DOCUMENT_STATE.documents || {}) : {};
+          } catch (_) { return {}; }
         }
         allowExplicitDocumentRefresh = false;
         return originalRefreshProcurementDocuments(options);
@@ -413,13 +655,25 @@
 
     window.MSW_BIDDER_LOCAL_PR_BRIDGE = Object.freeze({
       listLocalProjectFiles,
+      listLocalTcFiles,
       resolveLocalFile,
       findExistingPrFolder,
-      normalizeBasePr
+      normalizeBasePr,
+      refreshStorageSetup,
+      getConnectedPrRoot,
+      getConnectedTcRoot
     });
   }
 
+  function initStorageSetup() {
+    if (!document.body) return;
+    wireStorageSetup();
+  }
+
   document.addEventListener('readystatechange', installOverrides);
-  document.addEventListener('DOMContentLoaded', installOverrides, { once: true });
+  document.addEventListener('DOMContentLoaded', () => {
+    installOverrides();
+    initStorageSetup();
+  }, { once: true });
   window.setTimeout(installOverrides, 0);
 })();
