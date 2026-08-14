@@ -21,7 +21,8 @@
     const source = text(value);
     if (!source) return '';
     return source
-      .replace(/\s+R\s*\d+(?:\s*\([^)]*\))?\s*$/i, '')
+      .replace(/\s*\(\s*Line[^)]*\)\s*$/i, '')
+      .replace(/\s+R\s*\d+\s*$/i, '')
       .trim();
   }
 
