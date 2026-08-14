@@ -240,14 +240,23 @@
     window.setTimeout(() => URL.revokeObjectURL(url), 60000);
   }
 
-  function captureClick(id, action) {
+  async function hasLocalRoot() {
+    const handle = rootHandle || await loadRoot();
+    if (!handle) return false;
+    rootHandle = handle;
+    return true;
+  }
+
+  function captureClick(id, localAction, fallbackAction) {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('click', event => {
-      if (!rootHandle) return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      Promise.resolve(action()).catch(error => managerStatus(error.message || 'Aksi folder lokal gagal.', true));
+      (async () => {
+        if (await hasLocalRoot()) return localAction();
+        if (typeof fallbackAction === 'function') return fallbackAction();
+      })().catch(error => managerStatus(error.message || 'Aksi folder gagal.', true));
     }, true);
   }
 
@@ -255,17 +264,19 @@
     captureClick('ensureFolderBtn', async () => {
       const result = await ensureStructure();
       managerStatus(`Folder lokal siap: PR/${result.pr}`, false);
-    });
-    captureClick('openTargetFolderBtn', showContents);
-    captureClick('refreshFolderFilesBtn', showContents);
-    captureClick('uploadFilesBtn', () => document.getElementById('folderFileInput')?.click());
-    captureClick('uploadDirectoryBtn', () => document.getElementById('folderDirectoryInput')?.click());
+    }, () => window.ensureFolderStructure?.());
+
+    captureClick('openTargetFolderBtn', showContents, () => window.openSelectedFolder?.());
+    captureClick('refreshFolderFilesBtn', showContents, () => window.loadSelectedFolderFiles?.());
+    captureClick('uploadFilesBtn', () => document.getElementById('folderFileInput')?.click(), () => document.getElementById('folderFileInput')?.click());
+    captureClick('uploadDirectoryBtn', () => document.getElementById('folderDirectoryInput')?.click(), () => document.getElementById('folderDirectoryInput')?.click());
+
     captureClick('saveCreateFolderBtn', async () => {
       const result = await ensureStructure();
       managerStatus(`Folder lokal siap: PR/${result.pr}`, false);
       if (typeof window.saveProcurement !== 'function') throw new Error('Fungsi penyimpanan procurement tidak tersedia.');
       await window.saveProcurement({ createFolderAfterSave: false });
-    });
+    }, () => window.saveProcurement?.({ createFolderAfterSave: true }));
 
     document.getElementById('folderFileInput')?.addEventListener('change', event => {
       if (!rootHandle) return;
