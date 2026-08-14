@@ -28,8 +28,9 @@ window.APP_CONFIG = Object.freeze({
   // sengaja di fase parser agar bridge lokal aktif sinkron SEBELUM script besar
   // BidderList menjalankan initializeBidderWorkspace() dan preload master lama.
   if (document.readyState === "loading") {
-    const bridgeUrl = new URL("./local-pr-bridge.js", window.location.href).href + "?v=20260814-local-pr-v1";
-    document.write('<script data-msw-bidder-local-pr-bridge="true" src="' + bridgeUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"><\\/script>');
+    const bridgeUrl = new URL("./local-pr-bridge.js", window.location.href).href + "?v=20260814-local-pr-v2";
+    const safeUrl = bridgeUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+    document.write('<script data-msw-bidder-local-pr-bridge="true" src="' + safeUrl + '"></' + 'script>');
   }
 })();
 
