@@ -19,3 +19,15 @@ window.APP_CONFIG = Object.freeze({
     procurementCc: ""
   })
 });
+
+(function loadProcurementFolderRules() {
+  if (!/\/procurement-admin\/Form\//i.test(window.location.pathname)) return;
+  window.addEventListener("DOMContentLoaded", function () {
+    if (document.querySelector('script[data-msw-pr-folder-rules]')) return;
+    const script = document.createElement("script");
+    script.src = new URL("../../procurement-folder-rules.js", window.location.href).href + "?v=20260814-pr-folder-v1";
+    script.defer = true;
+    script.dataset.mswPrFolderRules = "true";
+    document.body.appendChild(script);
+  }, { once: true });
+})();
