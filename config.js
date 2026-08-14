@@ -35,6 +35,14 @@ window.APP_CONFIG = Object.freeze({
       localFiles.src = new URL("../../procurement-local-files.js", window.location.href).href + "?v=20260814-pr-local-v1";
       localFiles.defer = true;
       localFiles.dataset.mswPrLocalFiles = "true";
+      localFiles.addEventListener("load", function () {
+        if (document.querySelector('script[data-msw-existing-pr-folder]')) return;
+        const existingPr = document.createElement("script");
+        existingPr.src = new URL("../../procurement-existing-pr-folder.js", window.location.href).href + "?v=20260814-existing-pr-v1";
+        existingPr.defer = true;
+        existingPr.dataset.mswExistingPrFolder = "true";
+        document.body.appendChild(existingPr);
+      }, { once: true });
       document.body.appendChild(localFiles);
     }, { once: true });
     document.body.appendChild(rules);
