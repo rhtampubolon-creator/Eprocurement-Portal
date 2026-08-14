@@ -1,0 +1,6 @@
+(function(){
+  'use strict';
+  if(!window.AndroidFolder)return;
+  async function choose(kind,expected,label){const fs=window.MSW_ANDROID_FOLDER_FS;if(!fs?.chooseRoot)throw new Error('Android folder bridge belum siap. Tutup lalu buka kembali APK.');const handle=await fs.chooseRoot(kind);const actual=String(handle?.name||'').trim();if(actual.toUpperCase()!==expected.toUpperCase())throw new Error(`${label} harus memilih folder bernama "${expected}". Folder terpilih: ${actual||'-'}`);return handle;}
+  document.addEventListener('click',event=>{const btn=event.target.closest?.('#mswSidebarChoosePr,#mswSidebarChooseTc');if(!btn)return;event.preventDefault();event.stopPropagation();event.stopImmediatePropagation();const isTc=btn.id==='mswSidebarChooseTc';const message=document.getElementById('mswStorageSidebarMessage');if(message)message.textContent='Membuka pemilih folder Android...';choose(isTc?'tc':'pr',isTc?'Original TC':'PR',isTc?'Folder Master TC':'Folder Log Book / PR').then(()=>{if(message)message.textContent='✓ Folder tersimpan otomatis.';}).catch(error=>{if(message)message.textContent=error?.message||String(error);});},true);
+})();
