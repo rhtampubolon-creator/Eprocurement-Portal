@@ -20,6 +20,20 @@ window.APP_CONFIG = Object.freeze({
   })
 });
 
+(function loadBidderLocalPrBridgeEarly() {
+  if (!/\/bidder-list\//i.test(window.location.pathname)) return;
+  if (document.querySelector('script[data-msw-bidder-local-pr-bridge]')) return;
+
+  // config.js berada sebelum bidder-list/script.js. document.write digunakan
+  // sengaja di fase parser agar bridge lokal aktif sinkron SEBELUM script besar
+  // BidderList menjalankan initializeBidderWorkspace() dan preload master lama.
+  if (document.readyState === "loading") {
+    const bridgeUrl = new URL("./local-pr-bridge.js", window.location.href).href + "?v=20260814-local-pr-v2";
+    const safeUrl = bridgeUrl.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+    document.write('<script data-msw-bidder-local-pr-bridge="true" src="' + safeUrl + '"></' + 'script>');
+  }
+})();
+
 (function loadProcurementFolderRules() {
   if (!/\/procurement-admin\/Form\//i.test(window.location.pathname)) return;
   window.addEventListener("DOMContentLoaded", function () {
