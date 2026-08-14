@@ -4,6 +4,10 @@
   const native = window.AndroidFolder;
   if (!native) return;
 
+  const DB_NAME = 'MSW_PROCUREMENT_LOCAL_FS';
+  const PR_ROOT_KEY = 'prRoot';
+  const TC_ROOT_KEY = 'tcRoot';
+
   const parseJson = (value, fallback) => {
     try { return JSON.parse(String(value || '')); }
     catch (_) { return fallback; }
@@ -130,9 +134,10 @@
   }
 
   function getRoot(kind) {
-    const info = folderInfo(kind);
+    const normalized = kind === 'tc' ? 'tc' : 'pr';
+    const info = folderInfo(normalized);
     if (!info.connected || !info.name) return null;
-    return new AndroidDirectoryHandle(kind, '', info.name);
+    return new AndroidDirectoryHandle(normalized, '', info.name);
   }
 
   function chooseRoot(kind) {
@@ -154,6 +159,65 @@
       window.addEventListener('msw-android-folder-selected', listener);
       native.chooseFolder(normalized);
     });
+  }
+
+  function inferPickerKind() {
+    const active = document.activeElement;
+    const clue = `${active?.id || ''} ${active?.textContent || ''} ${active?.getAttribute?.('aria-label') || ''}`;
+    return /(?:^|\W)tc(?:\W|$)|original\s*tc|master\s*tc/i.test(clue) ? 'tc' : 'pr';
+  }
+
+  // Android WebView tidak menyediakan File System Access API. Polyfill ini membuat
+  // modul portal lama tetap dapat memakai showDirectoryPicker() tanpa rewrite besar.
+  window.showDirectoryPicker = async function () {
+    return chooseRoot(inferPickerKind());
+  };
+
+  // Semua modul procurement menyimpan FileSystemDirectoryHandle pada DB ini.
+  // Handle SAF Android tidak structured-cloneable, jadi khusus DB handle tersebut
+  // IndexedDB dibuat sebagai facade yang mengambil root langsung dari native prefs.
+  const realIndexedDbOpen = window.indexedDB?.open?.bind(window.indexedDB);
+  if (realIndexedDbOpen) {
+    window.indexedDB.open = function (name, version) {
+      if (String(name) !== DB_NAME) return realIndexedDbOpen(name, version);
+
+      const fakeDb = {
+        objectStoreNames: { contains: () => true },
+        close() {},
+        transaction() {
+          let completeHandler = null;
+          const tx = {
+            error: null,
+            objectStore() {
+              return {
+                get(key) {
+                  const request = { result: key === TC_ROOT_KEY ? getRoot('tc') : (key === PR_ROOT_KEY ? getRoot('pr') : null), error: null };
+                  Object.defineProperty(request, 'onsuccess', { set(fn) { if (typeof fn === 'function') queueMicrotask(() => fn({ target: request })); } });
+                  Object.defineProperty(request, 'onerror', { set() {} });
+                  return request;
+                },
+                put(value, key) {
+                  // Native chooseRoot() sudah menyimpan URI secara persisten.
+                  // Put dipertahankan sebagai no-op agar kontrak kode lama tetap sama.
+                  queueMicrotask(() => { if (completeHandler) completeHandler({ target: tx }); });
+                  return { result: key, error: null };
+                }
+              };
+            }
+          };
+          Object.defineProperty(tx, 'oncomplete', { set(fn) { completeHandler = fn; queueMicrotask(() => { if (completeHandler) completeHandler({ target: tx }); }); } });
+          Object.defineProperty(tx, 'onerror', { set() {} });
+          Object.defineProperty(tx, 'onabort', { set() {} });
+          return tx;
+        }
+      };
+
+      const request = { result: fakeDb, error: null };
+      Object.defineProperty(request, 'onupgradeneeded', { set() {} });
+      Object.defineProperty(request, 'onsuccess', { set(fn) { if (typeof fn === 'function') queueMicrotask(() => fn({ target: request })); } });
+      Object.defineProperty(request, 'onerror', { set() {} });
+      return request;
+    };
   }
 
   window.MSW_ANDROID_FOLDER_FS = Object.freeze({
