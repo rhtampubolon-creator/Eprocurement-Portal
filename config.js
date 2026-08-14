@@ -24,10 +24,19 @@ window.APP_CONFIG = Object.freeze({
   if (!/\/procurement-admin\/Form\//i.test(window.location.pathname)) return;
   window.addEventListener("DOMContentLoaded", function () {
     if (document.querySelector('script[data-msw-pr-folder-rules]')) return;
-    const script = document.createElement("script");
-    script.src = new URL("../../procurement-folder-rules.js", window.location.href).href + "?v=20260814-pr-folder-v1";
-    script.defer = true;
-    script.dataset.mswPrFolderRules = "true";
-    document.body.appendChild(script);
+
+    const rules = document.createElement("script");
+    rules.src = new URL("../../procurement-folder-rules.js", window.location.href).href + "?v=20260814-pr-folder-v2";
+    rules.defer = true;
+    rules.dataset.mswPrFolderRules = "true";
+    rules.addEventListener("load", function () {
+      if (document.querySelector('script[data-msw-pr-local-files]')) return;
+      const localFiles = document.createElement("script");
+      localFiles.src = new URL("../../procurement-local-files.js", window.location.href).href + "?v=20260814-pr-local-v1";
+      localFiles.defer = true;
+      localFiles.dataset.mswPrLocalFiles = "true";
+      document.body.appendChild(localFiles);
+    }, { once: true });
+    document.body.appendChild(rules);
   }, { once: true });
 })();
