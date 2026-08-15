@@ -12,7 +12,9 @@
   if (isAndroidApp) document.body.classList.add('android-app-webview');
   if (isTouchDevice) document.body.classList.add('touch-device');
 
-  function useDrawerMode() { return isAndroidApp || isTouchDevice || window.innerWidth <= 860; }
+  // APK always uses the drawer navigation, including wide foldable screens.
+  // Normal web browsers use the drawer only on compact widths.
+  function useDrawerMode() { return isAndroidApp || window.innerWidth <= 860; }
   function isLandscape() { return !!(window.matchMedia && window.matchMedia('(orientation: landscape)').matches); }
   function clearDesktopHiddenState() {
     sidebar.classList.remove('overlay', 'sidebar-hidden');
@@ -20,8 +22,15 @@
     const desktopTrigger = document.getElementById('sidebarTrigger');
     if (desktopTrigger) desktopTrigger.classList.add('hidden');
   }
+  function syncDrawerModeClass() {
+    const drawerMode = useDrawerMode();
+    document.body.classList.toggle('mobile-drawer-mode', drawerMode);
+    return drawerMode;
+  }
   function setOpen(open) {
-    if (useDrawerMode()) clearDesktopHiddenState();
+    const drawerMode = syncDrawerModeClass();
+    if (drawerMode) clearDesktopHiddenState();
+    else open = false;
     document.body.classList.toggle('mobile-sidebar-open', !!open);
     toggle.setAttribute('aria-expanded', String(!!open));
     toggle.setAttribute('aria-label', open ? 'Close workspace menu' : 'Open workspace menu');
@@ -37,16 +46,17 @@
     const landscape = isLandscape();
     document.documentElement.classList.toggle('eproc-landscape', landscape);
     document.body.classList.toggle('eproc-landscape', landscape);
-    if (landscape) closeDrawer();
-    if (useDrawerMode()) clearDesktopHiddenState(); else closeDrawer();
+    const drawerMode = syncDrawerModeClass();
+    if (drawerMode) clearDesktopHiddenState();
+    closeDrawer();
   }
 
   toggle.addEventListener('click', () => setOpen(!document.body.classList.contains('mobile-sidebar-open')));
   backdrop.addEventListener('click', closeDrawer);
   sidebar.addEventListener('click', event => {
     if (!useDrawerMode() || !event.target.closest('.workspace-navigation-item')) return;
-    // Close the overlay before the workspace handler swaps dashboard/module content.
-    // This avoids a stale backdrop covering the newly loaded iframe in Android WebView.
+    // Close before the workspace handler swaps dashboard/module content so
+    // Fold/phone APK navigation never leaves the drawer visible over the new page.
     closeDrawer();
     requestAnimationFrame(closeDrawer);
     setTimeout(closeDrawer, 80);
@@ -56,7 +66,9 @@
   window.addEventListener('pageshow', closeDrawer, { passive: true });
   document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDrawer(); });
 
-  if (useDrawerMode()) { clearDesktopHiddenState(); closeDrawer(); }
+  syncDrawerModeClass();
+  if (useDrawerMode()) clearDesktopHiddenState();
+  closeDrawer();
   syncOrientationState();
 })();
 
@@ -67,7 +79,7 @@
   if(!document.querySelector('link[data-eproc-responsive-device]')){
     const responsive=document.createElement('link');
     responsive.rel='stylesheet';
-    responsive.href='responsive-device.css?v=20260815-drawer-v2';
+    responsive.href='responsive-device.css?v=20260815-drawer-v3';
     responsive.setAttribute('data-eproc-responsive-device','1');
     document.head.appendChild(responsive);
   }
