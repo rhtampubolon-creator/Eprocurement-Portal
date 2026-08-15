@@ -29,22 +29,34 @@
     if (icon) icon.setAttribute('data-lucide', open ? 'x' : 'menu');
     if (window.lucide) window.lucide.createIcons();
   }
+  function closeDrawer() {
+    setOpen(false);
+    document.body.classList.remove('mobile-sidebar-open');
+  }
   function syncOrientationState() {
     const landscape = isLandscape();
     document.documentElement.classList.toggle('eproc-landscape', landscape);
     document.body.classList.toggle('eproc-landscape', landscape);
-    if (landscape) setOpen(false);
-    if (useDrawerMode()) clearDesktopHiddenState(); else setOpen(false);
+    if (landscape) closeDrawer();
+    if (useDrawerMode()) clearDesktopHiddenState(); else closeDrawer();
   }
 
   toggle.addEventListener('click', () => setOpen(!document.body.classList.contains('mobile-sidebar-open')));
-  backdrop.addEventListener('click', () => setOpen(false));
-  sidebar.addEventListener('click', event => { if (useDrawerMode() && event.target.closest('.workspace-navigation-item')) setOpen(false); });
+  backdrop.addEventListener('click', closeDrawer);
+  sidebar.addEventListener('click', event => {
+    if (!useDrawerMode() || !event.target.closest('.workspace-navigation-item')) return;
+    // Close the overlay before the workspace handler swaps dashboard/module content.
+    // This avoids a stale backdrop covering the newly loaded iframe in Android WebView.
+    closeDrawer();
+    requestAnimationFrame(closeDrawer);
+    setTimeout(closeDrawer, 80);
+  }, true);
   window.addEventListener('resize', syncOrientationState, { passive: true });
   window.addEventListener('orientationchange', () => setTimeout(syncOrientationState, 80), { passive: true });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') setOpen(false); });
+  window.addEventListener('pageshow', closeDrawer, { passive: true });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDrawer(); });
 
-  if (useDrawerMode()) { clearDesktopHiddenState(); setOpen(false); }
+  if (useDrawerMode()) { clearDesktopHiddenState(); closeDrawer(); }
   syncOrientationState();
 })();
 
@@ -55,7 +67,7 @@
   if(!document.querySelector('link[data-eproc-responsive-device]')){
     const responsive=document.createElement('link');
     responsive.rel='stylesheet';
-    responsive.href='responsive-device.css?v=20260813-v130';
+    responsive.href='responsive-device.css?v=20260815-drawer-v2';
     responsive.setAttribute('data-eproc-responsive-device','1');
     document.head.appendChild(responsive);
   }
