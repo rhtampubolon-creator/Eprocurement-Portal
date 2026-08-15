@@ -12,6 +12,18 @@
   try { assetBase = currentScript?.src ? new URL('./assets/', currentScript.src).href : 'assets/'; }
   catch (_) { assetBase = 'assets/'; }
 
+  /* USER role guard must load before the page/module script that follows this file.
+     The portal includes performance-cache.js immediately before each business script,
+     so parser-time loading keeps Web and Android WebView behavior identical. */
+  try {
+    if (!window.__MSW_USER_READONLY_ROLE_V1__ && currentScript?.src && document.readyState === 'loading') {
+      const guardUrl = new URL('./user-role-readonly.js?v=20260815-user-readonly-v1', currentScript.src).href;
+      document.write('<script src="' + guardUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"><\/script>');
+    }
+  } catch (error) {
+    console.warn('USER read-only guard gagal dimuat.', error);
+  }
+
   const CACHE_PREFIX = 'MSW_NET_CACHE_V1_';
   const MAX_STALE_MS = 24 * 60 * 60 * 1000;
   const nativeFetch = window.fetch.bind(window);
