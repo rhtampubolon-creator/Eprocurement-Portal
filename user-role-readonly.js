@@ -70,6 +70,7 @@
     const baseViewOnly = auth.isViewOnlyModule?.bind(auth);
     const baseManage = auth.canManageModule?.bind(auth);
     const baseMessage = auth.showViewOnlyMessage?.bind(auth);
+    const baseRoleBanner = auth.addRoleBanner?.bind(auth);
 
     auth.canAccessModule = function(moduleName){
       if (isUser()) return true;
@@ -87,6 +88,17 @@
       if (isUser()) return notify();
       return baseMessage ? baseMessage() : undefined;
     };
+    if (baseRoleBanner) {
+      auth.addRoleBanner = function(message){
+        if (isUser()) {
+          const clean = String(message || '')
+            .replace(/^Buyer\s*[—-]\s*/i, '')
+            .replace(/^Akun Buyer\s*/i, '');
+          return baseRoleBanner('User — View Only. ' + clean.replace(/^View Only\.\s*/i, ''));
+        }
+        return baseRoleBanner(message);
+      };
+    }
   }
 
   patchAuth();
@@ -183,6 +195,17 @@
       if (rawRole === 'USER') queueMicrotask(() => decorateRoot());
       return result;
     };
+
+    // Jika login/profile sudah diproses sebelum patch root terpasang, apply ulang
+    // sekali agar USER langsung mendapat seluruh visibility SUPER_ADMIN.
+    const active = profile();
+    if (normalizeRole(active?.role) === 'USER' && !window.__MSW_USER_VIEW_REAPPLIED__) {
+      window.__MSW_USER_VIEW_REAPPLIED__ = true;
+      queueMicrotask(() => {
+        try { window.applyFrontendRole(active); } catch (_) {}
+        decorateRoot();
+      });
+    }
   }
 
   function decorateRoot(){
@@ -209,7 +232,17 @@
     hideMutationControls();
   }, {capture:true});
 
+  // Fallback bila common.js / script.js selesai dimuat setelah guard.
+  window.addEventListener('load', () => {
+    patchAuth();
+    patchRoot();
+    decorateRoot();
+    hideMutationControls();
+  }, {once:true});
+
   const observer = new MutationObserver(() => {
+    patchAuth();
+    patchRoot();
     ensureUserApprovalOption();
     if (isUser()) hideMutationControls();
   });
