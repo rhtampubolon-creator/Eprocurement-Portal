@@ -24,6 +24,17 @@
     console.warn('USER read-only guard gagal dimuat.', error);
   }
 
+  /* Super Admin User Approval helper. This is loaded for all portal roles,
+     but it only affects the existing approval-role select when that modal exists. */
+  try {
+    if (!window.__MSW_USER_APPROVAL_ROLE_V1__ && currentScript?.src && document.readyState === 'loading') {
+      const approvalUrl = new URL('./user-approval-role.js?v=20260815-user-approval-v1', currentScript.src).href;
+      document.write('<script src="' + approvalUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"><\/script>');
+    }
+  } catch (error) {
+    console.warn('USER approval role helper gagal dimuat.', error);
+  }
+
   const CACHE_PREFIX = 'MSW_NET_CACHE_V1_';
   const MAX_STALE_MS = 24 * 60 * 60 * 1000;
   const nativeFetch = window.fetch.bind(window);
