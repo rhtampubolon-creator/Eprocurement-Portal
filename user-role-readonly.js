@@ -50,6 +50,17 @@
     } catch (_) {}
   }
 
+  function ensureUserApprovalOption(){
+    document.querySelectorAll('select.approval-role').forEach(select => {
+      if (select.querySelector('option[value="USER"]')) return;
+      const option = document.createElement('option');
+      option.value = 'USER';
+      option.textContent = 'User (View Only)';
+      const vendor = select.querySelector('option[value="VENDOR"]');
+      select.insertBefore(option, vendor || null);
+    });
+  }
+
   function patchAuth(){
     const auth = window.MSW?.auth;
     if (!auth || auth.__MSW_USER_READONLY_PATCHED__) return;
@@ -161,7 +172,7 @@
     if (basePending) {
       window.loadPendingUsers = function(){
         if (isUser()) return Promise.resolve([]);
-        return basePending.apply(this, arguments);
+        return Promise.resolve(basePending.apply(this, arguments)).finally(ensureUserApprovalOption);
       };
     }
 
@@ -180,6 +191,9 @@
     if (accountRole) accountRole.textContent = 'USER · VIEW ONLY';
     const profileRole = document.getElementById('profileModalRole');
     if (profileRole) profileRole.textContent = 'USER · VIEW ONLY';
+    const badge = document.querySelector('#roleDashboardBadge span');
+    if (badge) badge.textContent = 'User Workspace · View Only';
+    document.querySelectorAll('.role-access-label').forEach(el => { el.textContent = 'View Only'; });
     const adminTools = document.getElementById('adminToolsSection');
     if (adminTools) adminTools.style.display = 'none';
     const approvals = document.getElementById('userApprovalsButton');
@@ -190,11 +204,13 @@
   document.addEventListener('DOMContentLoaded', () => {
     patchAuth();
     patchRoot();
+    ensureUserApprovalOption();
     decorateRoot();
     hideMutationControls();
   }, {capture:true});
 
   const observer = new MutationObserver(() => {
+    ensureUserApprovalOption();
     if (isUser()) hideMutationControls();
   });
   try { observer.observe(document.documentElement,{childList:true,subtree:true}); } catch (_) {}
