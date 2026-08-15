@@ -211,8 +211,59 @@ body.mobile-sidebar-open .mobile-sidebar-backdrop {
   opacity: 1 !important;
 }
 
-body.android-app-webview #leftSidebar {
+/* Unified APK drawer mode.
+   JS adds mobile-drawer-mode for the native WebView even when a Fold is wide.
+   These rules mirror the <=860px drawer CSS so phone and foldable APKs behave
+   identically: hidden by default, open via the header button, auto-hidden
+   again after workspace navigation. */
+body.mobile-drawer-mode .mobile-sidebar-toggle {
+  display: grid !important;
+}
+
+body.mobile-drawer-mode .mobile-sidebar-backdrop {
+  position: fixed !important;
+  inset: 64px 0 0 !important;
+  z-index: 52 !important;
+}
+
+body.mobile-drawer-mode.mobile-sidebar-open .mobile-sidebar-backdrop {
+  display: block !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
+}
+
+body.mobile-drawer-mode #mainLayout,
+body.mobile-drawer-mode #mainLayout.sidebar-collapsed {
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+}
+
+body.mobile-drawer-mode #leftSidebar,
+body.mobile-drawer-mode #mainLayout.module-open #leftSidebar {
+  position: fixed !important;
+  top: 64px !important;
+  left: 0 !important;
+  z-index: 53 !important;
+  width: min(320px, 88vw) !important;
+  height: calc(100dvh - 64px) !important;
+  padding: 16px !important;
+  overflow-y: auto !important;
+  background: var(--ui-bg, #f4f7fb) !important;
+  transform: translateX(-105%) !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  transition: transform .24s ease !important;
+  box-shadow: 16px 0 40px rgba(5, 28, 52, .18) !important;
   isolation: isolate;
-  transform: translateZ(0);
   -webkit-font-smoothing: antialiased;
+}
+
+body.mobile-drawer-mode.mobile-sidebar-open #leftSidebar,
+body.mobile-drawer-mode.mobile-sidebar-open #mainLayout.module-open #leftSidebar {
+  transform: translateX(0) !important;
+  pointer-events: auto !important;
+}
+
+body.mobile-drawer-mode.mobile-sidebar-open {
+  overflow: hidden !important;
 }
