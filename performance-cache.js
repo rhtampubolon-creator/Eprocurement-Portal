@@ -1,5 +1,6 @@
-/* MSW E-Procurement performance layer v1.0
+/* MSW E-Procurement performance layer v1.1
    - User-scoped stale-while-revalidate cache for authenticated GAS GET requests.
+   - Scoped fresh-fetch support for views that must bypass stale snapshots safely.
    - Lazy local XLSX loading on first Excel import/export interaction.
    - Never shares cached business responses between different user/role profiles. */
 (function(){
@@ -39,6 +40,7 @@
   const MAX_STALE_MS = 24 * 60 * 60 * 1000;
   const nativeFetch = window.fetch.bind(window);
   let xlsxPromise = null;
+  let freshFetchDepth = 0;
 
   function profileFrom(storage){
     try {
@@ -139,8 +141,33 @@
     } catch (_) {}
   }
 
+  /* Run only the supplied operation in a direct/fresh network scope.
+     Existing callers remain stale-while-revalidate; this is opt-in and therefore
+     does not increase GAS traffic for unrelated stable modules. */
+  window.MSW_WITH_FRESH_FETCH = async function(task){
+    if (typeof task !== 'function') return undefined;
+    freshFetchDepth += 1;
+    try {
+      return await task();
+    } finally {
+      freshFetchDepth = Math.max(0, freshFetchDepth - 1);
+    }
+  };
+
   window.fetch = async function(input, init){
     const url = typeof input === 'string' ? input : String(input?.url || '');
+
+    if (freshFetchDepth > 0 && isCacheableGasGet(url, init || {})) {
+      const freshInit = Object.assign({}, init || {}, { cache: 'no-store' });
+      const response = await nativeFetch(input, freshInit);
+      const usable = await usableJsonResponse(response);
+      if (usable) {
+        const scope = userScope();
+        saveCache(cacheKey(url, scope), usable.text, response.status, {'Content-Type':'application/json'});
+      }
+      return response;
+    }
+
     if (!isCacheableGasGet(url, init || {})) return nativeFetch(input, init);
 
     const scope = userScope();

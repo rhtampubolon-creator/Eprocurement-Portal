@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.11",
+  VERSION: "3.5.12",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
@@ -18,6 +18,25 @@ window.APP_CONFIG = Object.freeze({
   const url=new URL('./global-table-filter-scroll-v3511.js',configSrc).href+'?v=20260818-global-filter-v3511';
   if(document.readyState==='loading')document.write('<script data-msw-global-table-filter-scroll="true" src="'+url.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
   else{const s=document.createElement('script');s.src=url;s.dataset.mswGlobalTableFilterScroll='true';document.head.appendChild(s);}
+})();
+
+(function loadBuyerViewSyncOptimizerEarly(){
+  if(!/\/(?:vendor-company|detail-contract)\//i.test(window.location.pathname)||document.querySelector('script[data-msw-buyer-view-sync]'))return;
+  const configSrc=document.currentScript?.src||new URL('config.js',window.location.href).href;
+  const url=new URL('./buyer-view-sync-optimizer-v3512.js',configSrc).href+'?v=20260818-buyer-sync-v3512';
+  if(document.readyState==='loading')document.write('<script data-msw-buyer-view-sync="true" src="'+url.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+  else{const s=document.createElement('script');s.src=url;s.dataset.mswBuyerViewSync='true';document.head.appendChild(s);}
+})();
+
+(function loadUnrestrictedLocalUploadEarly(){
+  const path=window.location.pathname;
+  const isProcurementParent=/\/procurement-admin\/?(?:index\.html)?$/i.test(path);
+  const isProcurementForm=/\/procurement-admin\/Form\//i.test(path);
+  if((!isProcurementParent&&!isProcurementForm)||document.querySelector('script[data-msw-unrestricted-local-upload]'))return;
+  const configSrc=document.currentScript?.src||new URL('config.js',window.location.href).href;
+  const url=new URL('./unrestricted-local-upload-v3512.js',configSrc).href+'?v=20260818-any-file-v3512';
+  if(document.readyState==='loading')document.write('<script data-msw-unrestricted-local-upload="true" src="'+url.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+  else{const s=document.createElement('script');s.src=url;s.dataset.mswUnrestrictedLocalUpload='true';document.head.appendChild(s);}
 })();
 
 (function loadPrIdentityEarly(){
@@ -65,7 +84,7 @@ window.APP_CONFIG = Object.freeze({
       patch.defer=true;patch.dataset.mswPrRulesPatch='true';
       patch.addEventListener('load',function(){
         const localFiles=document.createElement('script');
-        localFiles.src=new URL('../../procurement-local-files.js',window.location.href).href+'?v=20260815-pr-local-v3';
+        localFiles.src=new URL('../../procurement-local-files.js',window.location.href).href+'?v=20260818-any-file-v3512';
         localFiles.defer=true;localFiles.dataset.mswPrLocalFiles='true';
         localFiles.addEventListener('load',function(){
           const existingPr=document.createElement('script');
