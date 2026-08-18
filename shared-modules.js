@@ -20,7 +20,7 @@
       navId: "workspaceVendor",
       label: "Vendor Management",
       icon: "building-2",
-      url: "vendor-company/index.html",
+      url: "vendor-company/index.html?v=20260818-filter-scroll-v3510",
       roles: ["PROCUREMENT_ADMIN"],
       viewOnlyRoles: ["BUYER"]
     },
