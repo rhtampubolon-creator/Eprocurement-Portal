@@ -12,7 +12,7 @@
       navId: "workspaceProcurement",
       label: "Procurement",
       icon: "clipboard-list",
-      url: "procurement-admin/index.html?v=20260818-round-state-v357",
+      url: "procurement-admin/index.html?v=20260818-backend-sync-v358",
       roles: ["SUPER_ADMIN", "BUYER"]
     },
     {
@@ -83,8 +83,6 @@
         ? "SUPER_ADMIN"
         : (["CONTRACTADMIN", "CONTRACT_ADMIN", "CONTRACTMANAGEMENT", "CONTRACT_MANAGEMENT"].includes(raw) ? "CONTRACT" : raw));
     if (normalized === "SUPER_ADMIN") return registry.map(item => item.id);
-    // Modul view-only tetap harus terlihat di Workspace. Permission mutasi
-    // tetap ditolak oleh UI modul dan backend.
     return registry
       .filter(item => item.roles.includes(normalized) || (item.viewOnlyRoles || []).includes(normalized))
       .map(item => item.id);

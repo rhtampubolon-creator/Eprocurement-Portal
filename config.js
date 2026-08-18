@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.7",
+  VERSION: "3.5.8",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
@@ -81,9 +81,9 @@ window.APP_CONFIG = Object.freeze({
     script.defer=true;
     script.dataset.mswProcurementActionBridge='true';
     script.addEventListener('load',function(){
-      if(window.__MSW_BUYER_SCOPED_ALLCLEAR_V355__||document.querySelector('script[data-msw-buyer-allclear]'))return;
+      if(window.__MSW_BUYER_SCOPED_ALLCLEAR_V358__||document.querySelector('script[data-msw-buyer-allclear]'))return;
       const buyerClear=document.createElement('script');
-      buyerClear.src=new URL('../procurement-buyer-allclear-v355.js',window.location.href).href+'?v=20260818-buyer-allclear-v355';
+      buyerClear.src=new URL('../procurement-buyer-allclear-v358.js',window.location.href).href+'?v=20260818-buyer-allclear-v358';
       buyerClear.defer=true;
       buyerClear.dataset.mswBuyerAllclear='true';
       document.body.appendChild(buyerClear);
