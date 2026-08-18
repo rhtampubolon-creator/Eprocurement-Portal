@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.15",
+  VERSION: "3.5.16",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
@@ -68,6 +68,8 @@ window.APP_CONFIG = Object.freeze({
     }
     const viewUrl=new URL('./local-document-view-bridge.js',window.location.href).href+'?v=20260815-local-view-v2';
     document.write('<script data-msw-local-document-view="true" src="'+viewUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+    const internalEmailUrl=new URL('./internal-email-release-pr-v3516.js',window.location.href).href+'?v=20260818-release-pr-email-v3516';
+    document.write('<script data-msw-release-pr-email="true" src="'+internalEmailUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
   }
 })();
 
