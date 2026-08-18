@@ -12,7 +12,7 @@
       navId: "workspaceProcurement",
       label: "Procurement",
       icon: "clipboard-list",
-      url: "procurement-admin/index.html?v=20260818-buyer-allclear-v355",
+      url: "procurement-admin/index.html?v=20260818-assign-date-v356",
       roles: ["SUPER_ADMIN", "BUYER"]
     },
     {
