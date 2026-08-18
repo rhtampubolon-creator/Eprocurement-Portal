@@ -10,63 +10,28 @@
   <link rel="stylesheet" href="../assets/tailwind.min.css?v=20260813-performance-v1">
   <script src="../assets/lucide.min.js?v=20260813-performance-v1"></script>
   <link rel="stylesheet" href="style.css?v=20260810-contract-dashboard-v28" />
-
-  <!-- XLSX -->
 </head>
 
 <body class="bg-gray-100 h-screen overflow-hidden">
   <div class="flex flex-col h-full bg-white p-4 shadow-md">
-
-<!-- Header: Home • Title • Search (kiri) + Action (kanan) -->
     <div id="moduleHeader" class="relative z-[999] flex flex-col lg:grid lg:grid-cols-[auto,1fr,auto] items-start lg:items-center gap-3 mb-3">
-
-      <!-- Home -->
       <div class="hidden sm:block">
         <p class="font-semibold">Procurement Division</p>
         <p class="text-xs text-gray-400">PT Makmur Sejahtera Wisesa</p>
         <p id="moduleSubtitle" class="text-xs text-gray-400">Admin Procurement</p>
       </div>
-      
-      <!-- Title (center) -->
       <h1 id="buyerCenteredTitle" class="text-lg sm:text-xl font-bold tracking-tight"></h1>
-    
-      <!-- 🔍 Search kiri dan ⚙️ Action kanan -->
       <div class="flex flex-col md:flex-row gap-2 w-full">
-
-        <!-- Search -->
         <div class="relative w-full md:w-72">
-          <input
-            id="searchInput"
-            type="search"
-            autocomplete="off"
-            aria-label="Search procurement"
-            placeholder="Search PR, PIC, vendor, status..."
-            class="border border-gray-300 rounded-lg pl-3 pr-10 py-2 h-[40px] w-full"
-          />
-          <button
-            id="clearSearchBtn"
-            type="button"
-            aria-label="Clear search"
-            title="Clear search"
-            class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 hidden"
-          >
-            ✕
-          </button>
+          <input id="searchInput" type="search" autocomplete="off" aria-label="Search procurement" placeholder="Search PR, PIC, vendor, status..." class="border border-gray-300 rounded-lg pl-3 pr-10 py-2 h-[40px] w-full" />
+          <button id="clearSearchBtn" type="button" aria-label="Clear search" title="Clear search" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 hidden">✕</button>
         </div>
-    
-        <!-- Action -->
-
         <div id="actionDropdown" class="action-dropdown">
-          <button id="menuBtn" type="button" class="action-btn" aria-haspopup="true" aria-expanded="false">
-            Action ▼
-          </button>
+          <button id="menuBtn" type="button" class="action-btn" aria-haspopup="true" aria-expanded="false">Action ▼</button>
           <div id="menu" class="action-menu" role="menu" aria-hidden="true">
             <button type="button" role="menuitem" onclick="handleAdd()">Add</button>
             <button type="button" role="menuitem" onclick="exportExcel()">Export Excel</button>
-            <label class="action-menu-item" role="menuitem">
-              Import Excel
-              <input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden" />
-            </label>
+            <label class="action-menu-item" role="menuitem">Import Excel<input type="file" id="excelFile" accept=".xlsx,.xls" class="hidden" /></label>
             <hr>
             <button type="button" role="menuitem" class="danger" onclick="clearAll()">All Clear</button>
           </div>
@@ -74,69 +39,40 @@
       </div>
     </div>
 
-    <!-- Tabel -->
-    <div
-      id="tableContainer"
-      class="table-container flex-1"
-      tabindex="0">
+    <div id="tableContainer" class="table-container flex-1" tabindex="0">
       <table class="text-xs sm:text-sm text-gray-700 border border-gray-300 rounded-lg">
-        <thead class="bg-slate-700 text-white uppercase text-xs">
-          <tr id="theadRow"></tr>
-        </thead>
+        <thead class="bg-slate-700 text-white uppercase text-xs"><tr id="theadRow"></tr></thead>
         <tbody id="tableBody" class="divide-y divide-gray-200"></tbody>
       </table>
     </div>
-    <div
-      id="syncInfo"
-      class="text-xs text-gray-500 mt-2 text-right pr-2">
-      Last Sync: -
-    </div>
-
+    <div id="syncInfo" class="text-xs text-gray-500 mt-2 text-right pr-2">Last Sync: -</div>
   </div>
 
-  <!-- PROCUREMENT FORM MODAL -->
-  <div id="formModal"
-      class="fixed inset-0 bg-black/60 hidden z-[9999]">
-
-    <!-- Yang digeser adalah window ini, bukan isi iframe -->
+  <div id="formModal" class="fixed inset-0 bg-black/60 hidden z-[9999]">
     <div id="formWindow" class="procurement-form-window">
-
-      <div id="formDragHandle" class="procurement-form-drag-handle"
-           title="Tahan dan geser untuk memindahkan form">
+      <div id="formDragHandle" class="procurement-form-drag-handle" title="Tahan dan geser untuk memindahkan form">
         <span>Procurement Form</span>
-
-        <button id="closeModal" type="button" aria-label="Tutup form">
-          ✕
-        </button>
+        <button id="closeModal" type="button" aria-label="Tutup form">✕</button>
       </div>
-
       <iframe id="formFrame" title="Procurement Form"></iframe>
-
     </div>
-
   </div>
-  
-  <!-- Menu klik kanan pada baris -->
+
   <div id="rowContextMenu" class="row-context-menu hidden" role="menu" aria-hidden="true">
-    <button id="contextEditBtn" type="button" role="menuitem">
-      <i data-lucide="pencil"></i><span>Edit Row</span>
-    </button>
-    <button id="contextFolderBtn" type="button" role="menuitem">
-      <i data-lucide="folder-open"></i><span>Open/Create Folder</span>
-    </button>
-    <button id="contextDeleteBtn" type="button" role="menuitem" class="danger">
-      <i data-lucide="trash-2"></i><span>Delete Row</span>
-    </button>
+    <button id="contextEditBtn" type="button" role="menuitem"><i data-lucide="pencil"></i><span>Edit Row</span></button>
+    <button id="contextFolderBtn" type="button" role="menuitem"><i data-lucide="folder-open"></i><span>Open/Create Folder</span></button>
+    <button id="contextDeleteBtn" type="button" role="menuitem" class="danger"><i data-lucide="trash-2"></i><span>Delete Row</span></button>
   </div>
 
-  <script src="../config.js?v=20260818-round-state-v357"></script>
-<script src="../shared-modules.js?v=20260818-round-state-v357"></script>
-<script src="../common.js?v=20260810-contract-dashboard-v28"></script>
-<script src="../performance-cache.js?v=20260813-performance-v1"></script>
-<script src="../procurement-assign-date-order-v356.js?v=20260818-assign-date-v356"></script>
-<script src="../procurement-round-state-fix-v357.js?v=20260818-round-state-v357"></script>
-  <script src="script.js?v=20260818-round-state-v357"></script>
-  
+  <script src="../config.js?v=20260818-backend-sync-v358"></script>
+  <script src="../shared-modules.js?v=20260818-backend-sync-v358"></script>
+  <script src="../common.js?v=20260810-contract-dashboard-v28"></script>
+  <script src="../cache-hardening-v358.js?v=20260818-cache-v358"></script>
+  <script src="../performance-cache.js?v=20260813-performance-v1"></script>
+  <script src="../procurement-assign-date-order-v356.js?v=20260818-assign-date-v356"></script>
+  <script src="../procurement-round-state-fix-v357.js?v=20260818-round-state-v357"></script>
+  <script src="script.js?v=20260818-backend-sync-v358"></script>
+
   <div id="toastContainer" class="toast-container" aria-live="polite"></div>
 </body>
 </html>
