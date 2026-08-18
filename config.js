@@ -135,20 +135,6 @@ window.APP_CONFIG = Object.freeze({
   else install();
 })();
 
-(function loadProcurementReviewFastNoteBridge(){
-  if(document.body?.dataset?.mswPage!=='main-menu')return;
-  const install=function(){
-    if(window.__MSW_PROCUREMENT_REVIEW_FAST_NOTE_V3514__||document.querySelector('script[data-msw-procurement-review-fast-note]'))return;
-    const script=document.createElement('script');
-    script.src=new URL('./procurement-review-note-fast-v3514.js',window.location.href).href+'?v=20260818-review-note-fast-v3514';
-    script.defer=true;
-    script.dataset.mswProcurementReviewFastNote='true';
-    document.body.appendChild(script);
-  };
-  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-})();
-
 (function loadProcurementReviewNoteEditor(){
   if(document.body?.dataset?.mswPage!=='main-menu')return;
   const install=function(){
