@@ -29,7 +29,10 @@ window.APP_CONFIG = Object.freeze({
 })();
 
 (function loadUnrestrictedLocalUploadEarly(){
-  if(!/\/procurement-admin\/Form\//i.test(window.location.pathname)||document.querySelector('script[data-msw-unrestricted-local-upload]'))return;
+  const path=window.location.pathname;
+  const isProcurementParent=/\/procurement-admin\/?(?:index\.html)?$/i.test(path);
+  const isProcurementForm=/\/procurement-admin\/Form\//i.test(path);
+  if((!isProcurementParent&&!isProcurementForm)||document.querySelector('script[data-msw-unrestricted-local-upload]'))return;
   const configSrc=document.currentScript?.src||new URL('config.js',window.location.href).href;
   const url=new URL('./unrestricted-local-upload-v3512.js',configSrc).href+'?v=20260818-any-file-v3512';
   if(document.readyState==='loading')document.write('<script data-msw-unrestricted-local-upload="true" src="'+url.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
