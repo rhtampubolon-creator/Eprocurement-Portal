@@ -1,6 +1,6 @@
 {
   "name": "msw-eprocurement",
-  "version": "3.5.1-performance-cache",
+  "version": "3.5.3",
   "private": true,
   "description": "MSW E-Procurement Web master with local production assets and cache-first loading.",
   "scripts": {

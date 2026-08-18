@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.2",
+  VERSION: "3.5.3",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
@@ -70,4 +70,18 @@ window.APP_CONFIG = Object.freeze({
     },{once:true});
     document.body.appendChild(rules);
   },{once:true});
+})();
+
+(function loadProcurementActionBridge(){
+  if(!/\/procurement-admin\/?(?:index\.html)?$/i.test(window.location.pathname))return;
+  const install=function(){
+    if(window.__MSW_PROCUREMENT_ACTION_BRIDGE_V353__||document.querySelector('script[data-msw-procurement-action-bridge]'))return;
+    const script=document.createElement('script');
+    script.src=new URL('../procurement-action-bridge.js',window.location.href).href+'?v=20260818-procurement-actions-v353';
+    script.defer=true;
+    script.dataset.mswProcurementActionBridge='true';
+    document.body.appendChild(script);
+  };
+  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
 })();

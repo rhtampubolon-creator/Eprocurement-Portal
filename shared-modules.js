@@ -12,7 +12,7 @@
       navId: "workspaceProcurement",
       label: "Procurement",
       icon: "clipboard-list",
-      url: "procurement-admin/index.html?v=20260810-contract-dashboard-v28",
+      url: "procurement-admin/index.html?v=20260818-procurement-actions-v353",
       roles: ["SUPER_ADMIN", "BUYER"]
     },
     {
