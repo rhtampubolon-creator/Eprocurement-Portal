@@ -88,11 +88,12 @@
     const body = values.map(row => `<tr>${row.map(value => `<td>${esc(value || '-')}</td>`).join('')}</tr>`).join('');
     const header = HEADERS.map(value => `<th>${esc(value)}</th>`).join('');
     const generated = new Date().toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    const popup = window.open('', '_blank', 'noopener,noreferrer');
+    const popup = window.open('', '_blank');
     if (!popup) {
       window.alert('Popup print diblokir browser. Izinkan popup untuk portal ini lalu coba lagi.');
       return;
     }
+    try { popup.opener = null; } catch (_) {}
     popup.document.open();
     popup.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Procurement Review</title><style>
       @page{size:A4 landscape;margin:8mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111827;margin:0;font-size:8.5px}
@@ -115,12 +116,12 @@
     const el = document.createElement('style');
     el.id = 'mswProcurementReviewExportStyleV3514';
     el.textContent = `
-      #mswProcurementReviewActions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-left:auto}
+      #mswProcurementReviewActions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;margin:6px 0 10px}
       #mswProcurementReviewActions button{border:1px solid #cbd5e1;background:#fff;color:#334155;border-radius:8px;padding:6px 10px;font:inherit;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
       #mswProcurementReviewActions button:hover{background:#f8fafc;border-color:#94a3b8}
       #mswProcurementReviewActions .msw-review-export-primary{background:#0f766e;border-color:#0f766e;color:#fff}
       #mswProcurementReviewActions .msw-review-export-primary:hover{background:#115e59}
-      @media(max-width:700px){#mswProcurementReviewActions{width:100%;justify-content:flex-end;margin-top:6px}}
+      @media(max-width:700px){#mswProcurementReviewActions{width:100%;justify-content:flex-end}}
     `;
     document.head.appendChild(el);
   }
@@ -132,19 +133,15 @@
     if (document.getElementById('mswProcurementReviewActions')) return true;
     style();
 
-    const host = title.parentElement;
-    if (!host) return false;
-    host.style.display = 'flex';
-    host.style.alignItems = 'center';
-    host.style.gap = '10px';
-    host.style.flexWrap = 'wrap';
-
     const actions = document.createElement('div');
     actions.id = 'mswProcurementReviewActions';
     actions.innerHTML = `
       <button type="button" id="mswProcurementReviewPrint" title="Print seluruh data sesuai filter">Print</button>
       <button type="button" id="mswProcurementReviewExcel" class="msw-review-export-primary" title="Export seluruh data sesuai filter ke Excel">Export Excel</button>`;
-    host.appendChild(actions);
+
+    const host = title.parentElement;
+    if (!host) return false;
+    title.insertAdjacentElement('afterend', actions);
 
     document.getElementById('mswProcurementReviewPrint')?.addEventListener('click', printReview);
     document.getElementById('mswProcurementReviewExcel')?.addEventListener('click', () => exportExcel().catch(error => window.alert(error?.message || 'Export Excel gagal.')));
