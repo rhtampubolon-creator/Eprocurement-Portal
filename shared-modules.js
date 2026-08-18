@@ -20,7 +20,7 @@
       navId: "workspaceVendor",
       label: "Vendor Management",
       icon: "building-2",
-      url: "vendor-company/index.html?v=20260818-global-filter-v3511",
+      url: "vendor-company/index.html?v=20260818-buyer-sync-v3512",
       roles: ["PROCUREMENT_ADMIN"],
       viewOnlyRoles: ["BUYER"]
     },
@@ -46,7 +46,7 @@
       navId: "workspaceContract",
       label: "Contract Management",
       icon: "file-text",
-      url: "detail-contract/index.html?v=20260818-global-filter-v3511",
+      url: "detail-contract/index.html?v=20260818-buyer-sync-v3512",
       roles: ["SUPER_ADMIN", "CONTRACT"],
       viewOnlyRoles: ["BUYER"]
     },
