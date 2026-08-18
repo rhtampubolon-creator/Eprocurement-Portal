@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.5",
+  VERSION: "3.5.6",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
