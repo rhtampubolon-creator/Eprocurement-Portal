@@ -12,7 +12,7 @@
       navId: "workspaceProcurement",
       label: "Procurement",
       icon: "clipboard-list",
-      url: "procurement-admin/index.html?v=20260818-global-filter-v3511",
+      url: "procurement-admin/index.html?v=20260818-buyer-sync-upload-v3512",
       roles: ["SUPER_ADMIN", "BUYER"]
     },
     {
