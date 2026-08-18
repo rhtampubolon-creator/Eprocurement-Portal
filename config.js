@@ -75,9 +75,9 @@ window.APP_CONFIG = Object.freeze({
 (function loadProcurementActionBridge(){
   if(!/\/procurement-admin\/?(?:index\.html)?$/i.test(window.location.pathname))return;
   const install=function(){
-    if(window.__MSW_PROCUREMENT_ACTION_BRIDGE_V354__||document.querySelector('script[data-msw-procurement-action-bridge]'))return;
+    if(window.__MSW_PROCUREMENT_ACTION_BRIDGE_V354_H1__||document.querySelector('script[data-msw-procurement-action-bridge]'))return;
     const script=document.createElement('script');
-    script.src=new URL('../procurement-action-bridge-v354.js',window.location.href).href+'?v=20260818-procurement-actions-v354';
+    script.src=new URL('../procurement-action-bridge-v354-hotfix1.js',window.location.href).href+'?v=20260818-allclear-cache-h1';
     script.defer=true;
     script.dataset.mswProcurementActionBridge='true';
     document.body.appendChild(script);
