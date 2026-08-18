@@ -7,10 +7,18 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.10",
+  VERSION: "3.5.11",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
+
+(function loadGlobalTableFilterScrollEarly(){
+  if(window.__MSW_GLOBAL_TABLE_FILTER_SCROLL_V3511__||document.querySelector('script[data-msw-global-table-filter-scroll]'))return;
+  const configSrc=document.currentScript?.src||new URL('config.js',window.location.href).href;
+  const url=new URL('./global-table-filter-scroll-v3511.js',configSrc).href+'?v=20260818-global-filter-v3511';
+  if(document.readyState==='loading')document.write('<script data-msw-global-table-filter-scroll="true" src="'+url.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+  else{const s=document.createElement('script');s.src=url;s.dataset.mswGlobalTableFilterScroll='true';document.head.appendChild(s);}
+})();
 
 (function loadPrIdentityEarly(){
   if(document.querySelector('script[data-msw-pr-identity]'))return;
