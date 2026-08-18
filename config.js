@@ -40,7 +40,7 @@ window.APP_CONFIG = Object.freeze({
       document.write('<script data-msw-android-storage-picker="true" src="'+pickerUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
     }
     const viewUrl=new URL('./local-document-view-bridge.js',window.location.href).href+'?v=20260815-local-view-v2';
-    document.write('<script data-msw-bidder-local-view="true" src="'+viewUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+    document.write('<script data-msw-local-document-view="true" src="'+viewUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
   }
 })();
 
