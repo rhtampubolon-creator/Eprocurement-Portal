@@ -1,0 +1,116 @@
+MSW E-Procurement — Code.gs lightweight Procurement Review Note patch v3.5.14
+
+Apply these 3 isolated changes to the currently deployed Code.gs. Do not replace unrelated functions.
+
+1) ACTION_PERMISSIONS
+Add this entry next to EDIT:
+
+  UPDATE_PROCUREMENT_NOTE: "procurement.edit_all|procurement.edit_own",
+
+So the Procurement section becomes:
+
+  ADD: "procurement.create",
+  EDIT: "procurement.edit_all|procurement.edit_own",
+  UPDATE_PROCUREMENT_NOTE: "procurement.edit_all|procurement.edit_own",
+  DELETE: "procurement.delete",
+
+
+2) doPost(e)
+Inside the Procurement action routing, place this immediately AFTER the existing EDIT block and BEFORE DELETE:
+
+    if (action === "UPDATE_PROCUREMENT_NOTE") {
+      return auditedJsonOutput_(effectiveAction, body, profile, updateProcurementNote_(
+        getSheetOrThrow_(body.sheet || DEFAULT_SHEET_NAME),
+        body.procurementId || body["Procurement ID"] || "",
+        body.note,
+        body.expectedVersion
+      ));
+    }
+
+
+3) Add this helper near addProcurement_ / editProcurement_ / deleteProcurement_:
+
+function updateProcurementNote_(sheet, procurementId, note, expectedVersion) {
+  const headers = ensureProcurementMetadataColumns_(sheet);
+  const targetId = String(procurementId == null ? "" : procurementId).trim();
+  if (!targetId) throw new Error("Procurement ID wajib diisi untuk update Note.");
+
+  const idColumn = findHeaderIndex_(headers, ["Procurement ID"]);
+  const noteColumn = findHeaderIndex_(headers, ["Note"]);
+  const versionColumn = findHeaderIndex_(headers, ["Version"]);
+  const updatedAtColumn = findHeaderIndex_(headers, ["Updated At"]);
+  const updatedByColumn = findHeaderIndex_(headers, ["Updated By"]);
+
+  if (idColumn < 0) throw new Error("Kolom Procurement ID tidak ditemukan.");
+  if (noteColumn < 0) throw new Error("Kolom Note tidak ditemukan.");
+
+  const lastRow = sheet.getLastRow();
+  if (lastRow < 2) return { success: false, message: "Data Procurement tidak ditemukan." };
+
+  // Hanya baca kolom ID untuk pencarian; jangan baca seluruh sheet dua kali.
+  const ids = sheet.getRange(2, idColumn + 1, lastRow - 1, 1).getDisplayValues();
+  let rowNumber = -1;
+  for (let index = 0; index < ids.length; index++) {
+    if (String(ids[index][0] || "").trim() === targetId) {
+      rowNumber = index + 2;
+      break;
+    }
+  }
+
+  if (rowNumber < 0) {
+    return { success: false, message: "Data Procurement tidak ditemukan." };
+  }
+
+  // Read exactly one matched row for ownership + Version validation.
+  const currentRow = sheet.getRange(rowNumber, 1, 1, headers.length).getDisplayValues()[0];
+  assertCanEditProcurementRow_(headers, currentRow);
+
+  const currentVersion = versionColumn >= 0
+    ? Number(currentRow[versionColumn] || 1)
+    : 1;
+  const suppliedVersion = expectedVersion === "" || expectedVersion == null
+    ? 0
+    : Number(expectedVersion);
+
+  if (suppliedVersion && suppliedVersion !== currentVersion) {
+    return {
+      success: false,
+      conflict: true,
+      message: "Data Procurement telah diperbarui user lain. Muat ulang sebelum menyimpan Note.",
+      currentVersion: currentVersion,
+      updatedBy: updatedByColumn >= 0 ? currentRow[updatedByColumn] : "",
+      updatedAt: updatedAtColumn >= 0 ? currentRow[updatedAtColumn] : ""
+    };
+  }
+
+  const nextVersion = currentVersion + 1;
+  const now = new Date().toISOString();
+  const actor = currentActorEmail_({});
+  const noteValue = note == null ? "" : String(note);
+
+  // Update hanya field yang diperlukan. Tidak rebuild seluruh row Procurement.
+  sheet.getRange(rowNumber, noteColumn + 1).setValue(noteValue);
+  if (versionColumn >= 0) sheet.getRange(rowNumber, versionColumn + 1).setValue(nextVersion);
+  if (updatedAtColumn >= 0) sheet.getRange(rowNumber, updatedAtColumn + 1).setValue(now);
+  if (updatedByColumn >= 0) sheet.getRange(rowNumber, updatedByColumn + 1).setValue(actor);
+
+  const revision = bumpSheetRevision_(sheet.getName());
+  return {
+    success: true,
+    message: "Note Procurement berhasil diperbarui.",
+    rowNumber: rowNumber,
+    procurementId: targetId,
+    version: nextVersion,
+    revision: revision
+  };
+}
+
+After applying the patch:
+Apps Script > Save > Deploy > Manage deployments > Edit > New version > Deploy.
+
+Compatibility:
+- Existing EDIT remains unchanged.
+- BUYER still requires edit_own and row ownership validation through assertCanEditProcurementRow_.
+- SUPER_ADMIN retains edit_all.
+- USER remains read-only through the existing assertUserReadOnlyAction_ guard.
+- No Round PR, Status Rebid, Smart Import, All Clear, Vendor, Contract, folder or document logic is changed.
