@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.4",
+  VERSION: "3.5.5",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
@@ -80,6 +80,14 @@ window.APP_CONFIG = Object.freeze({
     script.src=new URL('../procurement-action-bridge-v354-hotfix1.js',window.location.href).href+'?v=20260818-allclear-cache-h1';
     script.defer=true;
     script.dataset.mswProcurementActionBridge='true';
+    script.addEventListener('load',function(){
+      if(window.__MSW_BUYER_SCOPED_ALLCLEAR_V355__||document.querySelector('script[data-msw-buyer-allclear]'))return;
+      const buyerClear=document.createElement('script');
+      buyerClear.src=new URL('../procurement-buyer-allclear-v355.js',window.location.href).href+'?v=20260818-buyer-allclear-v355';
+      buyerClear.defer=true;
+      buyerClear.dataset.mswBuyerAllclear='true';
+      document.body.appendChild(buyerClear);
+    },{once:true});
     document.body.appendChild(script);
   };
   if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
