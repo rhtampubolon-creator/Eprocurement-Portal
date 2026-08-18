@@ -7,7 +7,7 @@
  */
 window.APP_CONFIG = Object.freeze({
   ENVIRONMENT: "production",
-  VERSION: "3.5.14",
+  VERSION: "3.5.15",
   GAS_URL: "https://script.google.com/macros/s/AKfycbwlpvbUm6CEPzSDzMFIfsrh_RnBUFNmWr7XLDhth_n1P2CM_XyifNKlFKxqrsmangwcSg/exec",
   EMAILS: Object.freeze({ releasePoCc: [], releasePrTo: "", releasePrCc: "", poProcTo: "", appointmentTo: "", procurementInbox: "", procurementCc: "" })
 });
@@ -129,6 +129,20 @@ window.APP_CONFIG = Object.freeze({
     script.src=new URL('./procurement-review-rules-v359.js',window.location.href).href+'?v=20260818-review-v359';
     script.defer=true;
     script.dataset.mswProcurementReviewRules='true';
+    document.body.appendChild(script);
+  };
+  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
+  else install();
+})();
+
+(function loadProcurementReviewFastNote(){
+  if(document.body?.dataset?.mswPage!=='main-menu')return;
+  const install=function(){
+    if(window.__MSW_PROCUREMENT_REVIEW_FAST_NOTE_V3514__||document.querySelector('script[data-msw-procurement-review-fast-note]'))return;
+    const script=document.createElement('script');
+    script.src=new URL('./procurement-review-note-fast-v3514.js',window.location.href).href+'?v=20260818-review-fast-note-v3515';
+    script.defer=true;
+    script.dataset.mswProcurementReviewFastNote='true';
     document.body.appendChild(script);
   };
   if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
