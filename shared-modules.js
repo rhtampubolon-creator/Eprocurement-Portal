@@ -12,7 +12,7 @@
       navId: "workspaceProcurement",
       label: "Procurement",
       icon: "clipboard-list",
-      url: "procurement-admin/index.html?v=20260818-backend-sync-v358",
+      url: "procurement-admin/index.html?v=20260818-global-filter-v3511",
       roles: ["SUPER_ADMIN", "BUYER"]
     },
     {
@@ -20,7 +20,7 @@
       navId: "workspaceVendor",
       label: "Vendor Management",
       icon: "building-2",
-      url: "vendor-company/index.html?v=20260818-filter-scroll-v3510",
+      url: "vendor-company/index.html?v=20260818-global-filter-v3511",
       roles: ["PROCUREMENT_ADMIN"],
       viewOnlyRoles: ["BUYER"]
     },
@@ -29,7 +29,7 @@
       navId: "workspaceVendorRequests",
       label: "Vendor Requests",
       icon: "inbox",
-      url: "vendor-requests/index.html",
+      url: "vendor-requests/index.html?v=20260818-global-filter-v3511",
       roles: ["PROCUREMENT_ADMIN"],
       viewOnlyRoles: ["BUYER"]
     },
@@ -38,7 +38,7 @@
       navId: "workspaceDashboard",
       label: "Agreement Dashboard",
       icon: "layout-dashboard",
-      url: "agreement-dashboard/index.html",
+      url: "agreement-dashboard/index.html?v=20260818-global-filter-v3511",
       roles: ["CONTRACT"]
     },
     {
@@ -46,7 +46,7 @@
       navId: "workspaceContract",
       label: "Contract Management",
       icon: "file-text",
-      url: "detail-contract/index.html",
+      url: "detail-contract/index.html?v=20260818-global-filter-v3511",
       roles: ["SUPER_ADMIN", "CONTRACT"],
       viewOnlyRoles: ["BUYER"]
     },
@@ -55,7 +55,7 @@
       navId: "workspaceAgreementTracker",
       label: "Agreement Tracker",
       icon: "clipboard-check",
-      url: "agreement-tracker/index.html?v=20260813-page20-v131",
+      url: "agreement-tracker/index.html?v=20260818-global-filter-v3511",
       roles: ["SUPER_ADMIN", "CONTRACT"]
     }
   ];
