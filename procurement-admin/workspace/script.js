@@ -13,6 +13,10 @@ function normalizeFlow(value) {
   return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, '');
 }
 
+function normalizePr(value) {
+  return String(value || '').trim();
+}
+
 function getProcurementRow() {
   try {
     return window.parent?.getProcurementByPR?.(noPR) || null;
@@ -22,6 +26,51 @@ function getProcurementRow() {
 }
 
 let procurementRow = getProcurementRow();
+
+// Bridge untuk nested iframe: Form berada satu level di bawah Workspace,
+// sementara sumber row Procurement berada satu level di atas Workspace.
+// Form/script.js memang mencari window.parent.getProcurementByPR(), jadi
+// Workspace harus meneruskan snapshot row yang sedang dibuka.
+window.getProcurementByPR = function(targetPR) {
+  const target = normalizePr(targetPR);
+  const current = normalizePr(
+    procurementRow?.noPR || procurementRow?.['No PR'] || noPR
+  );
+
+  if (!procurementRow) return null;
+  if (!target || target === current || target === normalizePr(noPR)) {
+    try {
+      return typeof structuredClone === 'function'
+        ? structuredClone(procurementRow)
+        : JSON.parse(JSON.stringify(procurementRow));
+    } catch (_) {
+      return { ...procurementRow };
+    }
+  }
+
+  return null;
+};
+
+// Company/Vendor lookup Form juga berasal dari Procurement Admin parent.
+// Proxy ini menjaga Form tetap memakai data yang sama tanpa bergantung pada
+// cache lokal ketika dibuka melalui nested Workspace.
+window.getCompanyDirectory = function() {
+  try {
+    const rows = window.parent?.getCompanyDirectory?.();
+    return Array.isArray(rows) ? rows.map(row => ({ ...row })) : [];
+  } catch (_) {
+    return [];
+  }
+};
+
+window.getVendorEmail = function(companyName) {
+  try {
+    return window.parent?.getVendorEmail?.(companyName) || '';
+  } catch (_) {
+    return '';
+  }
+};
+
 let flowProcess = params.get('flow') || procurementRow?.flowprocess || procurementRow?.['Flow Process'] || '';
 let activeRound = String(params.get('round') || procurementRow?.roundpo || procurementRow?.['Round PR'] || procurementRow?.['Round PO'] || 'R0').toUpperCase();
 let normalizedFlow = normalizeFlow(flowProcess);
