@@ -194,3 +194,13 @@
     }, 50);
   }
 })();
+
+/* Load the isolated RFQ Excel upload/import adapter on BidderList workspace. */
+(function loadRfqExcelImportV3523(){
+  if (window.__MSW_RFQ_EXCEL_IMPORT_V3523__ || document.querySelector('script[data-msw-rfq-excel-import]')) return;
+  const script = document.createElement('script');
+  script.src = new URL('./rfq-excel-import-v3523.js?v=20260819-rfq-import-v3523', window.location.href).href;
+  script.defer = true;
+  script.dataset.mswRfqExcelImport = 'true';
+  document.body.appendChild(script);
+})();
