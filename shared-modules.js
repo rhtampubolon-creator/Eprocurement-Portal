@@ -88,3 +88,16 @@
       .map(item => item.id);
   };
 })();
+
+(function loadProcurementExportRoleScopeV3517(){
+  const path=String(window.location.pathname||'');
+  const isMain=document.body?.dataset?.mswPage==='main-menu';
+  const isProcurement=/\/procurement-admin\/?(?:index\.html)?$/i.test(path);
+  if((!isMain&&!isProcurement)||window.__MSW_PROCUREMENT_EXPORT_ROLE_SCOPE_V3517__||document.querySelector('script[data-msw-procurement-export-role-scope]'))return;
+  const source=document.currentScript?.src||new URL('shared-modules.js',window.location.href).href;
+  const script=document.createElement('script');
+  script.src=new URL('./procurement-export-role-scope-v3517.js',source).href+'?v=20260819-export-role-scope-v3517';
+  script.defer=true;
+  script.dataset.mswProcurementExportRoleScope='true';
+  (document.body||document.head||document.documentElement).appendChild(script);
+})();
