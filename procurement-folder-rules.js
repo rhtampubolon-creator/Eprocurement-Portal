@@ -1,10 +1,12 @@
 (function () {
   'use strict';
 
-  const ROUND_FOLDER_TYPES = new Set(['02. Bidderlist', '03. CQS']);
+  const BIDDERLIST_FOLDER = '02. Bidderlist & Quotation';
+  const LEGACY_BIDDERLIST_FOLDER = '02. Bidderlist';
+  const ROUND_FOLDER_TYPES = new Set([BIDDERLIST_FOLDER, '03. CQS']);
   const FOLDER_TYPES = [
     '01. PR Approval',
-    '02. Bidderlist',
+    BIDDERLIST_FOLDER,
     '03. CQS',
     '04. PO',
     '05. Contract'
@@ -189,6 +191,12 @@
     const roundWrapper = document.getElementById('documentRoundWrapper');
     const pathEl = document.getElementById('folderTargetPath');
     if (!typeSelect || !roundSelect || !roundWrapper) return;
+
+    const legacyOption = Array.from(typeSelect.options || []).find(option => option.value === LEGACY_BIDDERLIST_FOLDER);
+    if (legacyOption) {
+      legacyOption.value = BIDDERLIST_FOLDER;
+      legacyOption.textContent = BIDDERLIST_FOLDER;
+    }
 
     const update = () => {
       const type = typeSelect.value;
