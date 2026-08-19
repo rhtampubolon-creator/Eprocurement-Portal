@@ -1,29 +1,35 @@
 /* ======================================================
-   RFQ EXCEL IMPORT v3.5.23
+   RFQ EXCEL IMPORT v3.5.24
 
    Scope only:
-   - Adds an Upload RFQ Excel button that is visible only in RFQ view.
+   - Upload RFQ Excel is visible only in RFQ view.
+   - The file picker starts from the ACTIVE No PR folder only.
+   - User chooses the subfolder/location manually; no document folder is selected automatically.
    - Reads only Sheet RFQ from XLS/XLSX/XLSM/XLSB.
-   - Main RFQ input comes from columns B:D, rows after the detected header
-     through row 25; blank rows are skipped, including blanks between items.
+   - Main RFQ input comes from columns B:D through row 25; blank rows are skipped.
    - Internal reference import is limited to:
        I = Est. Budget PR USD
        J = Est. Budget PR IDR / Convert IDR fallback
        K = Item Number
    - If I has a value, IDR is recalculated with the USD/IDR rate currently
      used by Procurement Workspace and Qty. If I is blank, J is used as-is.
-   - Previous Price / Date / Company / Commodity history is not imported.
 ====================================================== */
-(function installRfqExcelImportV3523(){
+(function installRfqExcelImportV3524(){
   'use strict';
-  if (window.__MSW_RFQ_EXCEL_IMPORT_V3523__) return;
+  if (window.__MSW_RFQ_EXCEL_IMPORT_V3524__) return;
+  window.__MSW_RFQ_EXCEL_IMPORT_V3524__ = true;
   window.__MSW_RFQ_EXCEL_IMPORT_V3523__ = true;
 
   const MAX_ROW = 25;
   const DEFAULT_DATA_START_ROW = 6;
   const IMPORT_BUTTON_ID = 'rfqExcelImportBtn';
-  const IMPORT_INPUT_ID = 'rfqExcelImportInput';
-  const XLSX_SRC = new URL('../assets/xlsx.full.min.js?v=20260819-rfq-import-v3523', window.location.href).href;
+  const XLSX_SRC = new URL('../assets/xlsx.full.min.js?v=20260819-rfq-import-v3524', window.location.href).href;
+
+  // Same storage used by the existing local PR folder feature.
+  const DB_NAME = 'MSW_PROCUREMENT_LOCAL_FS';
+  const DB_STORE = 'handles';
+  const ROOT_HANDLE_KEY = 'prRoot';
+
   let xlsxLoadPromise = null;
   let patchScheduled = false;
 
@@ -76,18 +82,12 @@
   function formatUsd(value){
     const number = Number(value || 0);
     if (!(number > 0)) return '';
-    return number.toLocaleString('id-ID', {
-      minimumFractionDigits: Number.isInteger(number) ? 0 : 0,
-      maximumFractionDigits: 6
-    });
+    return number.toLocaleString('id-ID', { maximumFractionDigits: 6 });
   }
 
-  function cellValue(sheet, column, row){
-    const cell = sheet?.[`${column}${row}`];
-    if (!cell) return '';
-    if (cell.v != null) return cell.v;
-    if (cell.w != null) return cell.w;
-    return '';
+  function setStatus(message){
+    const el = document.getElementById('saveStatus');
+    if (el) el.textContent = message;
   }
 
   function isRfqView(){
@@ -95,6 +95,131 @@
       if (typeof currentView !== 'undefined') return String(currentView).toUpperCase() === 'RFQ';
     } catch (_) {}
     return text(document.getElementById('viewTitle')?.textContent).toUpperCase() === 'RFQ';
+  }
+
+  function getActiveNoPr(){
+    try {
+      if (typeof getBidderMeta === 'function') {
+        const meta = getBidderMeta() || {};
+        const value = text(meta.nopr || meta.noPR || meta['No PR']);
+        if (value) return value;
+      }
+    } catch (_) {}
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return text(params.get('noPR') || params.get('nopr'));
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function getBasePr(value){
+    return text(value)
+      .replace(/\s*\(\s*Line[^)]*\)\s*$/i, '')
+      .replace(/\s+R\s*\d+\s*$/i, '')
+      .trim();
+  }
+
+  function isPrefixMatch(folderName, base){
+    const folder = text(folderName).toUpperCase();
+    const key = text(base).toUpperCase();
+    if (!folder || !key || !folder.startsWith(key)) return false;
+    if (folder === key) return true;
+    return /[\s\-_(]/.test(folder.charAt(key.length));
+  }
+
+  function openDb(){
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains(DB_STORE)) request.result.createObjectStore(DB_STORE);
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('Local PR database tidak dapat dibuka.'));
+    });
+  }
+
+  async function loadPrRootHandle(){
+    const db = await openDb();
+    try {
+      return await new Promise((resolve, reject) => {
+        const tx = db.transaction(DB_STORE, 'readonly');
+        const request = tx.objectStore(DB_STORE).get(ROOT_HANDLE_KEY);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error('Folder PR tersimpan tidak dapat dibaca.'));
+      });
+    } finally {
+      db.close();
+    }
+  }
+
+  async function ensureReadPermission(handle){
+    if (!handle) return false;
+    const options = { mode: 'read' };
+    try {
+      if ((await handle.queryPermission(options)) === 'granted') return true;
+      return (await handle.requestPermission(options)) === 'granted';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  async function findActivePrDirectory(root, noPr){
+    const base = getBasePr(noPr);
+    if (!base) throw new Error('No PR aktif belum tersedia.');
+
+    try {
+      const exact = await root.getDirectoryHandle(base, { create: false });
+      return exact;
+    } catch (_) {
+      // Continue with existing prefix behavior, e.g. "PR001 - Description".
+    }
+
+    const matches = [];
+    for await (const [name, handle] of root.entries()) {
+      if (handle.kind !== 'directory') continue;
+      if (isPrefixMatch(name, base)) matches.push({ name, handle });
+    }
+    matches.sort((a, b) => a.name.length - b.name.length || a.name.localeCompare(b.name));
+    if (matches.length) return matches[0].handle;
+
+    throw new Error(`Folder No PR ${base} tidak ditemukan di dalam folder PR yang terhubung.`);
+  }
+
+  async function pickExcelFromActivePr(){
+    const noPr = getActiveNoPr();
+    const basePr = getBasePr(noPr);
+    if (!basePr) throw new Error('No PR aktif belum tersedia. Buka PR terlebih dahulu.');
+
+    if (typeof window.showOpenFilePicker !== 'function') {
+      throw new Error('Browser ini belum mendukung pembukaan file langsung dari folder No PR. Gunakan Microsoft Edge atau Google Chrome terbaru.');
+    }
+
+    setStatus(`Membuka folder ${basePr}...`);
+    const root = await loadPrRootHandle();
+    if (!root) throw new Error('Folder PR belum terhubung. Connect Folder PR terlebih dahulu.');
+    if (!(await ensureReadPermission(root))) throw new Error('Izin akses folder PR belum diberikan.');
+
+    const prDirectory = await findActivePrDirectory(root, basePr);
+    const handles = await window.showOpenFilePicker({
+      startIn: prDirectory,
+      multiple: false,
+      excludeAcceptAllOption: false,
+      types: [{
+        description: 'RFQ Excel',
+        accept: {
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+          'application/vnd.ms-excel.sheet.macroEnabled.12': ['.xlsm'],
+          'application/vnd.ms-excel.sheet.binary.macroEnabled.12': ['.xlsb'],
+          'application/vnd.ms-excel': ['.xls']
+        }
+      }]
+    });
+
+    const handle = Array.isArray(handles) ? handles[0] : null;
+    if (!handle) return null;
+    return handle.getFile();
   }
 
   function readRateFromParent(){
@@ -140,6 +265,14 @@
     return 0;
   }
 
+  function cellValue(sheet, column, row){
+    const cell = sheet?.[`${column}${row}`];
+    if (!cell) return '';
+    if (cell.v != null) return cell.v;
+    if (cell.w != null) return cell.w;
+    return '';
+  }
+
   function detectStartRow(sheet){
     for (let row = 1; row <= MAX_ROW; row += 1) {
       const b = text(cellValue(sheet, 'B', row)).toUpperCase();
@@ -173,8 +306,6 @@
       const description = cellValue(sheet, 'B', sourceRow);
       const qtyRaw = cellValue(sheet, 'C', sourceRow);
       const unit = cellValue(sheet, 'D', sourceRow);
-
-      // B:D menentukan apakah baris adalah item. Blank di tengah tidak menghentikan import.
       if ([description, qtyRaw, unit].every(isBlank)) continue;
 
       const usdRaw = cellValue(sheet, 'I', sourceRow);
@@ -202,7 +333,6 @@
         row.__EstBudgetIdrMode = 'auto';
       } else {
         const fallbackIdr = parseNumber(idrRaw);
-        row['Est. Budget PR USD'] = '';
         row['Est. Budget PR IDR'] = fallbackIdr > 0 ? formatIdr(fallbackIdr) : '';
         row.__EstBudgetIdrMode = fallbackIdr > 0 ? 'manual' : 'auto';
       }
@@ -210,7 +340,7 @@
       items.push(row);
     }
 
-    return { items, startRow };
+    return items;
   }
 
   async function ensureXlsx(){
@@ -251,11 +381,6 @@
     return name ? workbook.Sheets[name] : null;
   }
 
-  function setStatus(message){
-    const el = document.getElementById('saveStatus');
-    if (el) el.textContent = message;
-  }
-
   async function importExcelFile(file){
     if (!file) return;
     const button = document.getElementById(IMPORT_BUTTON_ID);
@@ -269,13 +394,8 @@
       setStatus(`Membaca ${file.name}...`);
 
       const XLSX = await ensureXlsx();
-      const buffer = await file.arrayBuffer();
-      const workbook = XLSX.read(buffer, {
-        type: 'array',
-        cellDates: true,
-        cellFormula: true,
-        cellNF: true,
-        cellText: true
+      const workbook = XLSX.read(await file.arrayBuffer(), {
+        type: 'array', cellDates: true, cellFormula: true, cellNF: true, cellText: true
       });
       const sheet = findRfqSheet(workbook);
       if (!sheet) throw new Error('Sheet RFQ tidak ditemukan pada file Excel yang dipilih.');
@@ -285,13 +405,13 @@
         throw new Error('Dolar USD/IDR pada Procurement Workspace belum tersedia. Sync kurs terlebih dahulu lalu upload kembali.');
       }
 
-      const result = buildImportedItems(sheet, usdRate);
-      if (!result.items.length) {
-        throw new Error(`Tidak ada item RFQ terisi sampai baris ${MAX_ROW}.`);
-      }
+      const items = buildImportedItems(sheet, usdRate);
+      if (!items.length) throw new Error(`Tidak ada item RFQ terisi sampai baris ${MAX_ROW}.`);
 
+      const noPr = getBasePr(getActiveNoPr());
       const confirmed = window.confirm(
-        `Ditemukan ${result.items.length} item pada Sheet RFQ.\n\n` +
+        `No PR aktif: ${noPr}\n` +
+        `Ditemukan ${items.length} item pada Sheet RFQ.\n\n` +
         `Data item RFQ Workspace saat ini akan diganti dengan hasil upload.\n` +
         `Kurs USD/IDR yang dipakai: ${Math.round(usdRate).toLocaleString('id-ID')}.\n\n` +
         `Lanjutkan import?`
@@ -305,18 +425,22 @@
         throw new Error('Workspace RFQ belum siap. Silakan buka tab RFQ lalu coba kembali.');
       }
 
-      DATA.structured.RFQ.items = result.items;
+      DATA.structured.RFQ.items = items;
       try { if (typeof ensureRFQReferenceFields === 'function') ensureRFQReferenceFields(); } catch (_) {}
 
       if (typeof markDirty === 'function') {
-        markDirty(`${result.items.length} item RFQ diimport dari Excel. Menunggu autosave...`);
+        markDirty(`${items.length} item RFQ diimport dari Excel untuk ${noPr}. Menunggu autosave...`);
       } else {
-        setStatus(`${result.items.length} item RFQ berhasil diimport dari Excel.`);
+        setStatus(`${items.length} item RFQ berhasil diimport dari Excel.`);
       }
       try { if (typeof scheduleDocumentAutosave === 'function') scheduleDocumentAutosave(); } catch (_) {}
       if (typeof renderCurrent === 'function') renderCurrent();
       scheduleUsdDisplayPatch();
     } catch (error) {
+      if (error?.name === 'AbortError') {
+        setStatus('Pemilihan file RFQ dibatalkan.');
+        return;
+      }
       console.error('RFQ Excel import gagal:', error);
       setStatus(`Import RFQ gagal: ${error?.message || error}`);
       window.alert(`Import RFQ gagal.\n\n${error?.message || error}`);
@@ -328,12 +452,37 @@
     }
   }
 
+  async function chooseAndImport(){
+    const button = document.getElementById(IMPORT_BUTTON_ID);
+    const originalLabel = button?.textContent || 'Upload RFQ Excel';
+    try {
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Opening PR...';
+      }
+      const file = await pickExcelFromActivePr();
+      if (file) await importExcelFile(file);
+    } catch (error) {
+      if (error?.name === 'AbortError') {
+        setStatus('Pemilihan file RFQ dibatalkan.');
+        return;
+      }
+      console.error('Buka folder PR gagal:', error);
+      setStatus(`Upload RFQ gagal: ${error?.message || error}`);
+      window.alert(`Upload RFQ gagal.\n\n${error?.message || error}`);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
+  }
+
   function patchUsdDisplay(){
     patchScheduled = false;
     if (!isRfqView()) return;
-    const rows = (() => {
-      try { return DATA?.structured?.RFQ?.items || []; } catch (_) { return []; }
-    })();
+    let rows = [];
+    try { rows = DATA?.structured?.RFQ?.items || []; } catch (_) {}
 
     document.querySelectorAll('.rfq-reference-table [data-key="Est. Budget PR USD"]').forEach(cell => {
       const index = Number(cell.dataset.row);
@@ -367,34 +516,21 @@
     button.type = 'button';
     button.className = 'secondary';
     button.textContent = '⬆ Upload RFQ Excel';
-    button.title = 'Import item dari Sheet RFQ (.xlsx/.xlsm/.xls/.xlsb)';
+    button.title = 'Buka folder No PR aktif, pilih lokasi secara manual, lalu pilih file RFQ Excel';
     button.style.marginRight = '8px';
-    button.addEventListener('click', () => document.getElementById(IMPORT_INPUT_ID)?.click());
-
-    const input = document.createElement('input');
-    input.id = IMPORT_INPUT_ID;
-    input.type = 'file';
-    input.accept = '.xlsx,.xlsm,.xls,.xlsb,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel';
-    input.className = 'hidden-input';
-    input.style.display = 'none';
-    input.addEventListener('change', event => {
-      const file = event.target.files?.[0];
-      event.target.value = '';
-      if (file) importExcelFile(file);
-    });
+    button.addEventListener('click', chooseAndImport);
 
     toolbar.insertBefore(button, toolbar.firstChild);
-    document.body.appendChild(input);
 
     document.querySelectorAll('.nav-btn[data-view]').forEach(nav => {
       nav.addEventListener('click', () => window.setTimeout(syncButtonVisibility, 0));
     });
 
     const viewTitle = document.getElementById('viewTitle');
-    if (viewTitle) new MutationObserver(syncButtonVisibility).observe(viewTitle, {childList:true, subtree:true, characterData:true});
+    if (viewTitle) new MutationObserver(syncButtonVisibility).observe(viewTitle, { childList: true, subtree: true, characterData: true });
 
     const viewBody = document.getElementById('viewBody');
-    if (viewBody) new MutationObserver(scheduleUsdDisplayPatch).observe(viewBody, {childList:true, subtree:true, characterData:true});
+    if (viewBody) new MutationObserver(scheduleUsdDisplayPatch).observe(viewBody, { childList: true, subtree: true, characterData: true });
 
     syncButtonVisibility();
     return true;
@@ -409,6 +545,6 @@
     }, 50);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, {once:true});
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', install, { once: true });
   else install();
 })();
