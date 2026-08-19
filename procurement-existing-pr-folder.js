@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  const ROUND_TYPES = new Set(['02. Bidderlist', '03. CQS']);
-  const FOLDER_TYPES = ['01. PR Approval', '02. Bidderlist', '03. CQS', '04. PO', '05. Contract'];
+  const ROUND_TYPES = new Set(['02. Bidderlist & Quotation', '03. CQS']);
+  const FOLDER_TYPES = ['01. PR Approval', '02. Bidderlist & Quotation', '03. CQS', '04. PO', '05. Contract'];
   const DB_NAME = 'MSW_PROCUREMENT_LOCAL_FS';
   const DB_STORE = 'handles';
   const ROOT_HANDLE_KEY = 'prRoot';
