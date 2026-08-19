@@ -1,6 +1,8 @@
 (function(){
-  if (window.__MSW_DASHBOARD_PR_STATUS_V3519__) return;
-  window.__MSW_DASHBOARD_PR_STATUS_V3519__ = true;
+  if (window.__MSW_DASHBOARD_PR_STATUS_V3520__) return;
+  window.__MSW_DASHBOARD_PR_STATUS_V3520__ = true;
+
+  const baseCalculateSummary = typeof calculateSummary === 'function' ? calculateSummary : null;
 
   function text(value){
     return String(value == null ? '' : value).trim();
@@ -14,55 +16,54 @@
     return text(value).replace(/\s*\(.*?\)\s*$/, '').trim();
   }
 
-  function isBasePrRow(row){
-    const raw = text(row && row.prno);
-    return Boolean(raw) && raw === normalizePrNo(raw);
+  function unitStatus(row){
+    return statusOf(row) || '__UNCLASSIFIED__';
   }
 
-  function canonicalGroups(){
-    const groups = new Map();
+  function procurementUnits(){
+    const units = new Map();
     const rows = Array.isArray(dashboard.filteredRows) ? dashboard.filteredRows : [];
 
     rows.forEach(function(row){
-      const key = normalizePrNo(row && row.prno);
-      if (!key) return;
+      const basePr = normalizePrNo(row && row.prno);
+      if (!basePr) return;
 
-      if (!groups.has(key)) {
-        groups.set(key, {
+      const status = unitStatus(row);
+      const key = basePr + '||' + status;
+
+      if (!units.has(key)) {
+        units.set(key, {
           key: key,
-          statusRow: row,
-          hasBaseRow: isBasePrRow(row),
-          rows: [row]
+          basePr: basePr,
+          status: status,
+          rows: []
         });
-        return;
       }
 
-      const group = groups.get(key);
-      group.rows.push(row);
-
-      // Baris PR utama tanpa suffix "(Line x)" adalah sumber Status PR.
-      // Baris Line tidak boleh mengambil alih kategori PR utama.
-      if (!group.hasBaseRow && isBasePrRow(row)) {
-        group.statusRow = row;
-        group.hasBaseRow = true;
-      }
+      units.get(key).rows.push(row);
     });
 
-    return Array.from(groups.values());
+    return Array.from(units.values());
   }
 
-  function canonicalRows(){
-    return canonicalGroups().map(function(group){ return group.statusRow; });
-  }
-
-  function statusCounts(groups){
+  function statusCounts(units){
     const result = { BID:0, TDR:0, IOM:0, CTR:0, OTHER:0 };
-    (groups || canonicalGroups()).forEach(function(group){
-      const status = statusOf(group.statusRow);
-      if (status === 'BID' || status === 'TDR' || status === 'IOM' || status === 'CTR') result[status] += 1;
-      else result.OTHER += 1;
+    (units || procurementUnits()).forEach(function(unit){
+      if (unit.status === 'BID' || unit.status === 'TDR' || unit.status === 'IOM' || unit.status === 'CTR') {
+        result[unit.status] += 1;
+      } else {
+        result.OTHER += 1;
+      }
     });
     return result;
+  }
+
+  if (baseCalculateSummary) {
+    calculateSummary = function(){
+      const summary = baseCalculateSummary();
+      summary.totalPR = procurementUnits().length;
+      return summary;
+    };
   }
 
   calculateTotalPRByStatus = function(){
@@ -70,22 +71,19 @@
   };
 
   calculateProcurementType = function(){
-    const groups = canonicalGroups();
-    const counts = statusCounts(groups);
-    const totalPR = groups.length;
+    const units = procurementUnits();
+    const counts = statusCounts(units);
+    const totalPR = units.length;
     const result = {};
 
     ['BID','TDR','IOM','CTR'].forEach(function(type){
-      const statusGroups = groups.filter(function(group){
-        return statusOf(group.statusRow) === type;
-      });
-
-      // Status berasal dari PR utama, tetapi PO tetap boleh ditemukan pada
-      // baris Line dalam grup PR yang sama agar PO aktual tidak hilang.
+      const statusUnits = units.filter(function(unit){ return unit.status === type; });
       const poRows = [];
-      statusGroups.forEach(function(group){
-        group.rows.forEach(function(row){
-          if (text(row && row.pono)) poRows.push(row);
+
+      statusUnits.forEach(function(unit){
+        unit.rows.forEach(function(row){
+          const po = text(row && row.pono);
+          if (po && po !== '-') poRows.push(row);
         });
       });
 
@@ -101,8 +99,8 @@
 
   window.MSW_DASHBOARD_PR_STATUS = Object.freeze({
     normalizePrNo: normalizePrNo,
-    canonicalRows: canonicalRows,
-    canonicalGroups: canonicalGroups
+    procurementUnits: procurementUnits,
+    statusCounts: statusCounts
   });
 
   try { if (typeof filterDashboard === 'function') filterDashboard(); } catch (_) {}
