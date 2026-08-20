@@ -2619,6 +2619,7 @@ async function uploadExtendedRebidBackup() {
 
     const button = byId("uploadExtendedRebidBtn");
     if (button) button.disabled = true;
+    startProgress("Menyimpan Backup Rebid");
     try {
         const sourceRound = `R${requestedNumber - 1}`;
         const extension = file.name.includes(".") ? `.${file.name.split(".").pop()}` : "";
@@ -2648,8 +2649,13 @@ async function uploadExtendedRebidBackup() {
         };
         formChanged = true;
         updateExtendedRebidUI();
-        showPopup("Backup Tersimpan", `Permintaan ${requestedRound} disimpan lokal di ${uploadResult.folderPath}. Proses dapat dilanjutkan.`);
+        finishProgress(
+            `Permintaan ${requestedRound} disimpan lokal di ${uploadResult.folderPath}. Proses dapat dilanjutkan.`,
+            "Backup Tersimpan"
+        );
     } catch (error) {
+        window.clearInterval(progressTimer);
+        updateProgress(0);
         showPopup("Upload Gagal", error.message || String(error));
     } finally {
         if (button) button.disabled = false;
@@ -2657,8 +2663,8 @@ async function uploadExtendedRebidBackup() {
     }
 }
 
-function startProgress() {
-    showPopup(procurementMode === "ADD" ? "Creating Procurement" : "Updating Procurement", "");
+function startProgress(title) {
+    showPopup(title || (procurementMode === "ADD" ? "Creating Procurement" : "Updating Procurement"), "");
     let progress = 0;
     updateProgress(progress);
     progressTimer = window.setInterval(() => {
@@ -2674,10 +2680,10 @@ function updateProgress(percent) {
     byId("progressPercent").textContent = `${percent}%`;
 }
 
-function finishProgress(message) {
+function finishProgress(message, title = "Success") {
     window.clearInterval(progressTimer);
     updateProgress(100);
-    byId("popupTitle").textContent = "Success";
+    byId("popupTitle").textContent = title;
     byId("popupMessage").textContent = message;
 }
 
