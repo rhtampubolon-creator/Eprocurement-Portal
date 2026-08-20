@@ -2503,10 +2503,10 @@ function updateExtendedRebidUI() {
 
     const status = byId("extendedRebidStatus");
     const link = byId("extendedRebidLink");
-    if (requestMatches && extendedRebidRequest?.fileUrl) {
+    if (requestMatches && (extendedRebidRequest?.fileUrl || extendedRebidRequest?.fileId || extendedRebidRequest?.fileName)) {
         if (status) status.textContent = `Backup ${requestedRound} tersedia: ${extendedRebidRequest.fileName || "dokumen"}`;
         if (link) {
-            link.href = extendedRebidRequest.fileUrl;
+            link.href = extendedRebidRequest.fileUrl || "#";
             link.classList.remove("hidden");
         }
     } else {
@@ -2543,6 +2543,67 @@ function cleanBackupFilePart(value) {
     return asText(value).replace(/[\\/:*?"<>|#%{}]/g, " ").replace(/\s+/g, " ").trim();
 }
 
+async function getExtendedRebidLocalTarget(sourceRound, create = true) {
+    let storage = window.MSW_EXISTING_PR_FOLDER;
+    for (let attempt = 0; !storage?.resolvePrFolder && attempt < 20; attempt += 1) {
+        await new Promise(resolve => window.setTimeout(resolve, 100));
+        storage = window.MSW_EXISTING_PR_FOLDER;
+    }
+    if (!storage?.resolvePrFolder) {
+        throw new Error("Storage Location lokal belum siap. Hubungkan folder PR terlebih dahulu.");
+    }
+
+    const pr = await storage.resolvePrFolder();
+    let directory = await pr.handle.getDirectoryHandle("03. CQS", { create });
+    directory = await directory.getDirectoryHandle(sourceRound, { create });
+    return {
+        directory,
+        pr,
+        path: `PR/${pr.name}/03. CQS/${sourceRound}`
+    };
+}
+
+async function saveExtendedRebidBackupToLocal(file, fileName, sourceRound) {
+    const target = await getExtendedRebidLocalTarget(sourceRound, true);
+    const handle = await target.directory.getFileHandle(fileName, { create: true });
+    const writable = await handle.createWritable();
+    await writable.write(file);
+    await writable.close();
+    return {
+        fileId: `local-rebid|${encodeURIComponent(sourceRound)}|${encodeURIComponent(fileName)}`,
+        fileUrl: "",
+        fileName,
+        folderPath: `${target.path}/${fileName}`
+    };
+}
+
+async function openExtendedRebidLocalBackup(event) {
+    const request = extendedRebidRequest;
+    if (!String(request?.fileId || "").startsWith("local-rebid|")) return;
+    event?.preventDefault();
+
+    try {
+        const requestedNumber = roundNumber(request.requestedRound || roundPOInput?.value);
+        const sourceRound = request.sourceRound || `R${Math.max(0, requestedNumber - 1)}`;
+        const target = await getExtendedRebidLocalTarget(sourceRound, false);
+        const handle = await target.directory.getFileHandle(request.fileName, { create: false });
+        const file = await handle.getFile();
+        const url = URL.createObjectURL(file);
+        const opened = window.open(url, "_blank", "noopener");
+        if (!opened) {
+            const anchor = document.createElement("a");
+            anchor.href = url;
+            anchor.download = file.name;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+        }
+        window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (error) {
+        showPopup("Backup Tidak Ditemukan", error.message || String(error));
+    }
+}
+
 async function uploadExtendedRebidBackup() {
     const requestedRound = normalizeRound(roundPOInput?.value) || "R0";
     const requestedNumber = roundNumber(requestedRound);
@@ -2559,21 +2620,10 @@ async function uploadExtendedRebidBackup() {
     const button = byId("uploadExtendedRebidBtn");
     if (button) button.disabled = true;
     try {
-        await ensureFolderStructure({ quiet: true });
         const sourceRound = `R${requestedNumber - 1}`;
         const extension = file.name.includes(".") ? `.${file.name.split(".").pop()}` : "";
         const fileName = cleanBackupFilePart(`Backup Permintaan Rebid ${requestedRound} - ${noPR} ${sourceRound} - ${description}`) + extension;
-        const uploadResult = await postFolderAction({
-            action: "uploadFile",
-            noPR,
-            description,
-            folderId: loadedRow.folderid || "",
-            folderType: "01. PR Approval",
-            round: sourceRound,
-            fileName,
-            mimeType: file.type || "application/octet-stream",
-            fileData: await fileToBase64(file)
-        });
+        const uploadResult = await saveExtendedRebidBackupToLocal(file, fileName, sourceRound);
 
         const requestResult = await postFolderAction({
             action: "SAVE_REBID_REQUEST",
@@ -2596,11 +2646,9 @@ async function uploadExtendedRebidBackup() {
             fileUrl: uploadResult.fileUrl,
             fileName: uploadResult.fileName || fileName
         };
-        loadedRow.folderid = uploadResult.folderId || loadedRow.folderid;
-        loadedRow.folderlink = uploadResult.folderUrl || loadedRow.folderlink;
         formChanged = true;
         updateExtendedRebidUI();
-        showPopup("Backup Tersimpan", `Permintaan ${requestedRound} sudah disimpan. Proses dapat dilanjutkan.`);
+        showPopup("Backup Tersimpan", `Permintaan ${requestedRound} disimpan lokal di ${uploadResult.folderPath}. Proses dapat dilanjutkan.`);
     } catch (error) {
         showPopup("Upload Gagal", error.message || String(error));
     } finally {
@@ -2655,7 +2703,8 @@ async function saveProcurement(options = {}) {
     }
 
     if (roundNumber(data.roundpo) >= 3) {
-        const validBackup = extendedRebidRequest?.requestedRound === data.roundpo && extendedRebidRequest?.fileUrl;
+        const validBackup = extendedRebidRequest?.requestedRound === data.roundpo &&
+            (extendedRebidRequest?.fileId || extendedRebidRequest?.fileName);
         if (!validBackup) {
             isSaving = false;
             updateExtendedRebidUI();
@@ -2755,6 +2804,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     byId("folderDirectoryInput")?.addEventListener("change", event => uploadFilesToSelectedFolder(event.target.files));
     byId("saveCreateFolderBtn")?.addEventListener("click", () => saveProcurement({ createFolderAfterSave: true }));
     byId("uploadExtendedRebidBtn")?.addEventListener("click", uploadExtendedRebidBackup);
+    byId("extendedRebidLink")?.addEventListener("click", openExtendedRebidLocalBackup);
     syncUsdRateBtn?.addEventListener("click", syncUsdRateForAdd);
     byId("cancelBtn")?.addEventListener("click", cancelForm);
     byId("popupOk")?.addEventListener("click", hidePopup);
