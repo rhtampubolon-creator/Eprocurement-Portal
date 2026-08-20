@@ -1110,8 +1110,8 @@ let VENDOR_COMPANIES = [];
 let vendorSourceLabel = 'Fallback dari sheet FIND';
 
 const PROCUREMENT_DOCUMENT_VIEW_CONFIG = {
-  BIDDERLIST: { label: 'BidderList', view: 'BidderList', folderName: '02. Bidderlist' },
-  RFQ: { label: 'RFQ', view: 'RFQ', folderName: '01. PR Approval' },
+  BIDDERLIST: { label: 'BidderList', view: 'BidderList', folderName: '02. Bidderlist & Quotation' },
+  RFQ: { label: 'RFQ', view: 'RFQ', folderName: '02. Bidderlist & Quotation' },
   CQS: { label: 'CQS', view: 'CQS', folderName: '03. CQS' }
 };
 
@@ -1201,7 +1201,7 @@ const MULTIPLE_EMAIL_INTERNAL_CONFIG = {
     cc: String(RUNTIME_EMAIL_CONFIG.releasePrCc || '').trim(),
     attachmentSources: [
       { folderType: '01. PR Approval', label: 'Pilih PR / RFQ' },
-      { folderType: '02. Bidderlist', label: 'Pilih Bidderlist' }
+      { folderType: '02. Bidderlist & Quotation', label: 'Pilih Bidderlist' }
     ]
   },
   PO_PROC: {
@@ -2885,9 +2885,9 @@ function ensureProcurementDocumentViewButtons() {
     group.className = 'procurement-document-view-group';
 
     const saveToFolderHandlers = {
-      BIDDERLIST: exportBidderListToXlsxTemplate,
-      RFQ: exportRFQToXlsxTemplate,
-      CQS: exportCQSToXlsxTemplate
+      BIDDERLIST: saveBidderListAs,
+      RFQ: saveRFQAs,
+      CQS: saveCQSAs
     };
 
     Object.entries(PROCUREMENT_DOCUMENT_VIEW_CONFIG).forEach(([type, config]) => {
@@ -2908,8 +2908,8 @@ function ensureProcurementDocumentViewButtons() {
       saveToFolderButton.type = 'button';
       saveToFolderButton.id = `save${type}ToFolderBtn`;
       saveToFolderButton.className = 'secondary document-save-folder-btn';
-      saveToFolderButton.textContent = `Save ${config.label} to Folder`;
-      saveToFolderButton.title = `Simpan snapshot ${config.label} ke folder ${config.folderName} milik No PR aktif`;
+      saveToFolderButton.textContent = `Save ${config.label} to Storage`;
+      saveToFolderButton.title = `Simpan ${config.label} ke Storage Location lokal: ${config.folderName}/Round aktif`;
       saveToFolderButton.addEventListener('click', async () => {
         if (saveToFolderButton.disabled) return;
         const originalText = saveToFolderButton.textContent;
