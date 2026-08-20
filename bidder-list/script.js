@@ -37,7 +37,10 @@ async function saveBlobToLocalDrive(blob, fileName, documentType = '') {
   }
 
   const type = String(documentType || currentView || '').trim().toUpperCase();
-  const folderName = type === 'CQS' ? '03. CQS' : '02. Bidderlist & Quotation';
+  const folderName = type === 'RFQ'
+    ? '01. PR Approval'
+    : (type === 'CQS' ? '03. CQS' : '02. Bidderlist & Quotation');
+  const usesRoundFolder = type !== 'RFQ';
   const meta = getBidderMeta();
   const noPR = String(meta?.nopr || meta?.noPR || meta?.['No PR'] || '').trim();
   if (!noPR) throw new Error('No PR belum tersedia.');
@@ -51,14 +54,29 @@ async function saveBlobToLocalDrive(blob, fileName, documentType = '') {
     const root = await bridge.getConnectedPrRoot(true);
     const project = await bridge.findExistingPrFolder(root, noPR);
     const typeDirectory = await project.handle.getDirectoryHandle(folderName, { create: true });
-    const roundDirectory = await typeDirectory.getDirectoryHandle(normalizedRound, { create: true });
-    const fileHandle = await roundDirectory.getFileHandle(fileName, { create: true });
+    const targetDirectory = usesRoundFolder
+      ? await typeDirectory.getDirectoryHandle(normalizedRound, { create: true })
+      : typeDirectory;
+    const fileHandle = await targetDirectory.getFileHandle(fileName, { create: true });
     const writable = await fileHandle.createWritable();
     await writable.write(blob);
     await writable.close();
+
+    // Jangan tampilkan sukses sebelum file benar-benar dapat dibaca kembali
+    // dari folder Windows/OneDrive yang terhubung.
+    const verifiedHandle = await targetDirectory.getFileHandle(fileName, { create: false });
+    const verifiedFile = await verifiedHandle.getFile();
+    if (verifiedFile.size !== blob.size) {
+      throw new Error(
+        `Verifikasi file gagal. Ukuran sumber ${blob.size} byte, tetapi file tujuan ${verifiedFile.size} byte.`
+      );
+    }
     return {
       saved: true,
-      path: `PR/${project.name}/${folderName}/${normalizedRound}/${fileName}`
+      path: `PR/${project.name}/${folderName}${usesRoundFolder ? `/${normalizedRound}` : ''}/${fileName}`,
+      fileName: verifiedFile.name,
+      size: verifiedFile.size,
+      lastModified: verifiedFile.lastModified
     };
   } catch (error) {
     throw new Error(`File tidak dapat disimpan ke Storage Location: ${error?.message || error}`);
