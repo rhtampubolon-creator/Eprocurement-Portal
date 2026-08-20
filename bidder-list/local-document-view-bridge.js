@@ -1,10 +1,10 @@
 (function(){
   'use strict';
 
-  const ROUND_TYPES=new Set(['02. Bidderlist','03. CQS']);
+  const ROUND_TYPES=new Set(['02. Bidderlist & Quotation','03. CQS']);
   const TYPE_CONFIG={
-    BIDDERLIST:{folder:'02. Bidderlist',label:'BidderList'},
-    RFQ:{folder:'01. PR Approval',label:'RFQ'},
+    BIDDERLIST:{folder:'02. Bidderlist & Quotation',label:'BidderList'},
+    RFQ:{folder:'02. Bidderlist & Quotation',label:'RFQ'},
     CQS:{folder:'03. CQS',label:'CQS'}
   };
   const text=v=>v==null?'':String(v).trim();
