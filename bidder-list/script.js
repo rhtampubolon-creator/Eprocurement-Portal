@@ -1122,9 +1122,9 @@ let PROCUREMENT_DOCUMENT_STATE = {
   documents: {}
 };
 
-// Dokumen yang sedang dibuka pada viewer Drive. Nilai ini dipakai oleh tombol
-// Download/Open Excel dan Save Back to Google Folder agar file yang sudah
-// diedit selalu kembali ke jenis dokumen serta subfolder No PR yang benar.
+// Dokumen yang sedang dibuka pada viewer. Nilai ini dipakai oleh tombol
+// Download/Open Excel dan Save Back to Storage agar file yang sudah diedit
+// selalu kembali ke jenis dokumen serta subfolder No PR yang benar.
 let ACTIVE_STORED_DOCUMENT_TYPE = '';
 let STORED_DOCUMENT_UPLOAD_IN_FLIGHT = false;
 
@@ -2988,7 +2988,7 @@ Membuka file hasil yang sudah tersimpan di folder PR.`;
       } else if (!hasPR) {
         button.title = 'Pilih No PR terlebih dahulu.';
       } else {
-        button.title = `${config.label} belum tersimpan di ${config.folderName}. Gunakan Save ${config.label} to Folder terlebih dahulu.`;
+        button.title = `${config.label} belum tersimpan di ${config.folderName}. Gunakan Save ${config.label} to Storage terlebih dahulu.`;
       }
     }
 
@@ -3133,7 +3133,7 @@ function ensureStoredDocumentViewerDialog() {
       </div>
       <div class="stored-document-viewer-actions">
         <button type="button" class="secondary stored-document-excel-btn" id="storedDocumentDownloadExcel">Download/Open Excel</button>
-        <button type="button" class="secondary stored-document-save-back-btn" id="storedDocumentSaveBack">Save Back to Google Folder</button>
+        <button type="button" class="secondary stored-document-save-back-btn" id="storedDocumentSaveBack">Save Back to Storage</button>
         <button type="button" class="secondary stored-document-back-btn" id="storedDocumentViewerBack">← Back</button>
         <input type="file" id="storedDocumentUploadInput" class="hidden-input"
           accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
@@ -3234,17 +3234,17 @@ async function saveEditedProcurementDocumentBackToFolder(file) {
 
   const targetFileName = String(documentInfo.fileName || file.name || '').trim();
   const confirmed = window.confirm(
-    `Simpan kembali file hasil edit ke Google Drive?\n\n` +
+    `Simpan kembali file hasil edit ke Storage Location lokal?\n\n` +
     `${targetFileName}\n` +
     `Lokasi: ${config.folderName} pada No PR aktif\n\n` +
-    `Versi lama dengan nama yang sama akan dipindahkan ke Trash.`
+    `File dengan nama yang sama akan diperbarui.`
   );
   if (!confirmed) return;
 
   STORED_DOCUMENT_UPLOAD_IN_FLIGHT = true;
   const saveBackButton = document.getElementById('storedDocumentSaveBack');
   const downloadButton = document.getElementById('storedDocumentDownloadExcel');
-  const originalText = saveBackButton?.textContent || 'Save Back to Google Folder';
+  const originalText = saveBackButton?.textContent || 'Save Back to Storage';
   if (saveBackButton) {
     saveBackButton.disabled = true;
     saveBackButton.textContent = 'Saving Back...';
@@ -3252,29 +3252,19 @@ async function saveEditedProcurementDocumentBackToFolder(file) {
   if (downloadButton) downloadButton.disabled = true;
 
   try {
-    const result = await uploadBlobToProcurementFolder(file, type, targetFileName);
-    if (!result?.success) throw new Error(result?.message || 'File hasil edit gagal disimpan kembali.');
-
-    await refreshProcurementDocuments({ force: true });
-    const refreshedDocument = PROCUREMENT_DOCUMENT_STATE.documents?.[type] || result;
-    const frame = document.getElementById('storedDocumentViewerFrame');
-    const meta = document.getElementById('storedDocumentViewerMeta');
-    if (frame) frame.src = buildDrivePreviewUrl(refreshedDocument);
-    if (meta) {
-      meta.textContent = `${refreshedDocument.fileName || targetFileName} • ${refreshedDocument.folderName || config.folderName}`;
-    }
+    const result = await saveBlobToLocalDrive(file, targetFileName, type);
+    if (!result?.saved) throw new Error('File hasil edit gagal disimpan kembali.');
 
     alert(
-      `${config.label} hasil edit berhasil disimpan kembali ke folder PR.\n\n` +
-      `Versi Drive sebelumnya sudah dipindahkan ke Trash.\n` +
-      `Catatan: file pada folder Downloads komputer tidak dapat dihapus otomatis oleh browser.`
+      `${config.label} hasil edit berhasil disimpan kembali ke Storage Location.\n\n` +
+      `${result.path}`
     );
     recordProcurementActivity({
       type,
       documentNo: type === 'CQS' ? getCQSNumber() : formatRFQDisplayFromMeta(getBidderMeta()),
       status: 'Updated from Excel',
-      detail: `${config.folderName} · Replace file lama`,
-      fileName: refreshedDocument.fileName || targetFileName
+      detail: `${config.folderName} · Update file lokal`,
+      fileName: targetFileName
     });
   } catch (error) {
     console.error(`Gagal menyimpan kembali ${config.label}:`, error);
@@ -3295,13 +3285,13 @@ async function openStoredProcurementDocument(documentType) {
 
   // Setiap klik View membaca ulang folder PR agar iframe selalu membuka file
   // hasil yang benar-benar tersimpan. View tidak boleh membuat file dari master
-  // template; pembuatan/pembaruan file hanya dilakukan oleh Save ... to Folder.
+  // template; pembuatan/pembaruan file hanya dilakukan oleh Save ... to Storage.
   await refreshProcurementDocuments({ force: true });
   const documentInfo = PROCUREMENT_DOCUMENT_STATE.documents?.[type] || null;
 
   if (!isStoredProcurementDocumentAvailable(documentInfo)) {
     const config = PROCUREMENT_DOCUMENT_VIEW_CONFIG[type];
-    alert(`${config.label} belum ditemukan di folder ${config.folderName} untuk No PR aktif.\n\nGunakan Save ${config.label} to Folder terlebih dahulu, lalu klik View kembali.`);
+    alert(`${config.label} belum ditemukan di Storage Location ${config.folderName} untuk No PR aktif.\n\nGunakan Save ${config.label} to Storage terlebih dahulu, lalu klik View kembali.`);
     return;
   }
 
@@ -7546,21 +7536,7 @@ async function buildBidderListXlsxDocument(options = {}) {
 }
 
 async function exportBidderListToXlsxTemplate() {
-  try {
-    const result = await buildBidderListXlsxDocument({ download: false, upload: true });
-    const location = result.uploadResult?.folderPath || `${getBidderMeta().nopr} / 02. Bidderlist`;
-    alert(`BidderList tersimpan ke folder tujuan:\n${location}\n\n${result.fileName}`);
-    recordProcurementActivity({
-      type: 'BIDDERLIST',
-      documentNo: formatRFQDisplayFromMeta(getBidderMeta()),
-      status: 'Saved to Folder',
-      detail: location,
-      fileName: result.fileName
-    });
-  } catch (error) {
-    console.error('Gagal membuat BidderList XLSX:', error);
-    alert(`Gagal membuat BidderList XLSX: ${error.message || error}`);
-  }
+  return saveBidderListAs();
 }
 
 async function saveBidderListAs() {
@@ -7626,23 +7602,7 @@ async function buildRFQPdfDocument(options = {}) {
 }
 
 async function exportRFQToXlsxTemplate() {
-  try {
-    const result = await buildRFQXlsxDocument({ download: false, upload: true });
-    const location = result.uploadResult?.folderPath || `${getBidderMeta().nopr} / 01. PR Approval`;
-    alert(`RFQ tersimpan ke folder tujuan:\n${location}\n\n${result.fileName}`);
-    recordProcurementActivity({
-      type: 'RFQ',
-      documentNo: formatRFQDisplayFromMeta(getBidderMeta()),
-      status: 'Saved to Folder',
-      detail: location,
-      fileName: result.fileName
-    });
-    return result;
-  } catch (error) {
-    console.error('Gagal membuat RFQ XLSX:', error);
-    alert(`Gagal membuat RFQ XLSX: ${error.message || error}`);
-    throw error;
-  }
+  return saveRFQAs();
 }
 
 async function saveRFQAs() {
@@ -8745,21 +8705,7 @@ async function buildCQSXlsxDocument(options = {}) {
 }
 
 async function exportCQSToXlsxTemplate() {
-  try {
-    const result = await buildCQSXlsxDocument({ download: false, upload: true });
-    const location = result.uploadResult?.folderPath || `${getBidderMeta().nopr} / 03. CQS`;
-    alert(`CQS tersimpan ke folder tujuan:\n${location}\n\n${result.fileName}`);
-    recordProcurementActivity({
-      type: 'CQS',
-      documentNo: getCQSNumber(),
-      status: 'Saved to Folder',
-      detail: location,
-      fileName: result.fileName
-    });
-  } catch (error) {
-    console.error(error);
-    alert(`Gagal membuat CQS XLSX: ${error.message || error}`);
-  }
+  return saveCQSAs();
 }
 
 async function saveCQSAs() {
