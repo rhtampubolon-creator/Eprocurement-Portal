@@ -2555,6 +2555,12 @@ function hidePopup() {
     byId("popup").classList.remove("flex");
 }
 
+function syncUpdateButtonState() {
+    const button = byId("submitBtn");
+    if (!button) return;
+    button.disabled = isSaving || (procurementMode === "EDIT" && !formChanged);
+}
+
 
 function roundNumber(value) {
     const round = normalizeRound(value) || "R0";
@@ -2718,6 +2724,7 @@ async function uploadExtendedRebidBackup() {
             fileName: uploadResult.fileName || fileName
         };
         formChanged = true;
+        syncUpdateButtonState();
         updateExtendedRebidUI();
         finishProgress(
             `Permintaan ${requestedRound} disimpan lokal di ${uploadResult.folderPath}. Proses dapat dilanjutkan.`,
@@ -2811,7 +2818,7 @@ async function saveProcurement(options = {}) {
         if (saveFolderButton) saveFolderButton.disabled = false;
     } finally {
         isSaving = false;
-        submitButton.disabled = false;
+        syncUpdateButtonState();
         cancelButton.disabled = false;
         if (saveFolderButton) saveFolderButton.disabled = false;
     }
@@ -2888,13 +2895,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     byId("cancelBtn")?.addEventListener("click", cancelForm);
     byId("popupOk")?.addEventListener("click", hidePopup);
 
-    form.addEventListener("input", () => { formChanged = true; });
-    form.addEventListener("change", () => { formChanged = true; });
+    const markFormChanged = () => {
+        formChanged = true;
+        syncUpdateButtonState();
+    };
+    form.addEventListener("input", markFormChanged);
+    form.addEventListener("change", markFormChanged);
     form.addEventListener("submit", event => {
         event.preventDefault();
         saveProcurement();
     });
 
     await initForm();
+    syncUpdateButtonState();
     notifyWorkspaceContext();
 });
