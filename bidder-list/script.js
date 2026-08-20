@@ -4096,9 +4096,13 @@ function getCQSVendorStorageKey(vendor, index = 0) {
 
 function getCQSItemStorageKey(item, index = 0) {
   const itemNumber = normalizeTextKey(item?.['Item Number'] || item?.itemNumber || '');
-  if (itemNumber) return `item-${itemNumber}`;
-  return `row-${index + 1}-${normalizeTextKey(item?.Description || '')}`;
+  const description = normalizeTextKey(item?.Description || '');
+  // Item Number pada RFQ tidak selalu unik. Nomor urut wajib menjadi bagian
+  // key agar line tambahan milik satu baris tidak ikut tampil pada baris lain.
+  return `row-${index + 1}-${itemNumber || description || 'item'}`;
 }
+
+const CQS_BOTTOM_LINE_ANCHOR = '__CQS_BOTTOM__';
 
 function normalizeCQSRemarkImages(images) {
   return Array.isArray(images)
@@ -4152,7 +4156,10 @@ function ensureCQSWorkspaceVendor(vendor, index = 0) {
   const additionalItems = Array.isArray(current.additionalItems)
     ? current.additionalItems.map((item, itemIndex) => {
         const normalized = normalizeCQSAdditionalItem(item, itemIndex, defaultAfterItemKey);
-        if (!validBaseItemKeys.has(normalized.afterItemKey)) normalized.afterItemKey = defaultAfterItemKey;
+        if (normalized.afterItemKey !== CQS_BOTTOM_LINE_ANCHOR &&
+            !validBaseItemKeys.has(normalized.afterItemKey)) {
+          normalized.afterItemKey = defaultAfterItemKey;
+        }
         return normalized;
       })
     : [];
@@ -4384,6 +4391,29 @@ function addCQSAdditionalItem(key) {
   return addCQSLineAfter(key, baseKeys[baseKeys.length - 1] || '');
 }
 
+function addCQSLineAtBottom(key) {
+  if (getCQSExportRowCount() >= 28) {
+    alert('CQS maksimum 28 baris (RFQ + line tambahan). Hapus line lain sebelum menambah.');
+    return false;
+  }
+  const vendor = getCQSWorkspaceStore().vendors[String(key || '')];
+  if (!vendor) {
+    alert('Gagal menambah line: perusahaan belum dikenali. Muat ulang halaman lalu coba kembali.');
+    return false;
+  }
+
+  vendor.additionalItems = Array.isArray(vendor.additionalItems) ? vendor.additionalItems : [];
+  vendor.additionalItems.push(normalizeCQSAdditionalItem({
+    afterItemKey: CQS_BOTTOM_LINE_ANCHOR,
+    description: '',
+    qty: '',
+    unit: ''
+  }));
+  markDirty(`Line mandiri ${vendor.companyName || ''} ditambahkan pada baris akhir. Menunggu autosave...`);
+  renderCurrent();
+  return false;
+}
+
 function removeCQSAdditionalItem(key, index) {
   const vendor = getCQSWorkspaceStore().vendors[String(key || '')];
   if (!vendor || !Array.isArray(vendor.additionalItems)) return false;
@@ -4397,6 +4427,7 @@ function removeCQSAdditionalItem(key, index) {
 // sama seperti tombol lain yang sudah stabil pada iframe E-Procurement.
 window.addCQSLineAfter = addCQSLineAfter;
 window.addCQSAdditionalItem = addCQSAdditionalItem;
+window.addCQSLineAtBottom = addCQSLineAtBottom;
 window.removeCQSAdditionalItem = removeCQSAdditionalItem;
 
 function buildCQSRemarkImagePreview(images, key, itemKind, itemIndex) {
@@ -4562,6 +4593,9 @@ function renderCQSWorkspacePanel(workspace) {
     const total = parseCurrencyNumber(quote.qty || 0) * parseCurrencyNumber(quote.unitPrice || 0);
     const encodedAnchor = encodeURIComponent(anchorItemKey || '');
     const encodedExtraKey = encodeURIComponent(quote.itemKey || '');
+    const addButtonAction = anchorItemKey === CQS_BOTTOM_LINE_ANCHOR
+      ? `return addCQSLineAtBottom(decodeURIComponent('${onclickKey}'))`
+      : `return addCQSLineAfter(decodeURIComponent('${onclickKey}'),decodeURIComponent('${encodedAnchor}'),decodeURIComponent('${encodedExtraKey}'))`;
     out += `<tr class="cqs-equivalent-row">
       <td></td>
       <td><textarea class="cqs-auto-grow cqs-extra-description" data-cqs-vendor-key="${encodedKey}" data-cqs-item-kind="extra" data-cqs-item-index="${extraIndex}" data-cqs-field="description" oninput="autoResizeCQSTextarea(this)" onchange="updateCQSItemFieldFromElement(this)" placeholder="Description item tambahan">${escapeHtml(quote.description || '')}</textarea></td>
@@ -4571,7 +4605,7 @@ function renderCQSWorkspacePanel(workspace) {
       <td class="cqs-total-cell" data-cqs-total>${escapeHtml(formatIntegerID(total))}</td>
       ${renderRemarkCell(quote, 'extra', extraIndex)}
       <td class="cqs-row-action-cell"><div class="cqs-row-action-buttons">
-        <button type="button" class="mini-btn" onclick="return addCQSLineAfter(decodeURIComponent('${onclickKey}'),decodeURIComponent('${encodedAnchor}'),decodeURIComponent('${encodedExtraKey}'))">+ Line</button>
+        <button type="button" class="mini-btn" title="${anchorItemKey === CQS_BOTTOM_LINE_ANCHOR ? 'Tambahkan line mandiri lain pada bagian akhir tabel' : 'Tambahkan line yang terkait tepat di bawah baris ini'}" onclick="${addButtonAction}">+ Line</button>
         <button type="button" class="mini-btn danger" onclick="return removeCQSAdditionalItem(decodeURIComponent('${onclickKey}'),${extraIndex})">Delete</button>
       </div></td>
     </tr>`;
@@ -4591,7 +4625,7 @@ function renderCQSWorkspacePanel(workspace) {
       <td><input class="cqs-price-input" inputmode="decimal" value="${escapeHtml(String(quote.unitPrice || '').trim() ? formatIntegerID(parseCurrencyNumber(quote.unitPrice)) : '')}" data-qty="${escapeHtml(item?.Qty || '')}" data-cqs-vendor-key="${encodedKey}" data-cqs-item-kind="base" data-cqs-item-index="${itemIndex}" data-cqs-field="unitPrice" onfocus="prepareCQSPriceInput(this)" onblur="commitCQSPriceInput(this)"></td>
       <td class="cqs-total-cell" data-cqs-total>${escapeHtml(formatIntegerID(total))}</td>
       ${renderRemarkCell(quote, 'base', itemIndex)}
-      <td class="cqs-row-action-cell"><button type="button" class="mini-btn" onclick="return addCQSLineAfter(decodeURIComponent('${onclickKey}'),decodeURIComponent('${encodedItemKey}'))">+ Line</button></td>
+      <td class="cqs-row-action-cell"><button type="button" class="mini-btn" title="Tambahkan line yang terkait tepat di bawah baris ini" onclick="return addCQSLineAfter(decodeURIComponent('${onclickKey}'),decodeURIComponent('${encodedItemKey}'))">+ Line</button></td>
     </tr>`;
 
     (data.additionalItems || []).forEach((extraQuote, extraIndex) => {
@@ -4603,11 +4637,19 @@ function renderCQSWorkspacePanel(workspace) {
   const knownBaseKeys = new Set(rfqItems.map((item, itemIndex) => getCQSItemStorageKey(item, itemIndex)));
   const fallbackAnchor = rfqItems.length ? getCQSItemStorageKey(rfqItems[rfqItems.length - 1], rfqItems.length - 1) : '';
   (data.additionalItems || []).forEach((extraQuote, extraIndex) => {
-    if (!knownBaseKeys.has(String(extraQuote?.afterItemKey || ''))) renderAdditionalRow(extraQuote, extraIndex, fallbackAnchor);
+    const anchor = String(extraQuote?.afterItemKey || '');
+    if (anchor !== CQS_BOTTOM_LINE_ANCHOR && !knownBaseKeys.has(anchor)) {
+      renderAdditionalRow(extraQuote, extraIndex, fallbackAnchor);
+    }
   });
-  const lastBaseItemKey = rfqItems.length ? getCQSItemStorageKey(rfqItems[rfqItems.length - 1], rfqItems.length - 1) : '';
+  // Line mandiri selalu dirender satu kali setelah seluruh baris RFQ.
+  (data.additionalItems || []).forEach((extraQuote, extraIndex) => {
+    if (String(extraQuote?.afterItemKey || '') === CQS_BOTTOM_LINE_ANCHOR) {
+      renderAdditionalRow(extraQuote, extraIndex, CQS_BOTTOM_LINE_ANCHOR);
+    }
+  });
   out += `</tbody></table></div>
-    <div class="cqs-add-row-actions"><button type="button" class="mini-btn" onclick="return addCQSLineAfter(decodeURIComponent('${onclickKey}'),decodeURIComponent('${encodeURIComponent(lastBaseItemKey)}'))">+ Tambah Line di Bawah Terakhir</button><span>Total baris CQS seluruh vendor: ${getCQSExportRowCount()} / 28</span></div>
+    <div class="cqs-add-row-actions"><button type="button" class="mini-btn" title="Tambahkan line mandiri yang tidak terkait dengan item RFQ tertentu" onclick="return addCQSLineAtBottom(decodeURIComponent('${onclickKey}'))">+ Line Mandiri di Baris Akhir</button><span>Total baris CQS seluruh vendor: ${getCQSExportRowCount()} / 28</span></div>
   </section>`;
   requestAnimationFrame(() => document.querySelectorAll('.cqs-auto-grow').forEach(autoResizeCQSTextarea));
   return out;
