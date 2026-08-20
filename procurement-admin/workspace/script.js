@@ -164,6 +164,12 @@ window.addEventListener('message', event => {
   if (event.data.action === 'BIDDERLIST_PROCUREMENT_UPDATED') {
     procurementRow = { ...(procurementRow || {}), ...(event.data.data || {}) };
     activeRound = String(event.data.round || procurementRow.roundpo || procurementRow['Round PR'] || procurementRow['Round PO'] || activeRound || 'R0').toUpperCase();
+    procurementFrame.contentWindow?.postMessage({
+      action: 'MERGE_PROCUREMENT_WORKSPACE_DATA',
+      noPR,
+      round: activeRound,
+      data: event.data.data || {}
+    }, '*');
     forwardProcurementContext();
     window.parent.postMessage(event.data, '*');
     return;
