@@ -929,6 +929,39 @@ async function saveBidderListToProcurementAdmin(options = {}) {
     // Cache-first: data aman di browser sebelum dikirim ke Google Sheet.
     // Partial EDIT hanya menyentuh field vendor/tanggal pada Round PR aktif dan Final Vendor List.
     const vendorText = invitedVendors.join('\n');
+    const existingCompany = String(getProcurementAdminValue(procurementRow, [
+      `${round} Company`, `${round.toLowerCase()}company`, 'Round Company'
+    ]) || '').trim();
+    const existingStartDate = formatMetaDate(getProcurementAdminValue(procurementRow, [
+      `${round} Start Date`, `${round.toLowerCase()}startdate`, 'Round Start Date'
+    ]) || '');
+    const existingFinishDate = formatMetaDate(getProcurementAdminValue(procurementRow, [
+      `${round} Finish Date`, `${round.toLowerCase()}finishdate`, 'Round Finish Date'
+    ]) || '');
+    const existingFinalVendorList = String(getProcurementAdminValue(procurementRow, [
+      'Final Vendor List', 'finalvendorlist'
+    ]) || '').trim();
+    const normalizeVendorLines = value => String(value || '')
+      .split(/\r?\n|;/)
+      .map(item => item.trim().toLowerCase())
+      .filter(Boolean)
+      .sort()
+      .join('|');
+
+    if (
+      normalizeVendorLines(existingCompany) === normalizeVendorLines(vendorText) &&
+      existingStartDate === openDate &&
+      existingFinishDate === closeDate &&
+      normalizeVendorLines(existingFinalVendorList) === normalizeVendorLines(vendorText)
+    ) {
+      clearBidderProcurementPending(noPR, round);
+      if (status) status.textContent = `Data ${round} sudah sama di Procurement Admin; tidak ditulis ulang.`;
+      if (options.showSuccessAlert !== false) {
+        alert(`Data BidderList ${round} sudah tersimpan dan tidak ditulis ulang.`);
+      }
+      return true;
+    }
+
     const procurementPartial = {
       noPR,
       [`${round} Company`]: vendorText,
