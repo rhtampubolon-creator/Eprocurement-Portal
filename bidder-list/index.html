@@ -53,6 +53,8 @@
               <button onclick="openSendVendorEmailDialog()">✉ Outlook Draft + Attachment…</button>
               <hr>
               <button class="secondary" onclick="saveFinalData()">Save</button>
+              <button class="secondary" type="button" onclick="saveCurrentDocumentAsToStorage()"
+                title="Simpan dokumen aktif langsung ke Storage Location sesuai No PR dan round aktif">Save As ke Storage Location</button>
               <button class="secondary danger" onclick="resetData()">Reset</button>
               <button class="secondary" onclick="document.getElementById('jsonImport').click()">Import JSON</button>
             </div>
@@ -107,6 +109,6 @@
 <script src="../config.js?v=20260806-final-unified-v10"></script>
 <script src="../common.js?v=20260806-final-unified-v10"></script>
 <script src="../performance-cache.js?v=20260813-performance-v1"></script>
-<script src="script.js?v=20260820-cqs-line-actions-v1"></script>
+<script src="script.js?v=20260820-storage-save-as-v1"></script>
 </body>
 </html>
