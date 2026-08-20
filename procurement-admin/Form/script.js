@@ -2811,6 +2811,9 @@ async function saveProcurement(options = {}) {
         if (saveFolderButton) saveFolderButton.disabled = false;
     } finally {
         isSaving = false;
+        submitButton.disabled = false;
+        cancelButton.disabled = false;
+        if (saveFolderButton) saveFolderButton.disabled = false;
     }
 }
 
