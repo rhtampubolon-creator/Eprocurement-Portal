@@ -1717,7 +1717,9 @@ function collectFormData() {
         noPR: collectTextField("noPR"),
         Description: collectTextField("Description", "Description"),
         previoussubmitpo: collectTextField("previoussubmitpo"),
-        finalvendorlist: shouldPreserveImportedFormat() ? loadedRow.finalvendorlist : activeSubmitCompany,
+        // Final Vendor List adalah hasil BidderList. Form Admin tidak boleh
+        // menggantinya dengan Submit Company saat workspace disimpan belakangan.
+        finalvendorlist: loadedRow.finalvendorlist || "",
         finalsubmitvendor: shouldPreserveImportedFormat() ? loadedRow.finalsubmitvendor : activeSubmitCompany,
         roundpo: activeRound,
         extendedrebidreason: byId("extendedRebidReason")?.value || extendedRebidRequest?.reason || "",
@@ -2456,7 +2458,40 @@ function notifyWorkspaceContext() {
 }
 
 window.addEventListener('message', event => {
-    if (event.data?.action === 'REQUEST_PROCUREMENT_CONTEXT') notifyWorkspaceContext();
+    if (event.data?.action === 'REQUEST_PROCUREMENT_CONTEXT') {
+        notifyWorkspaceContext();
+        return;
+    }
+
+    if (event.data?.action === 'MERGE_PROCUREMENT_WORKSPACE_DATA') {
+        const incoming = event.data.data;
+        if (!incoming || typeof incoming !== 'object') return;
+
+        // Pertahankan input Admin yang sedang dikerjakan, lalu ambil hanya field
+        // hasil workspace BidderList/RFQ/CQS. Dengan demikian urutan pengisian
+        // workspace bebas dan Update Admin tidak mengembalikan snapshot lama.
+        persistCurrentRoundState();
+        const workspaceKeys = [
+            'finalvendorlist', 'finalsubmitvendor',
+            'roundcompany', 'roundsubmitcompany',
+            'roundstartdate', 'roundfinishdate'
+        ];
+        ROUND_OPTIONS.forEach(round => {
+            const key = round.toLowerCase();
+            workspaceKeys.push(
+                `${key}company`,
+                `${key}submitcompany`,
+                `${key}startdate`,
+                `${key}finishdate`
+            );
+        });
+        workspaceKeys.forEach(key => {
+            if (Object.prototype.hasOwnProperty.call(incoming, key)) {
+                loadedRow[key] = incoming[key];
+            }
+        });
+        notifyWorkspaceContext();
+    }
 });
 
 /* ==========================================
