@@ -9,12 +9,12 @@
   const LOCAL_TC_ID_PREFIX = 'localtc|';
   const PROJECT_FOLDER_TYPES = new Set([
     '01. PR Approval',
-    '02. Bidderlist',
+    '02. Bidderlist & Quotation',
     '03. CQS',
     '04. PO',
     '05. Contract'
   ]);
-  const ROUND_FOLDER_TYPES = new Set(['02. Bidderlist', '03. CQS']);
+  const ROUND_FOLDER_TYPES = new Set(['02. Bidderlist & Quotation', '03. CQS']);
   const MAX_INLINE_ATTACHMENT_BYTES = 20 * 1024 * 1024;
 
   let startupLazyGuard = true;
