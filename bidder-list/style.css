@@ -1878,6 +1878,7 @@ body.landscape-screen #viewBody .bidder-readonly-input {
   color: #166534;
   border-color: transparent;
   font-weight: 700;
+  text-align: center;
   cursor: default;
 }
 
