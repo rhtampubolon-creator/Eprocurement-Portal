@@ -1803,19 +1803,33 @@ function loadCompanyCache() {
       });
     }
 
-    window.onload = async () => {
+    let vendorCompanyInitialized = false;
+
+    function initializeVendorCompanyPage() {
+        if (vendorCompanyInitialized) return;
+        vendorCompanyInitialized = true;
 
         applyBuyerViewOnlyUI();
 
         const loaded = loadCompanyCache();
-
         if (!loaded) {
-
-            await loadFromGoogleSheet(true);
-
+            // Tampilkan header/kerangka tabel lebih dahulu. Pengambilan Google
+            // Sheet berjalan di belakang dan tidak menahan tampilan halaman.
+            renderTable();
+            void loadFromGoogleSheet(true);
+            return;
         }
 
-    };
+        // Cache langsung terlihat; data terbaru diperiksa setelah browser
+        // memperoleh kesempatan pertama untuk melukis halaman.
+        window.setTimeout(() => { void loadFromGoogleSheet(false); }, 0);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initializeVendorCompanyPage, { once: true });
+    } else {
+        initializeVendorCompanyPage();
+    }
 
     /* ==========================================================
       FIX STICKY HEADER REPAINT (Chrome / Edge)
