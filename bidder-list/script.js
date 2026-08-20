@@ -30,32 +30,51 @@ function ensureBidderNoCompanyColumn() {
 ensureBidderNoCompanyColumn();
 let currentView = 'BidderList';
 
-async function saveBlobToLocalDrive(blob, fileName) {
-  if (typeof window.showSaveFilePicker !== 'function' || !window.isSecureContext) {
-    throw new Error(
-      'Browser tidak mendukung pemilihan lokasi Save As. Buka aplikasi melalui HTTPS dan gunakan Microsoft Edge atau Google Chrome versi terbaru.'
-    );
+async function saveBlobToLocalDrive(blob, fileName, documentType = '') {
+  const bridge = window.MSW_BIDDER_LOCAL_PR_BRIDGE;
+  if (!bridge?.getConnectedPrRoot || !bridge?.findExistingPrFolder) {
+    throw new Error('Storage Location belum siap. Buka Storage Location lalu aktifkan kembali folder PR.');
   }
 
+  const type = String(documentType || currentView || '').trim().toUpperCase();
+  const folderName = type === 'CQS' ? '03. CQS' : '02. Bidderlist & Quotation';
+  const meta = getBidderMeta();
+  const noPR = String(meta?.nopr || meta?.noPR || meta?.['No PR'] || '').trim();
+  if (!noPR) throw new Error('No PR belum tersedia.');
+
+  const round = typeof getDocumentRound === 'function'
+    ? String(getDocumentRound(meta) || 'R0').toUpperCase().replace(/\s+/g, '')
+    : 'R0';
+  const normalizedRound = /^R\d+$/.test(round) ? round : 'R0';
+
   try {
-    const extension = String(fileName || '').split('.').pop().toLowerCase();
-    const mime = blob.type || 'application/octet-stream';
-    const handle = await window.showSaveFilePicker({
-      suggestedName: fileName,
-      types: [{
-        description: extension === 'pdf' ? 'PDF Document' : 'Excel Workbook',
-        accept: { [mime]: [`.${extension}`] }
-      }]
-    });
-    const writable = await handle.createWritable();
+    const root = await bridge.getConnectedPrRoot(true);
+    const project = await bridge.findExistingPrFolder(root, noPR);
+    const typeDirectory = await project.handle.getDirectoryHandle(folderName, { create: true });
+    const roundDirectory = await typeDirectory.getDirectoryHandle(normalizedRound, { create: true });
+    const fileHandle = await roundDirectory.getFileHandle(fileName, { create: true });
+    const writable = await fileHandle.createWritable();
     await writable.write(blob);
     await writable.close();
-    return true;
+    return {
+      saved: true,
+      path: `PR/${project.name}/${folderName}/${normalizedRound}/${fileName}`
+    };
   } catch (error) {
-    if (error?.name === 'AbortError') return false;
-    throw new Error(`Lokasi file tidak dapat dipilih: ${error?.message || error}`);
+    throw new Error(`File tidak dapat disimpan ke Storage Location: ${error?.message || error}`);
   }
 }
+
+async function saveCurrentDocumentAsToStorage() {
+  const view = String(currentView || '').toUpperCase();
+  if (view === 'BIDDERLIST') return saveBidderListAs();
+  if (view === 'RFQ') return saveRFQAs();
+  if (view === 'CQS') return saveCQSAs();
+  alert('Save As lokal tersedia pada tab BidderList, RFQ, atau CQS.');
+  return false;
+}
+
+window.saveCurrentDocumentAsToStorage = saveCurrentDocumentAsToStorage;
 
 // Guard proses Save Vendor & Dates agar tombol tidak menjalankan dua request bersamaan.
 // Variabel ini wajib dideklarasikan; tanpa deklarasi browser berhenti dengan ReferenceError.
@@ -7547,8 +7566,9 @@ async function exportBidderListToXlsxTemplate() {
 async function saveBidderListAs() {
   try {
     const result = await buildBidderListXlsxDocument({ download: false, upload: false });
-    if (await saveBlobToLocalDrive(result.blob, result.fileName)) {
-      alert(`BidderList berhasil disimpan: ${result.fileName}`);
+    const saved = await saveBlobToLocalDrive(result.blob, result.fileName, 'BIDDERLIST');
+    if (saved?.saved) {
+      alert(`BidderList berhasil disimpan ke Storage Location:\n${saved.path}`);
     }
   } catch (error) {
     console.error('Gagal menjalankan BidderList Save As:', error);
@@ -7628,8 +7648,9 @@ async function exportRFQToXlsxTemplate() {
 async function saveRFQAs() {
   try {
     const result = await buildRFQXlsxDocument({ download: false, upload: false });
-    if (await saveBlobToLocalDrive(result.blob, result.fileName)) {
-      alert(`RFQ berhasil disimpan: ${result.fileName}`);
+    const saved = await saveBlobToLocalDrive(result.blob, result.fileName, 'RFQ');
+    if (saved?.saved) {
+      alert(`RFQ berhasil disimpan ke Storage Location:\n${saved.path}`);
     }
     return result;
   } catch (error) {
@@ -8744,8 +8765,9 @@ async function exportCQSToXlsxTemplate() {
 async function saveCQSAs() {
   try {
     const result = await buildCQSXlsxDocument({ download: false, upload: false });
-    if (await saveBlobToLocalDrive(result.blob, result.fileName)) {
-      alert(`CQS berhasil disimpan: ${result.fileName}`);
+    const saved = await saveBlobToLocalDrive(result.blob, result.fileName, 'CQS');
+    if (saved?.saved) {
+      alert(`CQS berhasil disimpan ke Storage Location:\n${saved.path}`);
     }
   } catch (error) {
     console.error('Gagal menjalankan CQS Save As:', error);
