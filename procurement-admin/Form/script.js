@@ -287,6 +287,33 @@ function formatCurrencyInput(value) {
     return digits ? Number(digits).toLocaleString("id-ID") : "";
 }
 
+function parseUsdAmount(value) {
+    if (typeof value === "number") return Number.isFinite(value) ? value : "";
+    let text = asText(value).replace(/[^0-9,.-]/g, "");
+    if (!text) return "";
+
+    const comma = text.lastIndexOf(",");
+    const dot = text.lastIndexOf(".");
+    if (comma >= 0 && dot >= 0) {
+        text = comma > dot
+            ? text.replace(/\./g, "").replace(",", ".")
+            : text.replace(/,/g, "");
+    } else if (comma >= 0) {
+        text = text.replace(/\./g, "").replace(",", ".");
+    }
+
+    const numeric = Number(text);
+    return Number.isFinite(numeric) ? numeric : "";
+}
+
+function formatUsdAmount(value) {
+    const numeric = parseUsdAmount(value);
+    return numeric === "" ? "" : Number(numeric).toLocaleString("id-ID", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+}
+
 function parseBooleanValue(value) {
     if (typeof value === "boolean") return value;
     const normalized = asText(value).toLowerCase();
@@ -507,7 +534,7 @@ async function syncUsdRateForAdd() {
 }
 
 function recalculateEstimatedPriceIdr() {
-    const numeric = parseCurrency(estPricePrInput?.value);
+    const numeric = parseUsdAmount(estPricePrInput?.value);
     const rate = Number(usdRateSnapshot.rate || USD_IDR_FALLBACK_RATE);
     if (estPriceUsInput) {
         estPriceUsInput.value = numeric === ""
@@ -1643,7 +1670,7 @@ function fillForm(row) {
     byId("pengadaan").value = row.pengadaan || "";
     byId("statuspr").value = row.statuspr || "";
     rfqInput.value = formatRFQ(row.rfq, row.statuspr);
-    estPricePrInput.value = formatCurrencyInput(row.estpricerp);
+    estPricePrInput.value = formatUsdAmount(row.estpricerp);
     // Nilai IDR selalu dihitung ulang dari Est. Price PR dan snapshot kurs PR.
     // Jangan memakai nilai lama/fallback yang tersimpan pada record Edit.
     recalculateEstimatedPriceIdr();
@@ -1687,6 +1714,12 @@ function collectCurrencyField(input, originalKey) {
     const originalValue = loadedRow?.[originalKey] ?? "";
     if (shouldPreserveImportedFormat() && input.value === formatCurrencyInput(originalValue)) return originalValue;
     return parseCurrency(input.value);
+}
+
+function collectUsdField(input, originalKey) {
+    const originalValue = loadedRow?.[originalKey] ?? "";
+    if (shouldPreserveImportedFormat() && input.value === formatUsdAmount(originalValue)) return originalValue;
+    return parseUsdAmount(input.value);
 }
 
 function collectRFQField() {
@@ -1738,7 +1771,7 @@ function collectFormData() {
         pengadaan: collectTextField("pengadaan"),
         statuspr: collectTextField("statuspr"),
         rfq: collectRFQField(),
-        estpricerp: collectCurrencyField(estPricePrInput, "estpricerp"),
+        estpricerp: collectUsdField(estPricePrInput, "estpricerp"),
         estpriceus: collectCurrencyField(estPriceUsInput, "estpriceus"),
         usdidrrate: Number(usdRateSnapshot.rate || 0),
         usdidrratedate: usdRateSnapshot.rateDate || "",
@@ -2045,8 +2078,10 @@ function bindFormattingEvents() {
     previousSubmitPOInput?.addEventListener("change", resizePreviousSubmitPO);
 
     estPricePrInput.addEventListener("input", function () {
-        const numeric = parseCurrency(this.value);
-        this.value = numeric === "" ? "" : Number(numeric).toLocaleString("id-ID");
+        recalculateEstimatedPriceIdr();
+    });
+    estPricePrInput.addEventListener("blur", function () {
+        this.value = formatUsdAmount(this.value);
         recalculateEstimatedPriceIdr();
     });
 
