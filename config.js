@@ -58,7 +58,7 @@ window.APP_CONFIG = Object.freeze({
 (function loadBidderLocalPrBridgeEarly(){
   if(!/\/bidder-list\//i.test(window.location.pathname)||document.querySelector('script[data-msw-bidder-local-pr-bridge]'))return;
   if(document.readyState==='loading'){
-    const bridgeUrl=new URL('./local-pr-bridge.js',window.location.href).href+'?v=20260815-storage-v4';
+    const bridgeUrl=new URL('./local-pr-bridge.js',window.location.href).href+'?v=20260820-storage-folder-v5';
     document.write('<script data-msw-bidder-local-pr-bridge="true" src="'+bridgeUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
     const sidebarUrl=new URL('./storage-sidebar.js',window.location.href).href+'?v=20260815-storage-sidebar-v3';
     document.write('<script data-msw-storage-sidebar="true" src="'+sidebarUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
@@ -66,7 +66,7 @@ window.APP_CONFIG = Object.freeze({
       const pickerUrl=new URL('./android-storage-picker-fix.js',window.location.href).href+'?v=20260815-android-picker-v1';
       document.write('<script data-msw-android-storage-picker="true" src="'+pickerUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
     }
-    const viewUrl=new URL('./local-document-view-bridge.js',window.location.href).href+'?v=20260815-local-view-v2';
+    const viewUrl=new URL('./local-document-view-bridge.js',window.location.href).href+'?v=20260820-local-view-v3';
     document.write('<script data-msw-local-document-view="true" src="'+viewUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
     const internalEmailUrl=new URL('./internal-email-release-pr-v3516.js',window.location.href).href+'?v=20260818-release-pr-email-v3516';
     document.write('<script data-msw-release-pr-email="true" src="'+internalEmailUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
