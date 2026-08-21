@@ -123,56 +123,20 @@ window.APP_CONFIG = Object.freeze({
   else install();
 })();
 
-(function loadProcurementReviewRules(){
+(function loadProcurementReviewBundle(){
   if(document.body?.dataset?.mswPage!=='main-menu')return;
   const install=function(){
-    if(window.__MSW_PROCUREMENT_REVIEW_RULES_V359__||document.querySelector('script[data-msw-procurement-review-rules]'))return;
+    if(
+      (window.__MSW_PROCUREMENT_REVIEW_RULES_V359__ &&
+       window.__MSW_PROCUREMENT_REVIEW_FAST_NOTE_V3514__ &&
+       window.__MSW_PROCUREMENT_REVIEW_NOTE_V3513__ &&
+       window.__MSW_PROCUREMENT_REVIEW_EXPORT_V3514__) ||
+      document.querySelector('script[data-msw-procurement-review-bundle]')
+    )return;
     const script=document.createElement('script');
-    script.src=new URL('./procurement-review-rules-v359.js',window.location.href).href+'?v=20260818-review-v359';
+    script.src=new URL('./procurement-review-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
     script.defer=true;
-    script.dataset.mswProcurementReviewRules='true';
-    document.body.appendChild(script);
-  };
-  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-})();
-
-(function loadProcurementReviewFastNote(){
-  if(document.body?.dataset?.mswPage!=='main-menu')return;
-  const install=function(){
-    if(window.__MSW_PROCUREMENT_REVIEW_FAST_NOTE_V3514__||document.querySelector('script[data-msw-procurement-review-fast-note]'))return;
-    const script=document.createElement('script');
-    script.src=new URL('./procurement-review-note-fast-v3514.js',window.location.href).href+'?v=20260818-review-fast-note-v3515';
-    script.defer=true;
-    script.dataset.mswProcurementReviewFastNote='true';
-    document.body.appendChild(script);
-  };
-  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-})();
-
-(function loadProcurementReviewNoteEditor(){
-  if(document.body?.dataset?.mswPage!=='main-menu')return;
-  const install=function(){
-    if(window.__MSW_PROCUREMENT_REVIEW_NOTE_V3513__||document.querySelector('script[data-msw-procurement-review-note]'))return;
-    const script=document.createElement('script');
-    script.src=new URL('./procurement-review-note-v3513.js',window.location.href).href+'?v=20260818-review-note-v3514';
-    script.defer=true;
-    script.dataset.mswProcurementReviewNote='true';
-    document.body.appendChild(script);
-  };
-  if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
-  else install();
-})();
-
-(function loadProcurementReviewExport(){
-  if(document.body?.dataset?.mswPage!=='main-menu')return;
-  const install=function(){
-    if(window.__MSW_PROCUREMENT_REVIEW_EXPORT_V3514__||document.querySelector('script[data-msw-procurement-review-export]'))return;
-    const script=document.createElement('script');
-    script.src=new URL('./procurement-review-export-v3514.js',window.location.href).href+'?v=20260818-review-export-v3514';
-    script.defer=true;
-    script.dataset.mswProcurementReviewExport='true';
+    script.dataset.mswProcurementReviewBundle='true';
     document.body.appendChild(script);
   };
   if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
