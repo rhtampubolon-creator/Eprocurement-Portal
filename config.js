@@ -55,68 +55,44 @@ window.APP_CONFIG = Object.freeze({
   else{const s=document.createElement('script');s.src=url;s.dataset.mswAndroidFolderFs='true';document.head.appendChild(s);}
 })();
 
-(function loadBidderLocalPrBridgeEarly(){
-  if(!/\/bidder-list\//i.test(window.location.pathname)||document.querySelector('script[data-msw-bidder-local-pr-bridge]'))return;
+(function loadBidderExtensionsEarly(){
+  if(!/\/bidder-list\//i.test(window.location.pathname)||document.querySelector('script[data-msw-bidder-storage-bundle]'))return;
   if(document.readyState==='loading'){
-    const bridgeUrl=new URL('./local-pr-bridge.js',window.location.href).href+'?v=20260820-storage-folder-v5';
-    document.write('<script data-msw-bidder-local-pr-bridge="true" src="'+bridgeUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
-    const sidebarUrl=new URL('./storage-sidebar.js',window.location.href).href+'?v=20260815-storage-sidebar-v3';
-    document.write('<script data-msw-storage-sidebar="true" src="'+sidebarUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+    const storageUrl=new URL('./bidder-storage-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
+    document.write('<script data-msw-bidder-storage-bundle="true" src="'+storageUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\/script>');
     if(window.AndroidFolder){
       const pickerUrl=new URL('./android-storage-picker-fix.js',window.location.href).href+'?v=20260815-android-picker-v1';
-      document.write('<script data-msw-android-storage-picker="true" src="'+pickerUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+      document.write('<script data-msw-android-storage-picker="true" src="'+pickerUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\/script>');
     }
-    const viewUrl=new URL('./local-document-view-bridge.js',window.location.href).href+'?v=20260820-local-view-v3';
-    document.write('<script data-msw-local-document-view="true" src="'+viewUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
-    const internalEmailUrl=new URL('./internal-email-release-pr-v3516.js',window.location.href).href+'?v=20260818-release-pr-email-v3516';
-    document.write('<script data-msw-release-pr-email="true" src="'+internalEmailUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"></'+'script>');
+    const workspaceUrl=new URL('./bidder-workspace-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
+    document.write('<script data-msw-bidder-workspace-bundle="true" data-msw-rfq-excel-import="true" src="'+workspaceUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\/script>');
   }
 })();
 
-(function loadProcurementFolderRules(){
+(function loadProcurementFormStorageBundle(){
   if(!/\/procurement-admin\/Form\//i.test(window.location.pathname))return;
   window.addEventListener('DOMContentLoaded',function(){
-    if(document.querySelector('script[data-msw-pr-folder-rules]'))return;
-    const rules=document.createElement('script');
-    rules.src=new URL('../../procurement-folder-rules.js',window.location.href).href+'?v=20260815-pr-folder-v3';
-    rules.defer=true;rules.dataset.mswPrFolderRules='true';
-    rules.addEventListener('load',function(){
-      const patch=document.createElement('script');
-      patch.src=new URL('../../procurement-pr-rules-patch.js',window.location.href).href+'?v=20260815-pr-rules-patch-v1';
-      patch.defer=true;patch.dataset.mswPrRulesPatch='true';
-      patch.addEventListener('load',function(){
-        const localFiles=document.createElement('script');
-        localFiles.src=new URL('../../procurement-local-files.js',window.location.href).href+'?v=20260818-any-file-v3512';
-        localFiles.defer=true;localFiles.dataset.mswPrLocalFiles='true';
-        localFiles.addEventListener('load',function(){
-          const existingPr=document.createElement('script');
-          existingPr.src=new URL('../../procurement-existing-pr-folder.js',window.location.href).href+'?v=20260815-existing-pr-v3';
-          existingPr.defer=true;existingPr.dataset.mswExistingPrFolder='true';document.body.appendChild(existingPr);
-        },{once:true});
-        document.body.appendChild(localFiles);
-      },{once:true});
-      document.body.appendChild(patch);
-    },{once:true});
-    document.body.appendChild(rules);
+    if(document.querySelector('script[data-msw-procurement-form-storage-bundle]'))return;
+    const script=document.createElement('script');
+    script.src=new URL('../../procurement-form-storage-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
+    script.defer=true;
+    script.dataset.mswProcurementFormStorageBundle='true';
+    document.body.appendChild(script);
   },{once:true});
 })();
 
-(function loadProcurementActionBridge(){
+(function loadProcurementActionBundle(){
   if(!/\/procurement-admin\/?(?:index\.html)?$/i.test(window.location.pathname))return;
   const install=function(){
-    if(window.__MSW_PROCUREMENT_ACTION_BRIDGE_V354_H1__||document.querySelector('script[data-msw-procurement-action-bridge]'))return;
+    if(
+      (window.__MSW_PROCUREMENT_ACTION_BRIDGE_V354_H1__ &&
+       window.__MSW_BUYER_SCOPED_ALLCLEAR_V358__) ||
+      document.querySelector('script[data-msw-procurement-action-bundle]')
+    )return;
     const script=document.createElement('script');
-    script.src=new URL('../procurement-action-bridge-v354-hotfix1.js',window.location.href).href+'?v=20260818-allclear-cache-h1';
+    script.src=new URL('../procurement-action-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
     script.defer=true;
-    script.dataset.mswProcurementActionBridge='true';
-    script.addEventListener('load',function(){
-      if(window.__MSW_BUYER_SCOPED_ALLCLEAR_V358__||document.querySelector('script[data-msw-buyer-allclear]'))return;
-      const buyerClear=document.createElement('script');
-      buyerClear.src=new URL('../procurement-buyer-allclear-v358.js',window.location.href).href+'?v=20260818-buyer-allclear-v358';
-      buyerClear.defer=true;
-      buyerClear.dataset.mswBuyerAllclear='true';
-      document.body.appendChild(buyerClear);
-    },{once:true});
+    script.dataset.mswProcurementActionBundle='true';
     document.body.appendChild(script);
   };
   if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',install,{once:true});
