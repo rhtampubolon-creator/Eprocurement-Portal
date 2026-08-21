@@ -13,27 +13,21 @@
   try { assetBase = currentScript?.src ? new URL('./assets/', currentScript.src).href : 'assets/'; }
   catch (_) { assetBase = 'assets/'; }
 
-  /* USER role guard must load before the page/module script that follows this file.
-     The portal includes performance-cache.js immediately before each business script,
-     so parser-time loading keeps Web and Android WebView behavior identical. */
+  /* Role guards retain parser-time loading before each business module. */
   try {
-    if (!window.__MSW_USER_READONLY_ROLE_V1__ && currentScript?.src && document.readyState === 'loading') {
-      const guardUrl = new URL('./user-role-readonly.js?v=20260815-user-readonly-v1', currentScript.src).href;
-      document.write('<script src="' + guardUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"><\/script>');
+    const roleBundleLoaded =
+      window.__MSW_USER_READONLY_ROLE_V1__ &&
+      window.__MSW_USER_APPROVAL_ROLE_V1__;
+    if (!roleBundleLoaded && currentScript?.src && document.readyState === 'loading') {
+      const roleUrl = new URL('./role-access-bundle.js?v=20260821-shadow-test-v1', currentScript.src).href;
+      document.write(
+        '<script data-msw-role-access-bundle="true" src="' +
+        roleUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') +
+        '"><\/script>'
+      );
     }
   } catch (error) {
-    console.warn('USER read-only guard gagal dimuat.', error);
-  }
-
-  /* Super Admin User Approval helper. This is loaded for all portal roles,
-     but it only affects the existing approval-role select when that modal exists. */
-  try {
-    if (!window.__MSW_USER_APPROVAL_ROLE_V1__ && currentScript?.src && document.readyState === 'loading') {
-      const approvalUrl = new URL('./user-approval-role.js?v=20260815-user-approval-v1', currentScript.src).href;
-      document.write('<script src="' + approvalUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"><\/script>');
-    }
-  } catch (error) {
-    console.warn('USER approval role helper gagal dimuat.', error);
+    console.warn('Role access bundle gagal dimuat.', error);
   }
 
   const CACHE_PREFIX = 'MSW_NET_CACHE_V1_';
