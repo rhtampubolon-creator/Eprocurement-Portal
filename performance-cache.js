@@ -150,8 +150,12 @@
 
   window.fetch = async function(input, init){
     const url = typeof input === 'string' ? input : String(input?.url || '');
+    const requestedCacheMode = String(init?.cache || '').trim().toLowerCase();
+    const requiresFreshResponse = requestedCacheMode === 'no-store' || requestedCacheMode === 'reload';
 
-    if (freshFetchDepth > 0 && isCacheableGasGet(url, init || {})) {
+    // Import/Delete/All Clear must read the mutation that just reached Sheet.
+    // Explicit no-store/reload callers never receive a stale cache snapshot.
+    if ((freshFetchDepth > 0 || requiresFreshResponse) && isCacheableGasGet(url, init || {})) {
       const freshInit = Object.assign({}, init || {}, { cache: 'no-store' });
       const response = await nativeFetch(input, freshInit);
       const usable = await usableJsonResponse(response);
