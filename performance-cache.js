@@ -150,8 +150,13 @@
 
   window.fetch = async function(input, init){
     const url = typeof input === 'string' ? input : String(input?.url || '');
+    const requestedCacheMode = String(init?.cache || '').trim().toLowerCase();
+    const requiresFreshResponse = requestedCacheMode === 'no-store' || requestedCacheMode === 'reload';
 
-    if (freshFetchDepth > 0 && isCacheableGasGet(url, init || {})) {
+    // Callers that explicitly request no-store/reload must never receive a
+    // stale-while-revalidate snapshot. This is required after Import/Delete/
+    // All Clear so the UI reflects the mutation that just reached Google Sheet.
+    if ((freshFetchDepth > 0 || requiresFreshResponse) && isCacheableGasGet(url, init || {})) {
       const freshInit = Object.assign({}, init || {}, { cache: 'no-store' });
       const response = await nativeFetch(input, freshInit);
       const usable = await usableJsonResponse(response);
