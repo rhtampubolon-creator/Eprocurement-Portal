@@ -117,7 +117,7 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
     let originalRow = null;
     let lastExcelMtime = null;
     let ADMIN_SHEET_REVISION = null;
-    let isImportMode = false;
+    let isImporting = false;
     const PROCUREMENT_ADMIN_VIEW_ONLY = MSW.auth.isViewOnlyModule("procurementAdmin");
     // Pertahankan perilaku tabel asli: perubahan data dilakukan melalui form/action,
     // bukan edit langsung pada sel tabel.
@@ -486,6 +486,18 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
             procurementAdmin
         );
 
+    }
+
+    function clearProcurementReloadCaches() {
+      try { MSW.cache.remove(PROCUREMENT_CACHE_KEY); } catch (_) {}
+      try {
+        const keys = [];
+        for (let index = 0; index < localStorage.length; index++) {
+          const key = String(localStorage.key(index) || "");
+          if (key.startsWith("MSW_NET_CACHE_V1_")) keys.push(key);
+        }
+        keys.forEach(key => localStorage.removeItem(key));
+      } catch (_) {}
     }
 
     function loadProcurementCache() {
@@ -1140,16 +1152,19 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
       const label = row.noPR ? ` ${row.noPR}` : " ini";
       if (!confirm(`Hapus row${label}? Data akan dihapus dari cache dan Google Sheet.`)) return;
 
-      procurementAdmin.splice(i, 1);
-      saveProcurementCache();
-      refreshTableView();
-
       try {
-        await deleteSingleProcurementFromGoogleSheet(row);
+        const result = await deleteSingleProcurementFromGoogleSheet(row);
+        if (!result?.success) throw new Error(result?.message || "Data Procurement gagal dihapus.");
+
+        // Server/ownership harus menyetujui lebih dahulu. Cache tidak boleh
+        // menyembunyikan row ketika delete sebenarnya ditolak.
+        clearProcurementReloadCaches();
+        await loadFromGoogleSheet(true);
         showToast(`Row${label} berhasil dihapus.`, "success");
       } catch (error) {
         console.error("Delete row gagal disinkronkan:", error);
-        showToast("Row dihapus dari cache, tetapi sinkronisasi Google Sheet gagal.", "error");
+        showToast(error?.message || "Row gagal dihapus dari Google Sheet.", "error");
+        await loadFromGoogleSheet(true);
       }
     }
 
@@ -1788,10 +1803,44 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
 
     async function clearAll(){
       if (blockProcurementAdminMutation()) return;
-      if (!confirm("Hapus semua data?")) return;
-      procurementAdmin = [];      
-      await saveToGoogleSheet();      
-      refreshTableView();
+      const activeRole = String(MSW.auth.getRole?.() || "").trim().toUpperCase();
+      const activeProfile = MSW.auth.getProfile?.() || {};
+      const buyerEmail = String(activeProfile.email || "").trim().toLowerCase();
+      const isBuyer = activeRole === "BUYER";
+
+      const message = isBuyer
+        ? `Hapus semua data Procurement yang dibuat/dimiliki akun ${buyerEmail || "Buyer ini"}?\n\nData Buyer lain tidak akan dihapus.`
+        : "Hapus semua data Procurement? Tindakan ini tidak dapat dibatalkan.";
+      if (!confirm(message)) return;
+
+      try {
+        const result = isBuyer
+          ? await postProcurementAction({
+              action: "CLEAR_OWN_PROCUREMENT",
+              sheet: SHEET_NAME,
+              expectedRevision: ADMIN_SHEET_REVISION
+            })
+          : await postProcurementAction({
+              action: "BATCH_REPLACE_PROCUREMENT",
+              sheet: SHEET_NAME,
+              rows: [],
+              expectedRevision: ADMIN_SHEET_REVISION
+            });
+
+        if (!result?.success) throw new Error(result?.message || "All Clear gagal.");
+        clearProcurementReloadCaches();
+        await loadFromGoogleSheet(true);
+        showToast(
+          isBuyer
+            ? `${Number(result.deletedCount || 0)} data Procurement milik Buyer berhasil dihapus.`
+            : "Semua data Procurement berhasil dihapus.",
+          "success"
+        );
+      } catch (error) {
+        console.error("All Clear gagal:", error);
+        showToast(error?.message || "All Clear gagal.", "error");
+        await loadFromGoogleSheet(true);
+      }
     }
 
     /* ========== Export / Import ========== */
@@ -2926,12 +2975,12 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         const sourceRow = index + 2;
         const key = importBusinessKey(row);
 
-        // Baris tanpa No PR dan/atau Assign Date tetap sah dan diperlakukan
-        // sebagai record baru dengan Procurement ID unik.
+        // Kunci wajib supaya import dapat dibedakan secara deterministik antara
+        // NEW dan UPDATE. Baris tanpa kunci tidak boleh menjadi duplikat baru.
         if (!key) {
           row.prYear = "";
-          row.__importAction = "NEW";
-          preview.NEW.push({ row, sourceRow, key: `NEW_ROW_${sourceRow}` });
+          row.__importAction = "SKIP";
+          preview.INVALID.push({ row, sourceRow, key: "" });
           return;
         }
 
@@ -2939,6 +2988,7 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         row.prYear = Number(year);
 
         if (seen.has(key)) {
+          row.__importAction = "SKIP";
           preview.DUPLICATE_FILE.push({ row, sourceRow, key });
           return;
         }
@@ -2949,8 +2999,10 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
           row.__importAction = "NEW";
           preview.NEW.push({ row, sourceRow, key });
         } else if (importRowHasChanges(existing, row)) {
+          row.__importAction = "UPDATE";
           preview.UPDATE.push({ row, sourceRow, key, existing });
         } else {
+          row.__importAction = "SKIP";
           preview.UNCHANGED.push({ row, sourceRow, key, existing });
         }
       });
@@ -2967,9 +3019,11 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         `Kecocokan data lama       : ${preview.UPDATE.length}`,
         `Tidak berubah (dilewati)  : ${preview.UNCHANGED.length}`,
         `Duplikat di dalam file    : ${preview.DUPLICATE_FILE.length}`,
+        `Kunci tidak valid         : ${preview.INVALID.length}`,
         `Akan diproses             : ${selectedCount}`,
         "",
-        "No PR dan Assign Date yang kosong tetap diterima.",
+        "Kunci data menggunakan No PR + tahun Assign Date.",
+        "Data sama, duplikat file, atau kunci tidak valid otomatis dilewati.",
         "Lanjutkan Smart Import?"
       ];
       return window.confirm(lines.join("\n"));
@@ -2984,7 +3038,7 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
     function resolveSmartImportConflicts(preview, fileName) {
       const conflicts = [
         ...preview.UPDATE.map(item => ({ ...item, conflictType: "MATCH_EXISTING", defaultAction: "UPDATE" })),
-        ...preview.DUPLICATE_FILE.map(item => ({ ...item, conflictType: "DUPLICATE_FILE", defaultAction: "NEW" }))
+        ...preview.DUPLICATE_FILE.map(item => ({ ...item, conflictType: "DUPLICATE_FILE", defaultAction: "SKIP" }))
       ];
       if (!conflicts.length) return Promise.resolve(true);
 
@@ -3025,8 +3079,7 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
                         <td style="padding:10px">
                           <select data-smart-import-action="${index}" style="min-width:155px;padding:7px;border:1px solid #cbd5e1;border-radius:8px">
                             <option value="UPDATE" ${item.defaultAction === "UPDATE" ? "selected" : ""}>Update/Gabungkan</option>
-                            <option value="NEW" ${item.defaultAction === "NEW" ? "selected" : ""}>Tambah sebagai baru</option>
-                            <option value="SKIP">Abaikan</option>
+                            <option value="SKIP" ${item.defaultAction === "SKIP" ? "selected" : ""}>Abaikan</option>
                           </select>
                         </td>
                       </tr>`).join("")}
@@ -3064,6 +3117,12 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
       const input = e?.target || document.getElementById("excelFile");
       const file = input?.files?.[0];
       if (!file) return;
+      if (isImporting) {
+        showToast("Import lain masih diproses. Tunggu sampai selesai.", "info");
+        if (input) input.value = "";
+        return;
+      }
+      isImporting = true;
 
       try {
         if (!window.XLSX) {
@@ -3118,17 +3177,11 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         if (!mapped.length) throw new Error("Tidak ada baris data yang dapat diimpor.");
 
         const preview = buildSmartImportPreview(mapped);
-        const conflictAccepted = await resolveSmartImportConflicts(preview, file.name);
-        if (!conflictAccepted) {
-          showToast("Smart Import dibatalkan sebelum penyimpanan.", "info");
-          return;
-        }
 
         const selectedRows = [
           ...preview.NEW.map(item => item.row),
-          ...preview.UPDATE.map(item => item.row),
-          ...preview.DUPLICATE_FILE.map(item => item.row)
-        ].filter(row => String(row.__importAction || "NEW").toUpperCase() !== "SKIP");
+          ...preview.UPDATE.map(item => item.row)
+        ];
 
         if (!confirmSmartImport(preview, file.name, selectedRows.length)) {
           showToast("Smart Import dibatalkan sebelum penyimpanan.", "info");
@@ -3152,7 +3205,8 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
           action: "BATCH_IMPORT_PROCUREMENT_BY_BUYER",
           sheet: SHEET_NAME,
           rows: rowsForImport,
-          expectedRevision: ADMIN_SHEET_REVISION
+          expectedRevision: ADMIN_SHEET_REVISION,
+          clientMutationId: `IMPORT-${Date.now()}-${globalThis.crypto?.randomUUID?.() || Math.random().toString(36).slice(2)}`
         });
 
         if (result.queued || result.pendingSync) {
@@ -3184,8 +3238,9 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         await loadFromGoogleSheet(true);
         const buyerLabel = result.ownerName || result.ownerEmail || "akun aktif";
         showToast(
-          `${result.importedCount || rowsForImport.length} baris berhasil diimpor untuk ${buyerLabel}. ` +
-          `${result.addedCount || 0} data baru dan ${result.updatedCount || 0} data diperbarui.`,
+          `${result.importedCount ?? rowsForImport.length} baris diproses untuk ${buyerLabel}. ` +
+          `${result.addedCount || 0} data baru, ${result.updatedCount || 0} diperbarui, ` +
+          `${result.unchangedCount || 0} tidak berubah, dan ${result.duplicateFileCount || 0} duplikat dilewati.`,
           "success"
         );
       } catch (err) {
@@ -3193,6 +3248,7 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         showToast("Import gagal: " + (err?.message || err), "error");
         alert("Import Excel gagal:\n\n" + (err?.message || err));
       } finally {
+        isImporting = false;
         if (input) input.value = "";
       }
     }
