@@ -59,13 +59,13 @@ window.APP_CONFIG = Object.freeze({
   if(!/\/bidder-list\//i.test(window.location.pathname)||document.querySelector('script[data-msw-bidder-storage-bundle]'))return;
   if(document.readyState==='loading'){
     const storageUrl=new URL('./bidder-storage-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
-    document.write('<script data-msw-bidder-storage-bundle="true" src="'+storageUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\\/script>');
+    document.write('<script data-msw-bidder-storage-bundle="true" src="'+storageUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\/script>');
     if(window.AndroidFolder){
       const pickerUrl=new URL('./android-storage-picker-fix.js',window.location.href).href+'?v=20260815-android-picker-v1';
-      document.write('<script data-msw-android-storage-picker="true" src="'+pickerUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\\/script>');
+      document.write('<script data-msw-android-storage-picker="true" src="'+pickerUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\/script>');
     }
     const workspaceUrl=new URL('./bidder-workspace-bundle.js',window.location.href).href+'?v=20260821-shadow-test-v1';
-    document.write('<script data-msw-bidder-workspace-bundle="true" data-msw-rfq-excel-import="true" src="'+workspaceUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\\/script>');
+    document.write('<script data-msw-bidder-workspace-bundle="true" data-msw-rfq-excel-import="true" src="'+workspaceUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'"><\/script>');
   }
 })();
 
