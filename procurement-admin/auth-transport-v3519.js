@@ -5,6 +5,12 @@
    requests into POST JSON before the request reaches the
    common fetch wrapper.
 
+   Procurement Smart Import intentionally does NOT send a
+   stale page revision. The backend reads the current sheet
+   state immediately before the UPSERT, so import behaves as
+   synchronization: existing keys UPDATE, new keys INSERT,
+   duplicates are skipped.
+
    Scope: Procurement Admin page only.
    Android bridge is intentionally untouched.
 ====================================================== */
@@ -68,10 +74,41 @@
     };
   }
 
+  function normalizeProcurementSmartImportBody(init){
+    const method = String(init?.method || 'GET').toUpperCase();
+    if (method !== 'POST' || typeof init?.body !== 'string') return init;
+
+    let payload;
+    try { payload = JSON.parse(init.body); } catch (_) { return init; }
+
+    if (String(payload?.action || '').trim() !== 'BATCH_IMPORT_PROCUREMENT_BY_BUYER') {
+      return init;
+    }
+
+    // Smart Import is an UPSERT against the live sheet. Do not reject an
+    // otherwise valid import because the page revision became stale while
+    // the user was preparing the Excel file. The server still performs the
+    // current-state read, role/ownership checks, duplicate detection and
+    // writes a fresh revision after the mutation.
+    delete payload.expectedRevision;
+
+    // Preserve the mutation id for server-side idempotency.
+    if (!payload.clientMutationId) {
+      payload.clientMutationId = 'SMI-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    return Object.assign({}, init, { body: JSON.stringify(payload) });
+  }
+
   window.fetch = function(input, init){
     try {
       const converted = convertAuthenticatedGet(input, init || {});
       if (converted) return originalFetch(converted.url, converted.init);
+
+      const normalizedInit = normalizeProcurementSmartImportBody(init || {});
+      if (normalizedInit !== (init || {})) {
+        return originalFetch(input, normalizedInit);
+      }
     } catch (error) {
       console.warn('Procurement auth transport fallback:', error);
     }
