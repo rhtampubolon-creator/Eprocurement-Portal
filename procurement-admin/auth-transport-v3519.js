@@ -1,15 +1,10 @@
 /* ======================================================
    PROCUREMENT AUTH TRANSPORT v3.5.19
    Backend v3.5.19 rejects authToken in query strings.
-   This compatibility layer converts authenticated GAS GET
-   requests into POST JSON before the request reaches the
-   common fetch wrapper.
 
-   Procurement Smart Import intentionally does NOT send a
-   stale page revision. The backend reads the current sheet
-   state immediately before the UPSERT, so import behaves as
-   synchronization: existing keys UPDATE, new keys INSERT,
-   duplicates are skipped.
+   Procurement GET reads are converted to the backend's explicit
+   READ_SHEET POST action. Smart Import remains an UPSERT and does
+   not use a stale page revision.
 
    Scope: Procurement Admin page only.
    Android bridge is intentionally untouched.
@@ -60,6 +55,14 @@
         payload[key] = value;
       }
     });
+
+    // The backend's doPost() requires an explicit action for read requests.
+    // A legacy GET such as ?sheet=Admin therefore becomes:
+    // { action: "READ_SHEET", sheet: "Admin", authToken: "..." }.
+    if (payload.sheet && !payload.action) {
+      payload.action = 'READ_SHEET';
+    }
+
     payload.authToken = token;
 
     return {
@@ -85,14 +88,12 @@
       return init;
     }
 
-    // Smart Import is an UPSERT against the live sheet. Do not reject an
-    // otherwise valid import because the page revision became stale while
-    // the user was preparing the Excel file. The server still performs the
-    // current-state read, role/ownership checks, duplicate detection and
-    // writes a fresh revision after the mutation.
+    // Smart Import is an UPSERT against the live sheet. The backend reads
+    // current Procurement data and performs NEW/UPDATE/DUPLICATE handling.
+    // Do not reject a valid import because the browser page has an old
+    // revision snapshot.
     delete payload.expectedRevision;
 
-    // Preserve the mutation id for server-side idempotency.
     if (!payload.clientMutationId) {
       payload.clientMutationId = 'SMI-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
     }
