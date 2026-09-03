@@ -1,7 +1,0 @@
-File yang berubah pada V4:
-- index.html
-- script.js
-- PERBAIKAN_OVERDUE_ACTUAL_PO_DEL_DATE_V4.md
-- DAFTAR_FILE_BERUBAH_V4.txt
-
-Code.gs / codegs.js tidak berubah.

@@ -1,7 +1,0 @@
-Perbaikan Company Status otomatis dari Core Business saat import vendor:
-1. vendor-company/script.js
-2. vendor-company/index.html (cache-busting)
-3. PERBAIKAN_COMPANY_STATUS_IMPORT_V3.md
-4. DAFTAR_FILE_BERUBAH_V3.txt
-
-codegs.js: TIDAK BERUBAH
