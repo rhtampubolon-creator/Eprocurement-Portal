@@ -1,7 +1,0 @@
-Email,Name,Phone,Role,Company ID,Active
-admin@company.com,Development Admin,,SUPER_ADMIN,INTERNAL,TRUE
-procurement@company.com,Procurement Admin,,PROCUREMENT_ADMIN,INTERNAL,TRUE
-buyer@company.com,Buyer Example,,BUYER,INTERNAL,TRUE
-contract@company.com,Contract Example,,CONTRACT,INTERNAL,TRUE
-user@company.com,User View Only,,USER,INTERNAL,TRUE
-vendor@company.com,Vendor Example,,VENDOR,V-000001,TRUE
