@@ -10,12 +10,18 @@ let users = [], vendors = [];
 function parentData(){ try { return window.parent?.AGREEMENT_FORM_CONTEXT || null; } catch(e){ return null; } }
 function notifyParent(type, payload={}){ try { window.parent?.postMessage(Object.assign({type}, payload), "*"); } catch(e){} }
 function esc(v){ return String(v ?? "").trim(); }
-function authUrl(url){
+function authToken(){
   try{
-    const t=String(localStorage.getItem("MSW_AUTH_TOKEN")||sessionStorage.getItem("MSW_AUTH_TOKEN")||"").trim();
-    if(!t)return url;
-    return url+(url.includes("?")?"&":"?")+"authToken="+encodeURIComponent(t);
-  }catch(_){return url;}
+    return String(sessionStorage.getItem("MSW_AUTH_TOKEN")||localStorage.getItem("MSW_AUTH_TOKEN")||"").trim();
+  }catch(_){return "";}
+}
+async function gasRead(payload){
+  const response=await fetch(GAS_URL,{
+    method:"POST",
+    headers:{"Content-Type":"text/plain;charset=utf-8"},
+    body:JSON.stringify(Object.assign({},payload||{},{authToken:authToken()}))
+  });
+  return response.json();
 }
 function fillSelect(id, rows, placeholder, value=""){
   const el=byId(id); if(!el) return;
@@ -26,10 +32,10 @@ async function loadMasters(){
   const ctx=parentData();
   if(ctx){ users=Array.isArray(ctx.users)?ctx.users:[]; vendors=Array.isArray(ctx.vendors)?ctx.vendors:[]; }
   if(!users.length && GAS_URL){
-    try { const r=await fetch(authUrl(`${GAS_URL}?action=listAgreementUsers&_=${Date.now()}`)); const j=await r.json(); users=j.users||[]; } catch(e){ console.warn(e); }
+    try { const j=await gasRead({action:"listAgreementUsers"}); users=j.users||[]; } catch(e){ console.warn(e); }
   }
   if(!vendors.length && GAS_URL){
-    try { const r=await fetch(authUrl(`${GAS_URL}?sheet=Company&_=${Date.now()}`)); const j=await r.json(); vendors=(j.rows||[]).map(x=>({name:x.Company||x["Company Name"]||x["Company Name / Vendor"]||x["Vendor"]||x["No Company"]||""})).filter(x=>x.name); } catch(e){ console.warn(e); }
+    try { const j=await gasRead({action:"READ_SHEET",sheet:"Company"}); vendors=(j.rows||[]).map(x=>({name:x.Company||x["Company Name"]||x["Company Name / Vendor"]||x["Vendor"]||x["No Company"]||""})).filter(x=>x.name); } catch(e){ console.warn(e); }
   }
   const buyers=users.filter(x=>String(x.role||"").toUpperCase()==="BUYER");
   fillSelect("vendorSelect", vendors, "-- Select Vendor --", "");
