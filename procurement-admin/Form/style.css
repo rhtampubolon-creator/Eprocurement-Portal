@@ -1,0 +1,1076 @@
+.hidden {
+    display: none !important;
+}
+
+body,
+input,
+select,
+textarea,
+button,
+label,
+h2 {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, serif;
+}
+
+input:hover,
+select:hover,
+textarea:hover,
+.vendor-box:hover {
+    background: #f0f9ff;
+    transition: .2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.date-display-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, .20);
+    background: #eff6ff;
+}
+
+input::placeholder,
+textarea::placeholder {
+    text-align: center;
+}
+
+input[readonly],
+.date-display-input[readonly] {
+    cursor: default;
+}
+
+button {
+    transition: .2s;
+}
+
+button:not(:disabled):hover {
+    transform: translateY(-1px);
+}
+
+button:not(:disabled):active {
+    transform: scale(.98);
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: .55;
+}
+
+/* Searchable dropdown */
+.searchable-select {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-options {
+    position: absolute;
+    z-index: 3000;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    max-height: 230px;
+    overflow-y: auto;
+    padding: 4px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, .18);
+}
+
+.searchable-option {
+    display: block;
+    width: 100%;
+    padding: 8px 10px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: #1f2937;
+    text-align: left;
+    cursor: pointer;
+    transform: none !important;
+}
+
+.searchable-option:hover,
+.searchable-option.is-active {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.searchable-empty {
+    padding: 9px 10px;
+    color: #6b7280;
+    font-size: .875rem;
+    text-align: center;
+}
+
+/* Formatted date field */
+.formatted-date-field {
+    position: relative;
+    width: 100%;
+}
+
+.date-display-input {
+    position: relative;
+    z-index: 1;
+    padding-left: 2rem;
+    padding-right: 3.4rem;
+    min-height: 42px;
+    font-variant-numeric: tabular-nums;
+    /* Klik diterima oleh input date native transparan di atasnya. */
+    pointer-events: none;
+}
+
+.native-date-control {
+    /*
+     * Kontrol tanggal asli menutup seluruh field secara transparan. Klik user
+     * langsung membuka date picker browser, termasuk ketika form ada di iframe.
+     */
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+    pointer-events: auto;
+    z-index: 2;
+}
+
+.native-date-control:disabled,
+.native-date-control[readonly],
+.native-date-control[data-workflow-locked="true"] {
+    pointer-events: none;
+    cursor: not-allowed;
+}
+
+.date-calendar-button,
+.date-clear-button {
+    position: absolute;
+    z-index: 3;
+    top: 50%;
+    transform: translateY(-50%) !important;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #64748b;
+    line-height: 24px;
+    text-align: center;
+}
+
+.date-calendar-button {
+    right: 7px;
+    font-size: 12px;
+}
+
+.date-clear-button {
+    right: 31px;
+    font-size: 18px;
+}
+
+.date-calendar-button:not(:disabled):hover,
+.date-clear-button:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+/* Active round vendor fields */
+.round-help {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 11px;
+    line-height: 1.2;
+    text-align: center;
+}
+
+.vendor-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    min-height: 112px;
+    max-height: 330px;
+    overflow-y: auto;
+    padding: 9px;
+    border: 1px solid #d1d5db;
+    border-radius: 9px;
+    background: #ffffff;
+}
+
+.vendor-list-item {
+    width: 100%;
+    padding: 7px 9px;
+    border: 1px solid #e2e8f0;
+    border-radius: 7px;
+    background: #f8fafc;
+    line-height: 1.25;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+.vendor-choice {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 9px;
+    width: 100%;
+    min-height: 36px;
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    text-align: left;
+}
+
+.vendor-choice:hover {
+    border-color: #60a5fa;
+    background: #eff6ff;
+}
+
+.vendor-choice:has(input:checked) {
+    border-color: #2563eb;
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.vendor-choice input {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+}
+
+.vendor-choice span {
+    flex: 1;
+    overflow-wrap: anywhere;
+}
+
+.vendor-empty {
+    padding: 18px 10px;
+    color: #64748b;
+    font-size: .875rem;
+    line-height: 1.4;
+    text-align: center;
+}
+
+@media (max-width: 900px) {
+    .grid.grid-cols-12 > [class*="col-span-"] {
+        grid-column: span 12 / span 12;
+    }
+}
+
+/* Procurement folder manager */
+.folder-action-button {
+    min-height: 40px;
+    padding: 9px 14px;
+    border-radius: 9px;
+    font-weight: 600;
+}
+
+.folder-target-path {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px dashed #60a5fa;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #1e3a8a;
+    font-size: .875rem;
+    font-weight: 600;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+#folderManagerStatus[data-state="ready"] {
+    color: #047857;
+}
+
+#folderManagerStatus[data-state="error"] {
+    color: #b91c1c;
+}
+
+#folderManagerStatus[data-state="working"] {
+    color: #1d4ed8;
+}
+
+
+/* Workflow locking setelah CQS */
+.workflow-locked-control,
+input.workflow-locked-control,
+select.workflow-locked-control,
+textarea.workflow-locked-control,
+.date-display-input.workflow-locked-control,
+.date-display-input:disabled {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    border-color: #cbd5e1 !important;
+    cursor: not-allowed !important;
+    box-shadow: none !important;
+}
+
+#workflowEditNotice[data-state="locked"] {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #92400e;
+}
+
+#workflowEditNotice[data-state="rfq"] {
+    border-color: #60a5fa;
+    background: #eff6ff;
+    color: #1e40af;
+}
+
+/* Native date picker fix: jangan gunakan overlay transparan. */
+input[type="date"][data-formatted-date].native-date-visible {
+    position: relative !important;
+    inset: auto !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 38px;
+    pointer-events: auto !important;
+    cursor: pointer;
+    text-align: center;
+}
+input[type="date"][data-formatted-date].native-date-visible:disabled {
+    pointer-events: none !important;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   FORM ENHANCEMENTS 2026-07-22
+   Date display, adaptive vendor/previous submit height, status rebid.
+   ========================================================= */
+.auto-height-textarea {
+    min-height: 42px;
+    max-height: 210px;
+    overflow-y: hidden;
+    line-height: 24px;
+}
+
+.formatted-date-wrapper {
+    position: relative;
+    width: 100%;
+}
+.formatted-date-wrapper .formatted-native-date {
+    margin-top: 0 !important;
+    color: transparent !important;
+    -webkit-text-fill-color: transparent !important;
+    caret-color: transparent !important;
+    background-color: #fff;
+}
+.formatted-date-wrapper .formatted-native-date:disabled,
+.formatted-date-wrapper .formatted-native-date[readonly] {
+    background-color: #f1f5f9 !important;
+}
+.formatted-date-text {
+    position: absolute;
+    inset: 0 34px 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #111827;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 2;
+}
+.formatted-date-wrapper.is-disabled .formatted-date-text {
+    color: #64748b;
+}
+.formatted-date-wrapper .formatted-native-date::-webkit-calendar-picker-indicator {
+    opacity: 1;
+    cursor: pointer;
+    position: relative;
+    z-index: 3;
+}
+.vendor-box {
+    min-height: 58px;
+    max-height: 354px;
+    justify-content: flex-start;
+    transition: height .15s ease;
+}
+.status-rebid-display {
+    min-height: 78px;
+    line-height: 1.35;
+    white-space: pre-line;
+}
+
+
+/* Form drag + adaptive Description height */
+#formWindow {
+    position: relative;
+    will-change: transform;
+}
+.form-drag-handle {
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+}
+#formWindow.is-dragging .form-drag-handle {
+    cursor: grabbing;
+}
+.description-auto-height {
+    min-height: 42px;
+    max-height: 258px;
+    overflow-y: hidden;
+    resize: none;
+}
+
+
+/* =========================================================
+   REVISION 2026-07-26 R3
+   Form mengikuti lebar popup/iframe tanpa memaksa horizontal scroll.
+========================================================= */
+#formWindow {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+}
+
+#procurementForm,
+#procurementForm .grid,
+#procurementForm .grid > * {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#procurementForm input,
+#procurementForm select,
+#procurementForm textarea,
+#procurementForm .vendor-box,
+#procurementForm .searchable-select {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 1180px) {
+    #formWindow {
+        padding-left: 14px !important;
+        padding-right: 14px !important;
+    }
+
+    #topProcurementSection,
+    #editOnlySection .grid.grid-cols-12,
+    #poCreateDateWrapper .grid.grid-cols-12 {
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    }
+
+    #topProcurementSection > [class*="col-span-9"],
+    #topProcurementSection > [class*="col-span-7"],
+    #editOnlySection .grid.grid-cols-12 > [class*="col-span-12"] {
+        grid-column: span 6 / span 6 !important;
+    }
+
+    #topProcurementSection > [class*="col-span-4"],
+    #topProcurementSection > [class*="col-span-3"],
+    #editOnlySection .grid.grid-cols-12 > [class*="col-span-4"],
+    #poCreateDateWrapper .grid.grid-cols-12 > [class*="col-span-4"],
+    #poCreateDateWrapper .grid.grid-cols-12 > [class*="col-span-3"] {
+        grid-column: span 3 / span 3 !important;
+    }
+
+    #topProcurementSection > [class*="col-span-2"],
+    #editOnlySection .grid.grid-cols-12 > [class*="col-span-2"],
+    #poCreateDateWrapper .grid.grid-cols-12 > [class*="col-span-2"] {
+        grid-column: span 2 / span 2 !important;
+    }
+}
+
+@media (max-width: 720px) {
+    #topProcurementSection,
+    #editOnlySection .grid.grid-cols-12,
+    #poCreateDateWrapper .grid.grid-cols-12 {
+        grid-template-columns: 1fr !important;
+    }
+
+    #topProcurementSection > *,
+    #editOnlySection .grid.grid-cols-12 > *,
+    #poCreateDateWrapper .grid.grid-cols-12 > * {
+        grid-column: 1 / -1 !important;
+    }
+}
+
+/* PATCH R4 — file browser original Microsoft Excel/PDF */
+.folder-file-browser-list { display: grid; gap: 8px; max-height: 360px; overflow: auto; }
+.folder-file-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #f8fafc;
+}
+.folder-file-info { min-width: 0; }
+.folder-file-info strong,
+.folder-file-info small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder-file-info small { color: #64748b; margin-top: 3px; }
+@media (max-width: 640px) {
+  .folder-file-row { grid-template-columns: 1fr; }
+  .folder-file-row button { width: 100%; }
+}
+
+/* =========================================================
+   REVISION 2026-08-03 R10 — Compact top procurement layout
+   Posisi field mengikuti permintaan user dan tetap padat.
+   nth-child dipakai sebagai fallback agar layout tetap benar
+   apabila browser masih memuat HTML lama dari cache.
+========================================================= */
+#topProcurementSection {
+    display: grid !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    grid-template-areas:
+        "nopr nopr description description description description description description description description description description"
+        "previous previous previous pic pic assign assign pengadaan pengadaan department department department"
+        "previous previous previous statuspr statuspr flow flow flow flow rfq rfq rfq"
+        "previous previous previous estpr estpr estus estus usd usd . . ."
+        "previous previous previous round round statusrebid statusrebid statusrebid . . . ." !important;
+    align-items: start;
+    column-gap: 10px !important;
+    row-gap: 10px !important;
+}
+
+/* Hilangkan pengaruh col-span Tailwind pada layout khusus ini. */
+#topProcurementSection > * {
+    min-width: 0;
+    max-width: none;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    align-self: start;
+}
+
+/* ID utama + fallback urutan elemen untuk HTML yang masih tercache. */
+#noPRWrapper,
+#topProcurementSection > :nth-child(1) { grid-area: nopr !important; }
+
+#descriptionWrapper,
+#topProcurementSection > :nth-child(2) { grid-area: description !important; }
+
+#previousSubmitPOWrapper,
+#topProcurementSection > :nth-child(3) { grid-area: previous !important; }
+
+#picWrapper,
+#topProcurementSection > :nth-child(4) { grid-area: pic !important; }
+
+#assignDateWrapper,
+#topProcurementSection > :nth-child(5) { grid-area: assign !important; }
+
+#pengadaanWrapper,
+#topProcurementSection > :nth-child(6) { grid-area: pengadaan !important; }
+
+#departmentWrapper,
+#topProcurementSection > :nth-child(7) { grid-area: department !important; }
+
+#statusPRWrapper,
+#topProcurementSection > :nth-child(8) { grid-area: statuspr !important; }
+
+#flowProcessWrapper,
+#topProcurementSection > :nth-child(9) { grid-area: flow !important; }
+
+#rfqWrapper,
+#topProcurementSection > :nth-child(10) { grid-area: rfq !important; }
+
+#estPricePRWrapper,
+#topProcurementSection > :nth-child(11) { grid-area: estpr !important; }
+
+#estPriceUSWrapper,
+#topProcurementSection > :nth-child(12) { grid-area: estus !important; }
+
+#usdRateWrapper,
+#topProcurementSection > :nth-child(13) { grid-area: usd !important; }
+
+#roundPOWrapper,
+#topProcurementSection > :nth-child(14) {
+    grid-area: round !important;
+    width: 82px;
+    justify-self: start;
+}
+
+#statusRebidWrapper,
+#topProcurementSection > :nth-child(15) {
+    grid-area: statusrebid !important;
+    width: 100%;
+    max-width: 170px;
+    justify-self: start;
+}
+
+/* Description dan Previous Submit PO tetap menyesuaikan isi. */
+#descriptionWrapper textarea,
+#topProcurementSection > :nth-child(2) textarea,
+#previousSubmitPOWrapper textarea,
+#topProcurementSection > :nth-child(3) textarea {
+    width: 100%;
+}
+
+#previousSubmitPOWrapper,
+#topProcurementSection > :nth-child(3) {
+    width: 100%;
+}
+
+/* Kurs dibuat ringkas agar sejajar dengan Est. Price US - Rp. */
+#usdRateWrapper > div,
+#topProcurementSection > :nth-child(13) > div {
+    min-width: 0;
+    gap: 6px !important;
+}
+
+#syncUsdRateBtn {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+@media (max-width: 700px) {
+    #topProcurementSection {
+        grid-template-columns: 1fr !important;
+        grid-template-areas:
+            "nopr"
+            "description"
+            "previous"
+            "pic"
+            "statuspr"
+            "estpr"
+            "round"
+            "assign"
+            "flow"
+            "estus"
+            "usd"
+            "pengadaan"
+            "department"
+            "rfq"
+            "statusrebid" !important;
+        row-gap: 10px !important;
+    }
+
+    #topProcurementSection > * {
+        grid-column: 1 / -1 !important;
+        width: 100% !important;
+        max-width: none !important;
+    }
+}
+
+/* ===== Layout form procurement yang disetujui (2026-08-03) ===== */
+#topProcurementSection.procurement-top-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.procurement-identity-row {
+    display: grid;
+    grid-template-columns: minmax(210px, 1.65fr) minmax(0, 8.35fr);
+    gap: 14px;
+    align-items: start;
+}
+
+.procurement-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(225px, 2.05fr) minmax(0, 7.95fr);
+    gap: 14px;
+    align-items: stretch;
+}
+
+#previousSubmitPOWrapper {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+}
+
+#previousSubmitPOWrapper #previoussubmitpo {
+    flex: 1 1 auto;
+    min-height: 188px;
+    max-height: 340px;
+    overflow-y: auto;
+    line-height: 1.32;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.procurement-detail-main {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.procurement-detail-row {
+    display: grid;
+    min-width: 0;
+    gap: 14px;
+    align-items: start;
+}
+
+/* PIC | Assign Date | Pengadaan | Departement | Status PR */
+.procurement-primary-row {
+    grid-template-columns:
+        minmax(130px, 1.30fr)
+        minmax(148px, 1.42fr)
+        minmax(88px, .72fr)
+        minmax(128px, 1.02fr)
+        minmax(105px, .84fr);
+}
+
+/* RFQ | Round PR | Flow Process */
+.procurement-flow-row {
+    grid-template-columns: minmax(130px, 1.18fr) minmax(88px, .68fr) minmax(0, 4.14fr);
+}
+
+/* Est. Price PR | Est. Price US-Rp | Dolar USD/IDR | Status Rebid */
+.procurement-price-row {
+    grid-template-columns:
+        minmax(145px, 1fr)
+        minmax(145px, 1fr)
+        minmax(220px, 1fr)
+        minmax(105px, .84fr);
+}
+
+#statusRebidWrapper {
+    width: 100%;
+}
+
+#statusRebidWrapper .status-rebid-display {
+    min-height: 70px;
+}
+
+/* Kolom pendek dibuat padat seperti contoh yang disetujui. */
+#pengadaanWrapper input,
+#departmentWrapper input,
+#statusPRWrapper input,
+#rfqWrapper input,
+#roundPOWrapper select {
+    min-width: 0;
+    padding-left: 7px;
+    padding-right: 7px;
+}
+
+#pengadaanWrapper input::placeholder,
+#departmentWrapper input::placeholder,
+#statusPRWrapper input::placeholder,
+#rfqWrapper input::placeholder {
+    font-size: .82rem;
+}
+
+/* Bantuan Round PR sengaja tidak ditampilkan lagi. */
+#roundPOWrapper .round-help {
+    display: none !important;
+}
+
+@media (max-width: 1120px) {
+    .procurement-detail-layout {
+        grid-template-columns: minmax(205px, 1.85fr) minmax(0, 8.15fr);
+    }
+
+    .procurement-primary-row {
+        grid-template-columns:
+            minmax(120px, 1.25fr)
+            minmax(138px, 1.35fr)
+            minmax(82px, .70fr)
+            minmax(118px, 1fr)
+            minmax(98px, .82fr);
+        gap: 10px;
+    }
+
+    .procurement-flow-row,
+    .procurement-price-row,
+    .procurement-detail-main,
+    .procurement-identity-row,
+    .procurement-detail-layout {
+        gap: 10px;
+    }
+}
+
+
+/* Reset aturan grid-area dari layout R10 karena field sekarang berada di nested grid. */
+#topProcurementSection.procurement-top-layout {
+    display: flex !important;
+    grid-template-columns: none !important;
+    grid-template-areas: none !important;
+}
+
+.procurement-identity-row > *,
+.procurement-detail-layout > *,
+.procurement-primary-row > *,
+.procurement-flow-row > *,
+.procurement-price-row > *,
+.procurement-rebid-row > * {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+    justify-self: stretch !important;
+    align-self: start;
+}
+
+#previousSubmitPOWrapper {
+    align-self: stretch;
+}
+
+/* Specificity reset: menonaktifkan nama grid R10 pada semua wrapper field. */
+#topProcurementSection.procurement-top-layout > .procurement-identity-row,
+#topProcurementSection.procurement-top-layout > .procurement-detail-layout {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+#topProcurementSection.procurement-top-layout #noPRWrapper,
+#topProcurementSection.procurement-top-layout #descriptionWrapper,
+#topProcurementSection.procurement-top-layout #previousSubmitPOWrapper,
+#topProcurementSection.procurement-top-layout #picWrapper,
+#topProcurementSection.procurement-top-layout #assignDateWrapper,
+#topProcurementSection.procurement-top-layout #pengadaanWrapper,
+#topProcurementSection.procurement-top-layout #departmentWrapper,
+#topProcurementSection.procurement-top-layout #statusPRWrapper,
+#topProcurementSection.procurement-top-layout #rfqWrapper,
+#topProcurementSection.procurement-top-layout #roundPOWrapper,
+#topProcurementSection.procurement-top-layout #flowProcessWrapper,
+#topProcurementSection.procurement-top-layout #estPricePRWrapper,
+#topProcurementSection.procurement-top-layout #estPriceUSWrapper,
+#topProcurementSection.procurement-top-layout #usdRateWrapper,
+#topProcurementSection.procurement-top-layout #statusRebidWrapper {
+    grid-area: auto !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    justify-self: stretch !important;
+}
+
+#topProcurementSection.procurement-top-layout #previousSubmitPOWrapper {
+    width: 100% !important;
+    align-self: stretch !important;
+}
+
+/* Popup Procurement umumnya 720–900 px; tetap gunakan layout compact, bukan stack. */
+@media (max-width: 900px) {
+    #topProcurementSection.procurement-top-layout,
+    .procurement-detail-main {
+        gap: 9px;
+    }
+
+    .procurement-identity-row,
+    .procurement-detail-layout,
+    .procurement-detail-row {
+        gap: 8px;
+    }
+
+    .procurement-identity-row {
+        grid-template-columns: minmax(145px, 1.55fr) minmax(0, 8.45fr);
+    }
+
+    .procurement-detail-layout {
+        grid-template-columns: minmax(165px, 2fr) minmax(0, 8fr);
+    }
+
+    .procurement-primary-row {
+        grid-template-columns: minmax(0, 1.10fr) minmax(0, 1.20fr) minmax(0, .62fr) minmax(0, .90fr) minmax(0, .72fr);
+    }
+
+    .procurement-flow-row {
+        grid-template-columns: minmax(0, 1.05fr) minmax(62px, .62fr) minmax(0, 3.30fr);
+    }
+
+    .procurement-price-row {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) minmax(92px, .72fr);
+    }
+
+    #topProcurementSection label {
+        font-size: 12px;
+        line-height: 1.15;
+    }
+
+    #topProcurementSection input,
+    #topProcurementSection select,
+    #topProcurementSection textarea {
+        font-size: 13px;
+    }
+
+    #previousSubmitPOWrapper #previoussubmitpo {
+        min-height: 178px;
+        max-height: 300px;
+    }
+
+    #syncUsdRateBtn {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+        font-size: 12px;
+    }
+}
+
+/* Hanya layar yang benar-benar sempit yang ditumpuk satu kolom. */
+@media (max-width: 620px) {
+    .procurement-identity-row,
+    .procurement-detail-layout,
+    .procurement-primary-row,
+    .procurement-flow-row,
+    .procurement-price-row,
+    .procurement-rebid-row {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #previousSubmitPOWrapper #previoussubmitpo {
+        min-height: 82px;
+        max-height: 220px;
+    }
+}
+
+
+/* =========================================================
+   REVISION 2026-08-03 R12 — Penempatan milestone PO saja
+   Tidak mengubah isi, ID field, validasi, atau logika JavaScript.
+========================================================= */
+#procurementMilestoneLayout.procurement-milestone-layout {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+    align-items: start;
+}
+
+/*
+ * Ketika wrapper PO dibuka oleh JavaScript, anak-anaknya ikut menjadi
+ * item grid milik procurementMilestoneLayout. Class .hidden tetap bekerja.
+ */
+#procurementMilestoneLayout #poCreateDateWrapper:not(.hidden) {
+    display: contents;
+}
+
+#procurementMilestoneLayout .milestone-field,
+#procurementMilestoneLayout .winner-po-field,
+#procurementMilestoneLayout .winner-email-field,
+#procurementMilestoneLayout .no-po-field,
+#procurementMilestoneLayout .price-po-field,
+#procurementMilestoneLayout .grn-date-field {
+    min-width: 0;
+}
+
+/* Baris 1: empat tanggal dengan lebar seragam seperti Assign Date. */
+#cqsCreateDateWrapper { grid-column: 1; grid-row: 1; }
+#cqsApprovalDateWrapper { grid-column: 2; grid-row: 1; }
+#poCreateDateWrapper .milestone-field:nth-child(1) { grid-column: 3; grid-row: 1; }
+#poCreateDateWrapper .milestone-field:nth-child(2) { grid-column: 4; grid-row: 1; }
+
+/* Baris 2: dua tanggal aktual; dua ruang di kanan sengaja dibiarkan kosong. */
+#poCreateDateWrapper .actual-release-field { grid-column: 1; grid-row: 2; }
+#poCreateDateWrapper .actual-delivery-field { grid-column: 2; grid-row: 2; }
+
+/* Baris 3: Winner PO selebar satu kolom tanggal; Email menempati sisa ruang. */
+#poCreateDateWrapper .winner-po-field { grid-column: 1; grid-row: 3; }
+#poCreateDateWrapper .winner-email-field { grid-column: 2 / 5; grid-row: 3; }
+
+/* Baris 4: No PO, Price, dan GRN Date masing-masing selebar satu kolom tanggal. */
+#poCreateDateWrapper .no-po-field { grid-column: 1; grid-row: 4; }
+#poCreateDateWrapper .price-po-field { grid-column: 2; grid-row: 4; }
+#poCreateDateWrapper .grn-date-field { grid-column: 3; grid-row: 4; }
+
+/* Winner PO dan Email boleh bertambah tinggi ke bawah bila teks panjang. */
+#winnerpo,
+#emailwinnerpo {
+    min-height: 42px;
+}
+
+#emailwinnerpo {
+    max-height: 180px;
+    overflow-y: auto;
+    line-height: 1.35;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* Pada popup menengah tetap empat kolom, hanya jarak dipadatkan. */
+@media (max-width: 900px) {
+    #procurementMilestoneLayout.procurement-milestone-layout {
+        gap: 9px;
+    }
+
+    #procurementMilestoneLayout label {
+        font-size: 12px;
+        line-height: 1.15;
+    }
+
+    #procurementMilestoneLayout input,
+    #procurementMilestoneLayout select,
+    #procurementMilestoneLayout textarea {
+        font-size: 13px;
+    }
+}
+
+/* Hanya layar sangat sempit yang ditumpuk agar tidak terpotong. */
+@media (max-width: 620px) {
+    #procurementMilestoneLayout.procurement-milestone-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #procurementMilestoneLayout > *,
+    #procurementMilestoneLayout #poCreateDateWrapper:not(.hidden) > * {
+        grid-column: 1 !important;
+        grid-row: auto !important;
+    }
+}
+
+
+/* =========================================================
+   REVISION 2026-08-03 R14 — Urutan baris tanggal pertama
+   CQS Create | CQS Approval | PO Create | PO Del.
+   Keempatnya sama lebar. Tidak mengubah isi atau fungsi field.
+========================================================= */
+#procurementMilestoneLayout.procurement-milestone-layout {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-auto-flow: row !important;
+}
+
+/* Pastikan wrapper PO tetap melepas anak-anaknya sebagai item grid utama. */
+#procurementMilestoneLayout > #poCreateDateWrapper:not(.hidden) {
+    display: contents !important;
+}
+
+/* Baris pertama: urutan dipaksa persis sesuai instruksi. */
+#procurementMilestoneLayout > #cqsCreateDateWrapper {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 !important;
+    order: 1 !important;
+}
+
+#procurementMilestoneLayout > #cqsApprovalDateWrapper {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 !important;
+    order: 2 !important;
+}
+
+#procurementMilestoneLayout > #poCreateDateWrapper:not(.hidden) > .milestone-field:nth-child(1) {
+    grid-column: 3 / 4 !important;
+    grid-row: 1 !important;
+    order: 3 !important;
+}
+
+#procurementMilestoneLayout > #poCreateDateWrapper:not(.hidden) > .milestone-field:nth-child(2) {
+    grid-column: 4 / 5 !important;
+    grid-row: 1 !important;
+    order: 4 !important;
+}
+
+/* Keempat field tanggal mempunyai basis lebar identik. */
+#cqsCreateDateWrapper,
+#cqsApprovalDateWrapper,
+#poCreateDateWrapper > .milestone-field:nth-child(1),
+#poCreateDateWrapper > .milestone-field:nth-child(2) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+}

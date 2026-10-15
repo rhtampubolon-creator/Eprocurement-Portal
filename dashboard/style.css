@@ -1,0 +1,385 @@
+/* ======================================================
+   CSS Dashboard
+====================================================== */
+
+/* ======================================================
+   DESIGN TOKEN
+====================================================== */
+
+:root{
+
+    --primary:#0369a1;
+    --primary-light:#3b82f6;
+
+    --success:#16a34a;
+    --warning:#f59e0b;
+    --danger:#dc2626;
+
+    --white:#ffffff;
+
+    --gray50:#f8fafc;
+    --gray100:#f1f5f9;
+    --gray200:#e2e8f0;
+    --gray500:#64748b;
+    --gray700:#334155;
+
+    --radius:16px;
+
+    --shadow:0 8px 24px rgba(0,0,0,.08);
+
+}
+
+/* ======================================================
+   BODY
+====================================================== */
+
+body{
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    background:var(--gray100);
+
+    color:var(--gray700);
+
+}
+
+/* ======================================================
+   SECTION TITLE
+====================================================== */
+
+.section-title{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    font-size:18px;
+
+    font-weight:600;
+
+}
+
+.section-title svg{
+
+    width:20px;
+
+    height:20px;
+
+    color:var(--primary);
+
+}
+
+/* ======================================================
+   BUTTON
+====================================================== */
+
+#btnDetail{
+
+    margin-top:8px;
+
+    padding:8px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    background:var(--primary);
+
+    color:#fff;
+
+    cursor:pointer;
+
+}
+
+/* ======================================================
+   YEAR BUTTON
+====================================================== */
+
+.year-btn{
+
+    padding:8px 16px;
+
+    border-radius:10px;
+
+    border:1px solid var(--gray200);
+
+    background:white;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.year-btn:hover{
+
+    background:var(--primary);
+
+    color:white;
+
+}
+
+/* ======================================================
+   SUMMARY CARD
+====================================================== */
+
+.summary-card{
+
+    background:white;
+
+    border-radius:16px;
+
+    padding:20px;
+
+    box-shadow:var(--shadow);
+
+    min-height:120px;
+
+}
+
+.summary-title{
+
+    font-size:14px;
+
+    color:var(--gray500);
+
+}
+
+.summary-value{
+
+    margin-top:10px;
+
+    font-size:32px;
+
+    font-weight:700;
+
+    color:var(--primary);
+
+}
+
+.summary-sub{
+
+    margin-top:8px;
+
+    font-size:14px;
+
+    color:var(--gray500);
+
+}
+
+/* ======================================================
+   PO RELEASE
+====================================================== */
+
+.release-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,1fr);
+
+    gap:16px;
+
+}
+
+.release-item{
+
+    background:#f8fafc;
+
+    border-radius:12px;
+
+    padding:16px;
+
+}
+
+.release-number{
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    color:var(--primary);
+
+}
+
+.release-percent{
+
+    color:var(--gray500);
+
+    margin-top:5px;
+
+}
+
+.release-carry{
+
+    margin-top:20px;
+
+    border-top:1px solid var(--gray200);
+
+    padding-top:15px;
+
+}
+
+.release-carry div{
+
+    padding:5px 0;
+
+}
+
+body{
+
+    background:red !important;
+
+}
+
+.year-btn{
+
+    padding:8px 14px;
+
+    border:1px solid var(--gray-300);
+
+    border-radius:10px;
+
+    background:#fff;
+
+    color:var(--gray-700);
+
+    font-weight:500;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.year-btn:hover{
+
+    background:#e0f2fe;
+
+    border-color:var(--primary);
+
+}
+
+.year-btn.active{
+
+    background:var(--primary);
+
+    color:#fff;
+
+    border-color:var(--primary);
+
+    font-weight:600;
+
+}
+
+
+/* ======================================================
+   TOOLTIP
+====================================================== */
+
+.summary-card{
+    position:relative;
+}
+
+.info-tooltip{
+
+    position:absolute;
+
+    top:14px;
+    right:16px;
+
+    width:18px;
+    height:18px;
+
+    border-radius:50%;
+
+    background:#0ea5e9;
+    color:#fff;
+
+    font-size:11px;
+    font-weight:bold;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+}
+
+.tooltip-box{
+
+    position:absolute;
+
+    top:38px;
+    right:0;
+
+    min-width:230px;
+
+    background:#fff;
+
+    border-radius:10px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+    padding:12px;
+
+    display:none;
+
+    z-index:1000;
+}
+
+.info-tooltip:hover + .tooltip-box{
+
+    display:block;
+}
+
+.tooltip-row{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    padding:4px 0;
+
+    font-size:13px;
+}
+
+.tooltip-title{
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+    border-bottom:1px solid #eee;
+
+    padding-bottom:6px;
+}
+
+.dashboard-buyer-filter{
+    width:100%;
+    border:1px solid #cbd5e1;
+    border-radius:9px;
+    padding:9px 10px;
+    background:#fff;
+    color:#1e293b;
+    font-size:13px;
+    font-weight:600;
+}
+@media (max-width: 1024px){
+    .grid.grid-cols-12{display:block}
+    .grid.grid-cols-12 > .col-span-2,
+    .grid.grid-cols-12 > .col-span-10{width:100%}
+    #yearButtons{flex-direction:row!important;flex-wrap:wrap;margin-bottom:14px}
+    #buyerFilterPanel{margin-top:12px!important;margin-bottom:18px}
+    #summaryCards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media (max-width: 640px){
+    .min-h-screen{padding:10px!important}
+    #summaryCards{grid-template-columns:1fr!important}
+    .grid.grid-cols-4{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    header .flex.justify-between{align-items:flex-start;gap:12px;flex-direction:column}
+}

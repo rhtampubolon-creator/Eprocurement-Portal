@@ -1,0 +1,8 @@
+Di function doPost(e), setelah baris:
+  if (action === "LOGOUT_USER") return jsonOutput_(logoutUser_(body));
+
+tambahkan:
+  if (action === "REQUEST_PASSWORD_RESET") return jsonOutput_(requestPasswordReset_(body));
+  if (action === "CONFIRM_PASSWORD_RESET") return jsonOutput_(confirmPasswordReset_(body));
+
+JANGAN menempelkan seluruh Code.gs contoh jika backend produksi telah berubah.
