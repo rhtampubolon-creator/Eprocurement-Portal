@@ -7,7 +7,6 @@
 
 const SYSTEM_INFO = {
     environment: String(window.APP_CONFIG?.ENVIRONMENT || "development"),
-    version: String(window.APP_CONFIG?.VERSION || "v2.0.0-foundation"),
     latestUpdate: "10 August 2026",
     status: window.APP_CONFIG?.GAS_URL ? "Online" : "Configuration Required"
 };
@@ -77,9 +76,6 @@ function renderSystemInformation(){
 
     document.getElementById("appEnvironment").textContent =
         SYSTEM_INFO.environment;
-
-    document.getElementById("appVersion").textContent =
-        SYSTEM_INFO.version;
 
     document.getElementById("latestUpdate").textContent =
         SYSTEM_INFO.latestUpdate;
