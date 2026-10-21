@@ -2441,147 +2441,6 @@ function getBidderMeta() {
   return DATA.structured.BidderList.meta;
 }
 
-/* Assign Date editor for embedded BidderList workspace. */
-function normalizeWorkspaceFlow(value) {
-  return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, '');
-}
-
-function isWorkspaceAssignDateLocked(row = null) {
-  const flow = getProcurementAdminValue(row || {}, ['Flow Process', 'flowprocess']) ||
-    getBidderMeta().flow_process || EMBEDDED_FLOW_PROCESS;
-  const normalized = normalizeWorkspaceFlow(flow);
-  return normalized === 'CREATECQS' || normalized === 'CQS';
-}
-
-function findWorkspaceProcurementRow(meta) {
-  const id = String(meta?.procurementId || '').trim();
-  if (id) {
-    const byId = PROCUREMENT_ADMIN_ROWS.find(row =>
-      String(getProcurementRowId(row) || '').trim() === id
-    );
-    if (byId) return byId;
-  }
-  const noPR = String(meta?.nopr || '').trim();
-  const year = Number(meta?.prYear || 0);
-  return findProcurementRowByNoPR(year ? `${noPR} · ${year}` : noPR);
-}
-
-function renderWorkspaceAssignDateControl() {
-  const control = document.getElementById('workspaceAssignDateControl');
-  if (!control) return;
-  const isWorkspace = new URLSearchParams(window.location.search).get('workspace') === '1';
-  control.hidden = !isWorkspace;
-  control.style.display = isWorkspace ? 'flex' : 'none';
-  if (!isWorkspace) return;
-
-  const meta = getBidderMeta();
-  const row = findWorkspaceProcurementRow(meta);
-  const input = document.getElementById('workspaceAssignDateInput');
-  const button = document.getElementById('workspaceAssignDateSave');
-  const status = document.getElementById('workspaceAssignDateStatus');
-  if (!input || !button || !status) return;
-
-  const assignDate = getProcurementAdminValue(row, ['Assign Date', 'Assign PR Date', 'Assign PR', 'assignprdate']) ||
-    meta.assignprdate || '';
-  input.value = dateValueForInput(assignDate);
-  const locked = isWorkspaceAssignDateLocked(row);
-  input.disabled = locked || !row;
-  button.disabled = locked || !row;
-  status.textContent = !row
-    ? 'Pilih No PR terlebih dahulu.'
-    : locked
-      ? 'Terkunci: Flow Process sudah Create CQS.'
-      : 'Dapat diubah sebelum Create CQS.';
-}
-
-async function saveWorkspaceAssignDate() {
-  const meta = getBidderMeta();
-  const input = document.getElementById('workspaceAssignDateInput');
-  const button = document.getElementById('workspaceAssignDateSave');
-  const status = document.getElementById('workspaceAssignDateStatus');
-  if (!input || !button || !status) return;
-
-  button.disabled = true;
-  input.disabled = true;
-  const rawDate = String(input.value || '').trim();
-  status.textContent = 'Memeriksa status Procurement...';
-  try {
-    const noPR = String(meta.nopr || '').trim();
-    if (!noPR) throw new Error('Pilih No PR terlebih dahulu.');
-    if (!await syncProcurementAdminFromGoogleSheet(false)) {
-      throw new Error('Tidak dapat membaca data terbaru Google Sheets.');
-    }
-
-    const row = findWorkspaceProcurementRow(meta);
-    if (!row) throw new Error('Data Procurement tidak ditemukan.');
-    if (isWorkspaceAssignDateLocked(row)) {
-      renderWorkspaceAssignDateControl();
-      throw new Error('Assign Date terkunci karena Flow Process sudah Create CQS.');
-    }
-
-    let assignDate = '';
-    if (rawDate) {
-      const parsed = new Date(`${rawDate}T00:00:00`);
-      if (Number.isNaN(parsed.getTime())) throw new Error('Format Assign Date tidak valid.');
-      assignDate = parsed.toLocaleDateString('en-GB', {
-        day: '2-digit', month: 'short', year: 'numeric'
-      });
-    }
-
-    const currentDate = String(getProcurementAdminValue(row, [
-      'Assign Date', 'Assign PR Date', 'Assign PR', 'assignprdate'
-    ]) || '').trim();
-    const parsedCurrent = parseFlexibleDate(currentDate);
-    const normalizedCurrent = parsedCurrent && !Number.isNaN(parsedCurrent.getTime())
-      ? `${parsedCurrent.getFullYear()}-${String(parsedCurrent.getMonth()+1).padStart(2,'0')}-${String(parsedCurrent.getDate()).padStart(2,'0')}`
-      : '';
-    if (rawDate === normalizedCurrent) {
-      status.textContent = 'Assign Date tidak berubah.';
-      renderWorkspaceAssignDateControl();
-      return;
-    }
-
-    status.textContent = 'Menyimpan Assign Date ke Google Sheets...';
-    const version = Number(getProcurementAdminValue(row, ['Version', '__version', 'version']) || 0);
-    const result = await postProcurementUpdate({
-      action: 'EDIT',
-      sheet: 'Admin',
-      originalPR: noPR,
-      data: { 'Assign Date': assignDate, __version: version }
-    });
-    if (!result?.success) {
-      if (result?.conflict) throw new Error(result.message || 'Data berubah oleh pengguna lain. Muat ulang dan coba lagi.');
-      throw new Error(result?.message || 'Google Sheets menolak perubahan Assign Date.');
-    }
-
-    await syncProcurementAdminFromGoogleSheet(false);
-    const refreshedRow = findWorkspaceProcurementRow(meta) || row;
-    const refreshedDate = getProcurementAdminValue(refreshedRow, [
-      'Assign Date', 'Assign PR Date', 'Assign PR', 'assignprdate'
-    ]) || '';
-    meta.assignprdate = refreshedDate;
-    window.parent?.postMessage({
-      action: 'BIDDERLIST_PROCUREMENT_UPDATED',
-      noPR,
-      round: getDocumentRound(meta),
-      data: refreshedRow,
-      result
-    }, '*');
-    renderWorkspaceAssignDateControl();
-    status.textContent = 'Assign Date berhasil disimpan ke Google Sheets.';
-  } catch (error) {
-    status.textContent = error?.message || 'Gagal menyimpan Assign Date.';
-    renderWorkspaceAssignDateControl();
-  } finally {
-    const row = findWorkspaceProcurementRow(meta);
-    const locked = isWorkspaceAssignDateLocked(row);
-    if (input) input.disabled = locked || !row;
-    if (button) button.disabled = locked || !row;
-  }
-}
-
-document.getElementById('workspaceAssignDateSave')?.addEventListener('click', saveWorkspaceAssignDate);
-
 function parseCurrencyNumber(value) {
   let text = String(value ?? '').trim();
   if (!text) return 0;
@@ -8693,7 +8552,6 @@ function renderCurrent() {
   updateCQSNavigationStatus();
   ensureProcurementDocumentViewButtons();
   ensureBidderTemplatePreviewButton();
-  renderWorkspaceAssignDateControl();
 }
 
 async function toggleEdit() {
@@ -11587,7 +11445,6 @@ async function initializeBidderWorkspace() {
 
   updateDollarKPI();
   renderCurrent();
-  renderWorkspaceAssignDateControl();
 }
 
 window.addEventListener('online', () => {

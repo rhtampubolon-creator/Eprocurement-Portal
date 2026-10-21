@@ -1988,16 +1988,15 @@ function applyWorkflowRules(options = {}) {
     TOP_WORKFLOW_FIELD_IDS.forEach(id => setWorkflowFieldLocked(id, lockTopSection));
 
     if (lockTopSection && isRFQ) {
-        setWorkflowFieldLocked("assignprdate", false);
         setWorkflowNotice(
             hasApprovalDate
-                ? "Mode RFQ ulang: hanya Assign Date dan Flow Process yang dapat diubah. Submit Quote Vendor sudah aktif karena CQS Approval Date telah dipilih."
-                : "Mode RFQ ulang: hanya Assign Date dan Flow Process yang dapat diubah. Submit Quote Vendor dikosongkan dan akan aktif kembali setelah CQS Approval Date dipilih.",
+                ? "Mode RFQ ulang: Assign Date tetap terkunci karena proses sebelumnya sudah mencapai Create CQS/CQS. Flow Process dapat diubah; Submit Quote Vendor aktif karena CQS Approval Date telah dipilih."
+                : "Mode RFQ ulang: Assign Date tetap terkunci karena proses sebelumnya sudah mencapai Create CQS/CQS. Flow Process dapat diubah; Submit Quote Vendor aktif kembali setelah CQS Approval Date dipilih.",
             "rfq"
         );
     } else if (lockTopSection) {
         setWorkflowNotice(
-            "Proses sudah mencapai CQS. Data bagian atas dikunci; ubah Flow Process ke RFQ jika Assign Date perlu diperbarui.",
+            "Proses sudah mencapai Create CQS/CQS. Assign Date dan data bagian atas dikunci.",
             "locked"
         );
     } else {
