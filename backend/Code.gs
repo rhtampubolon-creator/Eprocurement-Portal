@@ -4435,32 +4435,30 @@ function ensureProcurementMetadataColumns_(sheet) {
     sheet.getRange(2, startColumn, Math.max(sheet.getMaxRows() - 1, 1), missing.length).setNumberFormat("@");
   }
 
-  // Kolom teknis diletakkan di kanan dan disembunyikan agar tampilan sheet
-  // yang sudah familiar tidak berubah.
+  // Pertahankan tampilan sheet, tetapi hindari operasi show/hide yang tidak
+  // perlu pada setiap pembacaan. Operasi layout hanya dijalankan bila status
+  // kolom memang berbeda dari status yang diinginkan.
   const visibleOwnerHeaders = {
     "Owner Name": true,
     "Owner Email": true
   };
+  function setColumnVisibilityIfNeeded_(columnIndex, shouldBeVisible) {
+    try {
+      const isHidden = sheet.isColumnHiddenByUser(columnIndex);
+      if (shouldBeVisible && isHidden) sheet.showColumns(columnIndex);
+      else if (!shouldBeVisible && !isHidden) sheet.hideColumns(columnIndex);
+    } catch (ignore) {}
+  }
   PROCUREMENT_METADATA_HEADERS.forEach(function (header) {
     const index = findHeaderIndex_(headers, [header]);
     if (index >= 0) {
-      try {
-        // Identitas Buyer harus terlihat langsung di Google Sheet agar setiap
-        // hasil Add/Import dapat ditelusuri. Metadata teknis lainnya tetap
-        // disembunyikan supaya tampilan sheet tidak terlalu lebar.
-        if (visibleOwnerHeaders[header]) {
-          sheet.showColumns(index + 1);
-        } else {
-          sheet.hideColumns(index + 1);
-        }
-      } catch (ignore) {}
+      // Identitas Buyer tetap terlihat; metadata teknis lainnya tetap tersembunyi.
+      setColumnVisibilityIfNeeded_(index + 1, Boolean(visibleOwnerHeaders[header]));
     }
   });
   PROCUREMENT_SYSTEM_HEADERS.forEach(function (header) {
     const index = findHeaderIndex_(headers, systemAliases[header] || [header]);
-    if (index >= 0) {
-      try { sheet.hideColumns(index + 1); } catch (ignore) {}
-    }
+    if (index >= 0) setColumnVisibilityIfNeeded_(index + 1, false);
   });
 
   ensureProcurementIdentifierMigration_(sheet, headers);
