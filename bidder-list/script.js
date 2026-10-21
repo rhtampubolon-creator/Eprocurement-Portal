@@ -11466,8 +11466,20 @@ initializeBidderWorkspace();
 
   const BUTTON_ID = 'rfqPdfImportBtn';
   const PDFJS_VERSION = '3.11.174';
-  const PDFJS_SRC = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.min.js`;
-  const PDFJS_WORKER = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
+  const PDFJS_CDNS = [
+    {
+      src: \`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/\${PDFJS_VERSION}/pdf.min.js\`,
+      worker: \`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/\${PDFJS_VERSION}/pdf.worker.min.js\`
+    },
+    {
+      src: \`https://cdn.jsdelivr.net/npm/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.min.js\`,
+      worker: \`https://cdn.jsdelivr.net/npm/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.worker.min.js\`
+    },
+    {
+      src: \`https://unpkg.com/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.min.js\`,
+      worker: \`https://unpkg.com/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.worker.min.js\`
+    }
+  ];
   let pdfJsPromise = null;
 
   const clean = value => String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
@@ -11516,34 +11528,41 @@ initializeBidderWorkspace();
 
   function ensurePdfJs() {
     if (window.pdfjsLib?.getDocument) {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+      const loaded = PDFJS_CDNS.find(cdn => window.pdfjsLib.GlobalWorkerOptions?.workerSrc === cdn.worker)
+        || PDFJS_CDNS[0];
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = loaded.worker;
       return Promise.resolve(window.pdfjsLib);
     }
     if (pdfJsPromise) return pdfJsPromise;
-    pdfJsPromise = new Promise((resolve, reject) => {
-      const existing = document.querySelector('script[data-msw-rfq-pdfjs]');
-      const finish = () => {
-        if (!window.pdfjsLib?.getDocument) {
-          reject(new Error('Library pembaca PDF tidak berhasil dimuat.'));
-          return;
-        }
-        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
-        resolve(window.pdfjsLib);
-      };
-      if (existing) {
-        existing.addEventListener('load', finish, { once: true });
-        existing.addEventListener('error', () => reject(new Error('Library PDF.js tidak dapat dimuat.')), { once: true });
-        if (window.pdfjsLib?.getDocument) finish();
-        return;
+
+    pdfJsPromise = (async () => {
+      const previous = document.querySelector('script[data-msw-rfq-pdfjs]');
+      if (previous && !window.pdfjsLib?.getDocument) previous.remove();
+
+      for (const cdn of PDFJS_CDNS) {
+        try {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = cdn.src;
+            script.async = true;
+            script.dataset.mswRfqPdfjs = 'true';
+            script.onload = () => {
+              if (window.pdfjsLib?.getDocument) resolve();
+              else reject(new Error('Skrip termuat tetapi PDF.js tidak tersedia.'));
+            };
+            script.onerror = () => {
+              script.remove();
+              reject(new Error('CDN tidak dapat diakses.'));
+            };
+            document.head.appendChild(script);
+          });
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = cdn.worker;
+          return window.pdfjsLib;
+        } catch (_) {}
       }
-      const script = document.createElement('script');
-      script.src = PDFJS_SRC;
-      script.async = true;
-      script.dataset.mswRfqPdfjs = 'true';
-      script.onload = finish;
-      script.onerror = () => reject(new Error('Library PDF.js tidak dapat dimuat. Periksa koneksi internet atau CDN.'));
-      document.head.appendChild(script);
-    });
+      pdfJsPromise = null;
+      throw new Error('Library PDF.js gagal dimuat dari semua CDN. Periksa koneksi internet, pemblokiran jaringan, atau kebijakan keamanan browser.');
+    })();
     return pdfJsPromise;
   }
 
