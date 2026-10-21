@@ -8693,6 +8693,7 @@ function renderCurrent() {
   updateCQSNavigationStatus();
   ensureProcurementDocumentViewButtons();
   ensureBidderTemplatePreviewButton();
+  renderWorkspaceAssignDateControl();
 }
 
 async function toggleEdit() {
