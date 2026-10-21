@@ -5212,9 +5212,22 @@ function spreadsheetIdForGroup_(group) {
  * - SECURITY: Users
  * - AGREEMENT: Agreement Tracker
  */
+// Cache objek Spreadsheet hanya selama satu eksekusi Apps Script.
+// loadAllData_ dan beberapa alur workspace dapat membuka spreadsheet yang sama
+// berkali-kali dalam satu request; gunakan objek yang sama tanpa menyimpan data
+// sheet atau membagikan objek antar-user/antar-eksekusi.
+const REQUEST_SPREADSHEET_CACHE_ = Object.create(null);
+
 function getSpreadsheet_(sheetNameOrGroup) {
   const group = spreadsheetGroupForSheet_(sheetNameOrGroup);
-  return SpreadsheetApp.openById(spreadsheetIdForGroup_(group));
+  const spreadsheetId = spreadsheetIdForGroup_(group);
+  if (!spreadsheetId) {
+    throw new Error("Spreadsheet ID untuk grup '" + group + "' belum dikonfigurasi.");
+  }
+  if (!REQUEST_SPREADSHEET_CACHE_[spreadsheetId]) {
+    REQUEST_SPREADSHEET_CACHE_[spreadsheetId] = SpreadsheetApp.openById(spreadsheetId);
+  }
+  return REQUEST_SPREADSHEET_CACHE_[spreadsheetId];
 }
 
 function testFourSpreadsheetRouting() {
