@@ -14,7 +14,8 @@
     "build:lucide": "terser ./node_modules/lucide/dist/umd/lucide.js -c -m -o ./assets/lucide.min.js",
     "build:xlsx": "node -e \"require('fs').copyFileSync('./node_modules/xlsx/dist/xlsx.full.min.js','./assets/xlsx.full.min.js')\"",
     "build:assets": "npm run build:tailwind && npm run build:lucide && npm run build:xlsx",
-    "audit:performance": "node tools/performance-audit.mjs"
+    "audit:performance": "node tools/performance-audit.mjs",
+    "test:browser-smoke": "node tools/browser-smoke.mjs"
   },
   "devDependencies": {
     "lucide": "0.453.0",
