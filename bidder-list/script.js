@@ -8802,26 +8802,13 @@ async function loadDefaultTemplate(fileName) {
     MASTER_TEMPLATE_LOAD_ERRORS[templateType] = driveError?.message || String(driveError);
     console.warn(`Master ${fileName} dari Google Drive gagal dimuat.`, driveError);
 
-    // Fallback hanya untuk paket yang dijalankan melalui web server/hosting.
+    // Fallback template lokal memakai path bersama yang benar dari modul
+    // Bidder List menuju folder Template di root repository.
     // Pada mode file://, master tetap diambil melalui Apps Script agar user
     // tidak perlu memilih file template dari komputer.
     if (window.location.protocol !== 'file:') {
       try {
-        const response = await fetch(fileName, { cache: 'no-store' });
-        if (response.ok) {
-          const buffer = await response.arrayBuffer();
-          const loaded = {
-            buffer,
-            fileName,
-            fileId: '',
-            updatedAt: '',
-            size: buffer.byteLength,
-            source: 'LOCAL_BUNDLED_TEMPLATE',
-            templateType
-          };
-          MASTER_TEMPLATE_LOAD_INFO[templateType] = loaded;
-          return loaded;
-        }
+        return await loadBundledMasterTemplate(fileName, templateType);
       } catch (localError) {
         console.warn(`Fallback master lokal ${fileName} juga gagal dimuat.`, localError);
       }
