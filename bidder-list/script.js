@@ -11452,3 +11452,331 @@ window.addEventListener('online', () => {
 });
 
 initializeBidderWorkspace();
+
+/* ===== RFQ PDF PURCHASE REQUISITION IMPORT =====
+   Independent of the existing Excel importer. Reads text-based PR PDFs
+   and maps each row according to its own currency:
+   USD -> Est. Budget PR USD (automatic IDR conversion remains enabled)
+   IDR -> Est. Budget PR IDR (manual value; no FX conversion)
+*/
+(function installRfqPdfImport(){
+  'use strict';
+  if (window.__MSW_RFQ_PDF_IMPORT_V1__) return;
+  window.__MSW_RFQ_PDF_IMPORT_V1__ = true;
+
+  const BUTTON_ID = 'rfqPdfImportBtn';
+  const PDFJS_VERSION = '3.11.174';
+  const PDFJS_SRC = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.min.js`;
+  const PDFJS_WORKER = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
+  let pdfJsPromise = null;
+
+  const clean = value => String(value == null ? '' : value).replace(/\\s+/g, ' ').trim();
+  const numberValue = value => {
+    let s = clean(value).replace(/[^0-9,.-]/g, '');
+    if (!s) return 0;
+    if (s.includes(',') && s.includes('.')) {
+      s = s.lastIndexOf(',') > s.lastIndexOf('.')
+        ? s.replace(/\\./g, '').replace(',', '.')
+        : s.replace(/,/g, '');
+    } else if (s.includes(',')) {
+      const parts = s.split(',');
+      s = parts.length > 1 && parts[parts.length - 1].length === 3
+        ? s.replace(/,/g, '')
+        : s.replace(',', '.');
+    }
+    const n = Number(s);
+    return Number.isFinite(n) ? n : 0;
+  };
+  const formatIdr = value => Math.round(Number(value || 0)).toLocaleString('id-ID');
+
+  function setStatus(message) {
+    const el = document.getElementById('saveStatus');
+    if (el) el.textContent = message;
+  }
+
+  function isRfqView() {
+    try {
+      if (typeof currentView !== 'undefined') return String(currentView).toUpperCase() === 'RFQ';
+    } catch (_) {}
+    return clean(document.getElementById('viewTitle')?.textContent).toUpperCase() === 'RFQ';
+  }
+
+  function getActivePr() {
+    try {
+      if (typeof getBidderMeta === 'function') {
+        const meta = getBidderMeta() || {};
+        return clean(meta.nopr || meta.noPR || meta['No PR']);
+      }
+    } catch (_) {}
+    try {
+      const p = new URLSearchParams(location.search);
+      return clean(p.get('noPR') || p.get('nopr') || p.get('pr'));
+    } catch (_) { return ''; }
+  }
+
+  function ensurePdfJs() {
+    if (window.pdfjsLib?.getDocument) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+      return Promise.resolve(window.pdfjsLib);
+    }
+    if (pdfJsPromise) return pdfJsPromise;
+    pdfJsPromise = new Promise((resolve, reject) => {
+      const existing = document.querySelector('script[data-msw-rfq-pdfjs]');
+      const finish = () => {
+        if (!window.pdfjsLib?.getDocument) {
+          reject(new Error('Library pembaca PDF tidak berhasil dimuat.'));
+          return;
+        }
+        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+        resolve(window.pdfjsLib);
+      };
+      if (existing) {
+        existing.addEventListener('load', finish, { once: true });
+        existing.addEventListener('error', () => reject(new Error('Library PDF.js tidak dapat dimuat.')), { once: true });
+        if (window.pdfjsLib?.getDocument) finish();
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = PDFJS_SRC;
+      script.async = true;
+      script.dataset.mswRfqPdfjs = 'true';
+      script.onload = finish;
+      script.onerror = () => reject(new Error('Library PDF.js tidak dapat dimuat. Periksa koneksi internet atau CDN.'));
+      document.head.appendChild(script);
+    });
+    return pdfJsPromise;
+  }
+
+  function getItemText(item) {
+    return clean(item?.str || '');
+  }
+
+  async function parsePurchaseRequisitionPdf(file) {
+    const pdfjs = await ensurePdfJs();
+    const pdf = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+    const allRows = [];
+
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber++) {
+      const page = await pdf.getPage(pageNumber);
+      const content = await page.getTextContent();
+      const tokens = content.items
+        .filter(item => getItemText(item))
+        .map(item => ({
+          text: getItemText(item),
+          x: Number(item.transform?.[4] || 0),
+          y: Number(item.transform?.[5] || 0)
+        }))
+        .filter(item => Number.isFinite(item.x) && Number.isFinite(item.y));
+
+      // In the supplied PR layout, each item row has a currency marker at the
+      // far right; quantity, unit and unit price share that row baseline.
+      const currencyRows = tokens
+        .filter(t => t.x >= 1050 && /^(IDR|USD)$/i.test(t.text))
+        .map(t => ({ y: t.y, currency: t.text.toUpperCase() }))
+        .sort((a, b) => a.y - b.y);
+
+      for (let i = 0; i < currencyRows.length; i++) {
+        const row = currencyRows[i];
+        const nextY = currencyRows[i + 1]?.y ?? Infinity;
+        const sameLine = tokens.filter(t => Math.abs(t.y - row.y) <= 3);
+        const qtyToken = sameLine
+          .filter(t => t.x >= 730 && t.x < 785 && /[0-9]/.test(t.text))
+          .sort((a, b) => a.x - b.x)[0];
+        const unitToken = sameLine
+          .filter(t => t.x >= 785 && t.x < 830)
+          .sort((a, b) => a.x - b.x)[0];
+        const priceToken = sameLine
+          .filter(t => t.x >= 830 && t.x < 900 && /[0-9]/.test(t.text))
+          .sort((a, b) => a.x - b.x)[0];
+
+        // Footer totals also contain USD/IDR, but do not have quantity, unit
+        // and unit-price cells, so they are intentionally ignored.
+        if (!qtyToken || !unitToken || !priceToken) continue;
+
+        const descTokens = tokens
+          .filter(t => t.x >= 70 && t.x < 230 && t.y >= row.y - 3 && t.y < nextY - 3)
+          .sort((a, b) => a.y - b.y || a.x - b.x);
+        const descLines = [];
+        for (const token of descTokens) {
+          let line = descLines.find(entry => Math.abs(entry.y - token.y) <= 2.5);
+          if (!line) {
+            line = { y: token.y, parts: [] };
+            descLines.push(line);
+          }
+          line.parts.push(token);
+        }
+        const description = descLines
+          .sort((a, b) => a.y - b.y)
+          .map(line => line.parts.sort((a, b) => a.x - b.x).map(t => t.text).join(' '))
+          .map(clean)
+          .filter(Boolean)
+          .join(' ')
+          .replace(/\\s+/g, ' ')
+          .trim();
+
+        const itemNumberTokens = tokens
+          .filter(t => t.x < 70 && t.y >= row.y - 3 && t.y < nextY - 3)
+          .sort((a, b) => a.y - b.y || a.x - b.x);
+        const itemNumber = itemNumberTokens.map(t => t.text).join('')
+          .replace(/\\s+/g, '')
+          .replace(/(\\.)(\\d{4})$/, '$1$2');
+
+        const qty = numberValue(qtyToken.text);
+        const unitPrice = numberValue(priceToken.text);
+        const unit = clean(unitToken.text);
+        if (!description || !(qty > 0) || !unit || !(unitPrice > 0)) continue;
+
+        const item = {
+          'No': String(allRows.length + 1),
+          'Description': description,
+          'Qty': clean(qtyToken.text),
+          'Ord Unit': unit,
+          'Est. Budget PR USD': '',
+          'Est. Budget PR IDR': '',
+          '__EstBudgetIdrMode': row.currency === 'IDR' ? 'manual' : 'auto',
+          'Item Number': itemNumber,
+          'Previous Price': '',
+          'Date': '',
+          'No Company': '',
+          'Company Name': '',
+          'Commodity WHS': '',
+          'Previous Company': '',
+          'Reference Source': '',
+          'Reference Checked At': ''
+        };
+
+        if (row.currency === 'IDR') {
+          item['Est. Budget PR IDR'] = formatIdr(unitPrice);
+          item.__EstBudgetIdrMode = 'manual';
+        } else {
+          item['Est. Budget PR USD'] = String(unitPrice);
+          item.__EstBudgetIdrMode = 'auto';
+        }
+        allRows.push(item);
+      }
+    }
+
+    if (!allRows.length) {
+      throw new Error('Tidak ada baris item yang terbaca. Pastikan PDF berisi teks yang dapat dipilih, bukan hasil scan gambar.');
+    }
+    return allRows;
+  }
+
+  async function importPdf(file) {
+    const button = document.getElementById(BUTTON_ID);
+    const originalLabel = button?.textContent || 'Upload PR PDF';
+    try {
+      if (!file) return;
+      if (!/\\.pdf$/i.test(file.name)) throw new Error('Pilih file berformat PDF.');
+      if (!isRfqView()) throw new Error('Buka tab RFQ terlebih dahulu.');
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Membaca PDF...';
+      }
+      setStatus(`Membaca Purchase Requisition: ${file.name}...`);
+      const items = await parsePurchaseRequisitionPdf(file);
+      const noPr = getActivePr();
+      const currencies = [...new Set(items.map(row =>
+        row['Est. Budget PR USD'] ? 'USD' : 'IDR'
+      ))];
+      const preview = items.slice(0, 8).map((row, i) =>
+        `${i + 1}. ${row.Description.slice(0, 95)} | Qty ${row.Qty} ${row['Ord Unit']} | ` +
+        (row['Est. Budget PR USD']
+          ? `USD ${row['Est. Budget PR USD']}`
+          : `IDR ${row['Est. Budget PR IDR']}`)
+      ).join('\\n');
+      const confirmed = window.confirm(
+        `No PR aktif: ${noPr || '(tidak terdeteksi)'}\\n` +
+        `File: ${file.name}\\n` +
+        `Item terbaca: ${items.length}\\nMata uang: ${currencies.join(', ')}\\n\\n` +
+        `Pratinjau:\\n${preview}${items.length > 8 ? `\\n...dan ${items.length - 8} item lainnya` : ''}\\n\\n` +
+        `Data item RFQ saat ini akan diganti. Lanjutkan?`
+      );
+      if (!confirmed) {
+        setStatus('Import PR PDF dibatalkan.');
+        return;
+      }
+      if (typeof DATA === 'undefined' || !DATA?.structured?.RFQ) {
+        throw new Error('Workspace RFQ belum siap. Buka tab RFQ lalu coba kembali.');
+      }
+      DATA.structured.RFQ.items = items;
+      try { if (typeof ensureRFQReferenceFields === 'function') ensureRFQReferenceFields(); } catch (_) {}
+      if (typeof markDirty === 'function') {
+        markDirty(`${items.length} item diimport dari PDF PR ${noPr || file.name}. Menunggu autosave...`);
+      } else {
+        setStatus(`${items.length} item berhasil diimport dari PDF PR.`);
+      }
+      try { if (typeof scheduleDocumentAutosave === 'function') scheduleDocumentAutosave(); } catch (_) {}
+      if (typeof renderCurrent === 'function') renderCurrent();
+    } catch (error) {
+      console.error('RFQ PDF import gagal:', error);
+      setStatus(`Import PR PDF gagal: ${error?.message || error}`);
+      window.alert(`Import PR PDF gagal.\\n\\n${error?.message || error}`);
+    } finally {
+      if (button) {
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
+  }
+
+  function syncVisibility() {
+    const button = document.getElementById(BUTTON_ID);
+    if (button) button.style.display = isRfqView() ? '' : 'none';
+  }
+
+  function installUi() {
+    if (document.getElementById(BUTTON_ID)) return true;
+    const toolbar = document.querySelector('.panel-header .toolbar');
+    if (!toolbar) return false;
+    const button = document.createElement('button');
+    button.id = BUTTON_ID;
+    button.type = 'button';
+    button.className = 'secondary';
+    button.textContent = '⬆ Upload PR PDF';
+    button.title = 'Import item dari Purchase Requisition PDF; mata uang IDR/USD dipetakan ke kolom yang sesuai';
+    button.style.marginRight = '8px';
+    button.addEventListener('click', () => {
+      const picker = document.createElement('input');
+      picker.type = 'file';
+      picker.accept = '.pdf,application/pdf';
+      picker.style.display = 'none';
+      picker.addEventListener('change', () => {
+        const file = picker.files?.[0];
+        if (file) importPdf(file);
+        picker.remove();
+      }, { once: true });
+      document.body.appendChild(picker);
+      picker.click();
+    });
+    const excelButton = document.getElementById('rfqExcelImportBtn');
+    if (excelButton?.parentElement === toolbar) excelButton.insertAdjacentElement('afterend', button);
+    else toolbar.insertBefore(button, toolbar.firstChild);
+
+    document.querySelectorAll('.nav-btn[data-view]').forEach(nav => {
+      nav.addEventListener('click', () => window.setTimeout(syncVisibility, 0));
+    });
+    const title = document.getElementById('viewTitle');
+    if (title) new MutationObserver(syncVisibility).observe(title, { childList: true, subtree: true, characterData: true });
+    syncVisibility();
+    return true;
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      if (installUi()) return;
+      let tries = 0;
+      const timer = window.setInterval(() => {
+        tries += 1;
+        if (installUi() || tries > 200) window.clearInterval(timer);
+      }, 50);
+    }, { once: true });
+  } else if (!installUi()) {
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      tries += 1;
+      if (installUi() || tries > 200) window.clearInterval(timer);
+    }, 50);
+  }
+})();
+
