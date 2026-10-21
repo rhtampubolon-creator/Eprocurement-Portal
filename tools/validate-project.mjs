@@ -55,10 +55,10 @@ const forbidden = [
   { name: 'Google Drive production folder', pattern: /https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]{20,}/g }
 ];
 for (const file of textFiles) {
-  // config.js adalah konfigurasi runtime lokal/deployment dan sengaja dapat
-  // berisi URL milik pengguna. File lain tetap diperiksa agar URL produksi
-  // tidak tersebar tanpa sengaja.
-  if (relative(root, file) === 'config.js') continue;
+  // Konfigurasi runtime sekarang digabung ke core/core.js. File tersebut
+  // memang harus berisi URL Web App publik yang dipakai frontend; file lain
+  // tetap diperiksa agar URL produksi tidak tersebar tanpa sengaja.
+  if (relative(root, file) === 'core/core.js') continue;
   const text = readFileSync(file, 'utf8');
   for (const rule of forbidden) {
     rule.pattern.lastIndex = 0;

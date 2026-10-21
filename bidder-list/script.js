@@ -8802,26 +8802,13 @@ async function loadDefaultTemplate(fileName) {
     MASTER_TEMPLATE_LOAD_ERRORS[templateType] = driveError?.message || String(driveError);
     console.warn(`Master ${fileName} dari Google Drive gagal dimuat.`, driveError);
 
-    // Fallback hanya untuk paket yang dijalankan melalui web server/hosting.
+    // Fallback template lokal memakai path bersama yang benar dari modul
+    // Bidder List menuju folder Template di root repository.
     // Pada mode file://, master tetap diambil melalui Apps Script agar user
     // tidak perlu memilih file template dari komputer.
     if (window.location.protocol !== 'file:') {
       try {
-        const response = await fetch(fileName, { cache: 'no-store' });
-        if (response.ok) {
-          const buffer = await response.arrayBuffer();
-          const loaded = {
-            buffer,
-            fileName,
-            fileId: '',
-            updatedAt: '',
-            size: buffer.byteLength,
-            source: 'LOCAL_BUNDLED_TEMPLATE',
-            templateType
-          };
-          MASTER_TEMPLATE_LOAD_INFO[templateType] = loaded;
-          return loaded;
-        }
+        return await loadBundledMasterTemplate(fileName, templateType);
       } catch (localError) {
         console.warn(`Fallback master lokal ${fileName} juga gagal dimuat.`, localError);
       }
@@ -11468,16 +11455,16 @@ initializeBidderWorkspace();
   const PDFJS_VERSION = '3.11.174';
   const PDFJS_CDNS = [
     {
-      src: \`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/\${PDFJS_VERSION}/pdf.min.js\`,
-      worker: \`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/\${PDFJS_VERSION}/pdf.worker.min.js\`
+      src: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.min.js`,
+      worker: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`
     },
     {
-      src: \`https://cdn.jsdelivr.net/npm/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.min.js\`,
-      worker: \`https://cdn.jsdelivr.net/npm/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.worker.min.js\`
+      src: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.min.js`,
+      worker: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.js`
     },
     {
-      src: \`https://unpkg.com/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.min.js\`,
-      worker: \`https://unpkg.com/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.worker.min.js\`
+      src: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/build/pdf.min.js`,
+      worker: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.js`
     }
   ];
   let pdfJsPromise = null;

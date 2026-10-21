@@ -1,0 +1,46 @@
+name: Performance Static Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/performance-audit.mjs'
+      - 'package.json'
+      - 'index.html'
+      - 'bidder-list/**'
+      - 'procurement-admin/**'
+      - 'core/**'
+      - 'backend/Code.gs'
+      - '.github/workflows/performance-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  performance-audit:
+    name: Static performance audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Validate project assets, syntax, JSON, and references
+        run: npm run validate
+      - name: Check Apps Script backend syntax
+        run: |
+          cp backend/Code.gs /tmp/msw-backend-check.js
+          node --check /tmp/msw-backend-check.js
+      - name: Run static performance audit
+        run: npm run audit:performance
+      - name: Install Playwright
+        run: npm install --no-save playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run isolated browser smoke test
+        run: npm run test:browser-smoke
