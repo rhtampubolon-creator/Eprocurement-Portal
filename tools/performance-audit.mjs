@@ -71,14 +71,22 @@ console.log(`Backend static indicators: ${sheetReads} getDataRange().getDisplayV
 console.log('These counts indicate review locations, not per-request call counts or measured latency.');
 
 const pdfCspMismatch = [];
-for (const rel of htmlFiles) {
-  const html = read(rel);
-  const pdfHosts = [...html.matchAll(/https:\/\/([^/'"\s]+)[^'"\s]*pdf(?:\.min)?\.js/gi)].map(m => m[1]);
-  if (!pdfHosts.length) continue;
+const pdfChecks = [
+  { htmlPath: 'bidder-list/index.html', sourcePath: 'bidder-list/script.js' }
+];
+for (const { htmlPath, sourcePath } of pdfChecks) {
+  const html = read(htmlPath);
+  const source = read(sourcePath);
+  const pdfHosts = [...source.matchAll(/https:\/\/([^/'"\s]+)[^'"\s]*pdf(?:\.min)?\.js/gi)].map(m => m[1]);
   const csp = (html.match(/Content-Security-Policy[^>]+content=["']([^"']+)/i) || [,''])[1];
+  const scriptSrc = (csp.match(/script-src\s+([^;]+)/i) || [,''])[1];
+  const workerSrc = (csp.match(/worker-src\s+([^;]+)/i) || [,''])[1];
   for (const host of new Set(pdfHosts)) {
-    if (csp && !csp.includes(host) && !/script-src[^;]*\*/.test(csp)) {
-      pdfCspMismatch.push(`${rel}: PDF.js host ${host} is not explicitly allowed by script-src`);
+    if (scriptSrc && !scriptSrc.includes(host) && !/\*/.test(scriptSrc)) {
+      pdfCspMismatch.push(`${htmlPath}: PDF.js host ${host} is not allowed by script-src`);
+    }
+    if (workerSrc && !workerSrc.includes(host) && !/\*/.test(workerSrc)) {
+      pdfCspMismatch.push(`${htmlPath}: PDF.js worker host ${host} is not allowed by worker-src`);
     }
   }
 }
