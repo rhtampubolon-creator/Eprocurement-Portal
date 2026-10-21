@@ -11468,16 +11468,16 @@ initializeBidderWorkspace();
   const PDFJS_VERSION = '3.11.174';
   const PDFJS_CDNS = [
     {
-      src: \`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/\${PDFJS_VERSION}/pdf.min.js\`,
-      worker: \`https://cdnjs.cloudflare.com/ajax/libs/pdf.js/\${PDFJS_VERSION}/pdf.worker.min.js\`
+      src: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.min.js`,
+      worker: `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`
     },
     {
-      src: \`https://cdn.jsdelivr.net/npm/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.min.js\`,
-      worker: \`https://cdn.jsdelivr.net/npm/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.worker.min.js\`
+      src: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.min.js`,
+      worker: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.js`
     },
     {
-      src: \`https://unpkg.com/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.min.js\`,
-      worker: \`https://unpkg.com/pdfjs-dist@\${PDFJS_VERSION}/build/pdf.worker.min.js\`
+      src: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/build/pdf.min.js`,
+      worker: `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/build/pdf.worker.min.js`
     }
   ];
   let pdfJsPromise = null;
