@@ -2503,6 +2503,7 @@ async function saveWorkspaceAssignDate() {
 
   button.disabled = true;
   input.disabled = true;
+  const rawDate = String(input.value || '').trim();
   status.textContent = 'Memeriksa status Procurement...';
   try {
     const noPR = String(meta.nopr || '').trim();
@@ -2518,7 +2519,6 @@ async function saveWorkspaceAssignDate() {
       throw new Error('Assign Date terkunci karena Flow Process sudah Create CQS.');
     }
 
-    const rawDate = String(input.value || '').trim();
     let assignDate = '';
     if (rawDate) {
       const parsed = new Date(`${rawDate}T00:00:00`);
