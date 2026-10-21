@@ -38,3 +38,9 @@ jobs:
           node --check /tmp/msw-backend-check.js
       - name: Run static performance audit
         run: npm run audit:performance
+      - name: Install Playwright
+        run: npm install --no-save playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run isolated browser smoke test
+        run: npm run test:browser-smoke
