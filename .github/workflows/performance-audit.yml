@@ -1,0 +1,32 @@
+name: Performance Static Audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'tools/performance-audit.mjs'
+      - 'package.json'
+      - 'index.html'
+      - 'bidder-list/**'
+      - 'procurement-admin/**'
+      - 'core/**'
+      - 'backend/Code.gs'
+      - '.github/workflows/performance-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  performance-audit:
+    name: Static performance audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Run static performance audit
+        run: npm run audit:performance
