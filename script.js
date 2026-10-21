@@ -1954,15 +1954,28 @@ function openSmartAlertRecord(alertId){
 }
 
 async function smartFetchSheet(sheetName){
-    const response = await fetch(
-        `${SMART_ALERT_CONFIG.gasUrl}?sheet=${encodeURIComponent(sheetName)}`,
-        { cache: "no-store" }
-    );
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
-    if (!payload?.success && payload?.message) {
-        throw new Error(payload.message);
+    const response = await fetch(SMART_ALERT_CONFIG.gasUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+            action: "READ_SHEET",
+            sheet: String(sheetName || "").trim(),
+            authToken: getStoredAuthToken()
+        }),
+        cache: "no-store"
+    });
+    const raw = await response.text();
+    let payload;
+    try {
+        payload = JSON.parse(raw);
+    } catch (_) {
+        const looksHtml = /^\\s*<!doctype html|^\\s*<html/i.test(raw);
+        throw new Error(looksHtml
+            ? "Google Apps Script mengembalikan halaman HTML, bukan JSON. Periksa deployment Web App dan akses endpoint."
+            : "Respons Google Apps Script bukan JSON yang valid.");
     }
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    if (!payload?.success && payload?.message) throw new Error(payload.message);
     if (!payload || !Array.isArray(payload.rows)) {
         throw new Error(`Data sheet ${sheetName} tidak valid`);
     }
@@ -2257,12 +2270,27 @@ async function loadRecentActivity(options = {}){
     }
 
     try {
-        const response = await fetch(
-            `${SMART_ALERT_CONFIG.gasUrl}?action=loadRecentActivity&limit=50`,
-            { cache: "no-store" }
-        );
+        const response = await fetch(SMART_ALERT_CONFIG.gasUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "loadRecentActivity",
+                limit: 50,
+                authToken: getStoredAuthToken()
+            }),
+            cache: "no-store"
+        });
+        const raw = await response.text();
+        let payload;
+        try {
+            payload = JSON.parse(raw);
+        } catch (_) {
+            const looksHtml = /^\\s*<!doctype html|^\\s*<html/i.test(raw);
+            throw new Error(looksHtml
+                ? "Google Apps Script mengembalikan halaman HTML, bukan JSON. Periksa deployment Web App dan akses endpoint."
+                : "Respons Recent Activity bukan JSON yang valid.");
+        }
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const payload = await response.json();
         const remoteRows = Array.isArray(payload?.activities)
             ? payload.activities
             : (Array.isArray(payload?.rows) ? payload.rows : []);
