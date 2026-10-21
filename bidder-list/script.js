@@ -11470,13 +11470,13 @@ initializeBidderWorkspace();
   const PDFJS_WORKER = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDFJS_VERSION}/pdf.worker.min.js`;
   let pdfJsPromise = null;
 
-  const clean = value => String(value == null ? '' : value).replace(/\\s+/g, ' ').trim();
+  const clean = value => String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
   const numberValue = value => {
     let s = clean(value).replace(/[^0-9,.-]/g, '');
     if (!s) return 0;
     if (s.includes(',') && s.includes('.')) {
       s = s.lastIndexOf(',') > s.lastIndexOf('.')
-        ? s.replace(/\\./g, '').replace(',', '.')
+        ? s.replace(/\./g, '').replace(',', '.')
         : s.replace(/,/g, '');
     } else if (s.includes(',')) {
       const parts = s.split(',');
@@ -11573,11 +11573,11 @@ initializeBidderWorkspace();
       const currencyRows = tokens
         .filter(t => t.x >= 1050 && /^(IDR|USD)$/i.test(t.text))
         .map(t => ({ y: t.y, currency: t.text.toUpperCase() }))
-        .sort((a, b) => a.y - b.y);
+        .sort((a, b) => b.y - a.y);
 
       for (let i = 0; i < currencyRows.length; i++) {
         const row = currencyRows[i];
-        const nextY = currencyRows[i + 1]?.y ?? Infinity;
+        const nextY = currencyRows[i + 1]?.y ?? -Infinity;
         const sameLine = tokens.filter(t => Math.abs(t.y - row.y) <= 3);
         const qtyToken = sameLine
           .filter(t => t.x >= 730 && t.x < 785 && /[0-9]/.test(t.text))
@@ -11594,8 +11594,8 @@ initializeBidderWorkspace();
         if (!qtyToken || !unitToken || !priceToken) continue;
 
         const descTokens = tokens
-          .filter(t => t.x >= 70 && t.x < 230 && t.y >= row.y - 3 && t.y < nextY - 3)
-          .sort((a, b) => a.y - b.y || a.x - b.x);
+          .filter(t => t.x >= 70 && t.x < 230 && t.y <= row.y + 3 && t.y > nextY + 3)
+          .sort((a, b) => b.y - a.y || a.x - b.x);
         const descLines = [];
         for (const token of descTokens) {
           let line = descLines.find(entry => Math.abs(entry.y - token.y) <= 2.5);
@@ -11606,20 +11606,20 @@ initializeBidderWorkspace();
           line.parts.push(token);
         }
         const description = descLines
-          .sort((a, b) => a.y - b.y)
+          .sort((a, b) => b.y - a.y)
           .map(line => line.parts.sort((a, b) => a.x - b.x).map(t => t.text).join(' '))
           .map(clean)
           .filter(Boolean)
           .join(' ')
-          .replace(/\\s+/g, ' ')
+          .replace(/\s+/g, ' ')
           .trim();
 
         const itemNumberTokens = tokens
           .filter(t => t.x < 70 && t.y >= row.y - 3 && t.y < nextY - 3)
           .sort((a, b) => a.y - b.y || a.x - b.x);
         const itemNumber = itemNumberTokens.map(t => t.text).join('')
-          .replace(/\\s+/g, '')
-          .replace(/(\\.)(\\d{4})$/, '$1$2');
+          .replace(/\s+/g, '')
+          .replace(/(\.)(\d{4})$/, '$1$2');
 
         const qty = numberValue(qtyToken.text);
         const unitPrice = numberValue(priceToken.text);
@@ -11667,7 +11667,7 @@ initializeBidderWorkspace();
     const originalLabel = button?.textContent || 'Upload PR PDF';
     try {
       if (!file) return;
-      if (!/\\.pdf$/i.test(file.name)) throw new Error('Pilih file berformat PDF.');
+      if (!/\.pdf$/i.test(file.name)) throw new Error('Pilih file berformat PDF.');
       if (!isRfqView()) throw new Error('Buka tab RFQ terlebih dahulu.');
       if (button) {
         button.disabled = true;
@@ -11684,12 +11684,12 @@ initializeBidderWorkspace();
         (row['Est. Budget PR USD']
           ? `USD ${row['Est. Budget PR USD']}`
           : `IDR ${row['Est. Budget PR IDR']}`)
-      ).join('\\n');
+      ).join('\n');
       const confirmed = window.confirm(
-        `No PR aktif: ${noPr || '(tidak terdeteksi)'}\\n` +
-        `File: ${file.name}\\n` +
-        `Item terbaca: ${items.length}\\nMata uang: ${currencies.join(', ')}\\n\\n` +
-        `Pratinjau:\\n${preview}${items.length > 8 ? `\\n...dan ${items.length - 8} item lainnya` : ''}\\n\\n` +
+        `No PR aktif: ${noPr || '(tidak terdeteksi)'}\n` +
+        `File: ${file.name}\n` +
+        `Item terbaca: ${items.length}\nMata uang: ${currencies.join(', ')}\n\n` +
+        `Pratinjau:\n${preview}${items.length > 8 ? `\n...dan ${items.length - 8} item lainnya` : ''}\n\n` +
         `Data item RFQ saat ini akan diganti. Lanjutkan?`
       );
       if (!confirmed) {
@@ -11711,7 +11711,7 @@ initializeBidderWorkspace();
     } catch (error) {
       console.error('RFQ PDF import gagal:', error);
       setStatus(`Import PR PDF gagal: ${error?.message || error}`);
-      window.alert(`Import PR PDF gagal.\\n\\n${error?.message || error}`);
+      window.alert(`Import PR PDF gagal.\n\n${error?.message || error}`);
     } finally {
       if (button) {
         button.disabled = false;
