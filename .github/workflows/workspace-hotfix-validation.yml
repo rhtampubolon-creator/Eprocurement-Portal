@@ -33,3 +33,9 @@ jobs:
         run: |
           cp backend/Code.gs /tmp/backend-check.js
           node --check /tmp/backend-check.js
+      - name: Install Playwright
+        run: npm install --no-save playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test Workspace iframe initialization
+        run: node tools/workspace-smoke.mjs
