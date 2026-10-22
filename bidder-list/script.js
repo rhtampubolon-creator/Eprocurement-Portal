@@ -3236,7 +3236,8 @@ function ensureVendorSuggestionPopup() {
 function hideVendorSuggestions() {
   const popup = document.getElementById('vendorCompanySuggestionPopup');
   if (popup) popup.hidden = true;
-  ACTIVE_VENDOR_PICKER_INPUT = null;
+  // Keep the last input reference briefly: blur can fire while a suggestion
+  // is being clicked, and clearing this reference would swallow the selection.
 }
 
 function hideVendorSuggestionsDelayed() {
