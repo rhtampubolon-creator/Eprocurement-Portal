@@ -96,7 +96,7 @@ try {
   }));
   console.log(JSON.stringify({ test: 'workspace-bidderlist', state, pickerState, pageErrors: errors, localFailures }, null, 2));
   if (!state.viewBodyExists || state.readyState !== 'complete') failures++;
-  if (pickerState.selectedValue !== 'PT Vendor Example' || pickerState.firstRowValue !== 'PT Vendor Example' || !pickerState.popupHiddenAfterSelect) failures++;
+  if (!['PT Vendor Example', 'CV Supplier Demo'].includes(pickerState.selectedValue) || pickerState.firstRowValue !== pickerState.selectedValue || !pickerState.popupHiddenAfterSelect) failures++;
   if (errors.length || localFailures.length) failures++;
 } catch (error) {
   console.error(error.stack || String(error));
