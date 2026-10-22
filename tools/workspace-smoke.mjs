@@ -85,7 +85,7 @@ try {
   await suggestion.waitFor({ state: 'visible', timeout: 5000 });
   const suggestionText = await suggestion.innerText();
   await suggestion.click();
-  await bidderFrame.waitForFunction(() => document.querySelector('input.vendor-select')?.value === 'PT Vendor Example', { timeout: 5000 });
+  await bidderFrame.waitForFunction(() => document.querySelector('input.vendor-select')?.value === 'PT Vendor Example', null, { timeout: 5000 });
   const pickerState = {
     suggestionVisibleOnFocus: true,
     firstSuggestion: suggestionText,
