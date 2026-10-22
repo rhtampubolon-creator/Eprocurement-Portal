@@ -74,7 +74,7 @@ for (const rel of ['index.html','procurement-admin/index.html','detail-contract/
   const html = read(rel);
   check(`${rel} viewport`, /name=["']viewport["']/.test(html));
   if (rel !== 'index.html') {
-    const expectedCommonVersion = /common\.js\?v=20260810-contract-dashboard-v28/;
+    const expectedCoreScript = /core\/core\.js/;
     check(`${rel} loads consolidated core and touch support`, expectedCoreScript.test(html));
   }
 }
