@@ -35,6 +35,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Install Playwright
+        run: npm install --no-save playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run Workspace and BidderList smoke test
+        run: node tools/workspace-smoke.mjs
       - name: Run project, security, hardening, and session audits
         run: npm run audit
       - name: Run performance audit
