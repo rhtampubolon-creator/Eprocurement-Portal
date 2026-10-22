@@ -7,7 +7,7 @@ on:
       - 'bidder-list/script.js'
       - '.github/workflows/workspace-hotfix-validation.yml'
   push:
-    branches: ['hotfix/workspace-blank-syntax', 'fix/vendor-company-picker']
+    branches: ['hotfix/workspace-blank-syntax', 'fix/vendor-company-picker', 'fix/bidderlist-vendor-management-source']
     paths:
       - 'bidder-list/script.js'
       - '.github/workflows/workspace-hotfix-validation.yml'
