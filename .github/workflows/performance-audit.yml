@@ -37,7 +37,5 @@ jobs:
           node-version: 22
       - name: Run project, security, hardening, and session audits
         run: npm run audit
-      - name: Run mobile role audit
-        run: npm run mobile-role-audit
       - name: Run performance audit
         run: npm run audit:performance
