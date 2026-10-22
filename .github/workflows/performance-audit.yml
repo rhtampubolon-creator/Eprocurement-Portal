@@ -27,7 +27,7 @@ jobs:
   audit:
     name: Static performance and safety checks
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,5 +35,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Run project, security, hardening, and session audits
+        run: npm run audit
+      - name: Run mobile role audit
+        run: npm run mobile-role-audit
       - name: Run performance audit
         run: npm run audit:performance
