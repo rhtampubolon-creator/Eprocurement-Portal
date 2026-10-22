@@ -3215,16 +3215,6 @@ function ensureVendorSuggestionPopup() {
   popup.hidden = true;
   popup.setAttribute('role', 'listbox');
   popup.addEventListener('mousedown', event => event.preventDefault());
-  popup.addEventListener('click', event => {
-    const option = event.target.closest('[data-vendor-index]');
-    if (!option || !ACTIVE_VENDOR_PICKER_INPUT) return;
-    const vendor = VENDOR_COMPANIES[Number(option.dataset.vendorIndex)];
-    const input = ACTIVE_VENDOR_PICKER_INPUT;
-    if (!vendor || !input?.isConnected) return;
-    const rowIndex = Number(input.dataset.row);
-    hideVendorSuggestions();
-    applySupplierName(rowIndex, vendor.companyName, true);
-  });
   document.body.appendChild(popup);
 
   // Close on viewport resize; scrolling caused by clicking a suggestion must
@@ -3245,6 +3235,15 @@ function hideVendorSuggestionsDelayed() {
     const popup = document.getElementById('vendorCompanySuggestionPopup');
     if (popup && !popup.matches(':hover')) hideVendorSuggestions();
   }, 160);
+}
+
+function selectVendorSuggestion(option) {
+  const vendor = VENDOR_COMPANIES[Number(option?.dataset?.vendorIndex)];
+  const input = ACTIVE_VENDOR_PICKER_INPUT || document.querySelector('.vendor-select:focus');
+  if (!vendor || !input?.isConnected) return;
+  const rowIndex = Number(input.dataset.row);
+  hideVendorSuggestions();
+  applySupplierName(rowIndex, vendor.companyName, true);
 }
 
 function showVendorSuggestions(inputEl) {
@@ -3276,7 +3275,7 @@ function showVendorSuggestions(inputEl) {
 
     popup.innerHTML = matches.length
       ? matches.map(({ vendor, index }) =>
-          '<button type="button" class="vendor-suggestion-option" role="option" data-vendor-index="' + index + '">' +
+          '<button type="button" class="vendor-suggestion-option" role="option" data-vendor-index="' + index + '" onclick="selectVendorSuggestion(this)">' +
             '<span class="vendor-suggestion-name">' + escapeHtml(vendor.companyName) + '</span>' +
             (vendor.noCompany ? '<span class="vendor-suggestion-code">' + escapeHtml(vendor.noCompany) + '</span>' : '') +
           '</button>'
