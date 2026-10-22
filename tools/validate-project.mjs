@@ -76,4 +76,3 @@ if (errors.length) {
 }
 
 console.log(`Validation OK: ${jsFiles.length} JavaScript files, ${htmlFiles.length} HTML files, ${files.length} total files.`);
-}
