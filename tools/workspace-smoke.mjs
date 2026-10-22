@@ -77,7 +77,18 @@ try {
     viewBodyExists: Boolean(document.getElementById('viewBody')),
     viewBodyChildren: document.getElementById('viewBody')?.children?.length || 0,
     viewBodyText: document.getElementById('viewBody')?.innerText?.trim()?.slice(0, 250) || '',
-    readyState: document.readyState
+    readyState: document.readyState,
+    navigationTiming: (() => {
+      const nav = performance.getEntriesByType('navigation')[0];
+      if (!nav) return null;
+      return {
+        responseStartMs: Math.round(nav.responseStart),
+        domInteractiveMs: Math.round(nav.domInteractive),
+        domContentLoadedMs: Math.round(nav.domContentLoadedEventEnd),
+        loadEventEndMs: Math.round(nav.loadEventEnd),
+        transferSizeBytes: nav.transferSize
+      };
+    })()
   }));
   const supplierInput = bidderFrame.locator('input.vendor-select').first();
   await supplierInput.focus();
