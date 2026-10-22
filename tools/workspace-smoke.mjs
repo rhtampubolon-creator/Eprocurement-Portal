@@ -85,16 +85,18 @@ try {
   await suggestion.waitFor({ state: 'visible', timeout: 5000 });
   const suggestionText = await suggestion.innerText();
   await suggestion.click();
-  await bidderFrame.waitForFunction(() => document.querySelector('input.vendor-select')?.value === 'PT Vendor Example', null, { timeout: 5000 });
-  const pickerState = {
+  await bidderFrame.waitForTimeout(250);
+  const pickerState = await bidderFrame.evaluate(() => ({
     suggestionVisibleOnFocus: true,
-    firstSuggestion: suggestionText,
-    selectedValue: await bidderFrame.locator('input.vendor-select').first().inputValue(),
-    popupHiddenAfterSelect: await bidderFrame.locator('#vendorCompanySuggestionPopup').evaluate(el => el.hidden)
-  };
+    firstSuggestion: document.querySelector('#vendorCompanySuggestionPopup [data-vendor-index]')?.innerText || '',
+    selectedValue: document.querySelector('input.vendor-select')?.value || '',
+    popupHiddenAfterSelect: document.getElementById('vendorCompanySuggestionPopup')?.hidden ?? true,
+    vendorCount: typeof VENDOR_COMPANIES !== 'undefined' ? VENDOR_COMPANIES.length : -1,
+    firstRowValue: typeof DATA !== 'undefined' ? DATA.structured.BidderList.rows[0]?.['Name of Invited Supplier'] : ''
+  }));
   console.log(JSON.stringify({ test: 'workspace-bidderlist', state, pickerState, pageErrors: errors, localFailures }, null, 2));
   if (!state.viewBodyExists || state.readyState !== 'complete') failures++;
-  if (pickerState.selectedValue !== 'PT Vendor Example' || !pickerState.popupHiddenAfterSelect) failures++;
+  if (pickerState.selectedValue !== 'PT Vendor Example' || pickerState.firstRowValue !== 'PT Vendor Example' || !pickerState.popupHiddenAfterSelect) failures++;
   if (errors.length || localFailures.length) failures++;
 } catch (error) {
   console.error(error.stack || String(error));
