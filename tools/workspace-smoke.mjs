@@ -43,15 +43,26 @@ try {
     }
   });
   // Isolate test from production: all Apps Script requests receive fixture data.
-  await page.route('https://script.google.com/**', route => route.fulfill({
-    status: 200, contentType: 'application/json',
-    headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' },
-    body: JSON.stringify({ success: true, status: 'ONLINE', loginRequired: true, rows: [], sheets: {}, data: [], result: [] })
-  }));
-  await page.route('https://script.googleusercontent.com/**', route => route.fulfill({
-    status: 200, contentType: 'application/json', headers: { 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify({ success: true, status: 'ONLINE', loginRequired: true, rows: [], sheets: {}, data: [], result: [] })
-  }));
+  const mockAppsScript = async route => {
+    let requestData = {};
+    try { requestData = route.request().postDataJSON() || {}; } catch (_) {}
+    let sheetName = String(requestData.sheet || '');
+    try {
+      const url = new URL(route.request().url());
+      sheetName = sheetName || url.searchParams.get('sheet') || '';
+    } catch (_) {}
+    const rows = sheetName.toLowerCase() === 'company' ? [
+      { 'No Company': 'V001', 'Company Name': 'PT Vendor Example', 'Customer Contact': 'Tester', 'Company Phone': '08123456789', 'Email': 'vendor@example.test', 'Status Register': 'Registered', 'Company Status': 'Active' },
+      { 'No Company': 'V002', 'Company Name': 'CV Supplier Demo', 'Customer Contact': 'Demo Contact', 'Company Phone': '08111111111', 'Email': 'demo@example.test', 'Status Register': 'Registered', 'Company Status': 'Active' }
+    ] : [];
+    return route.fulfill({
+      status: 200, contentType: 'application/json',
+      headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS' },
+      body: JSON.stringify({ success: true, status: 'ONLINE', loginRequired: true, rows, sheets: {}, data: [], result: [] })
+    });
+  };
+  await page.route('https://script.google.com/**', mockAppsScript);
+  await page.route('https://script.googleusercontent.com/**', mockAppsScript);
   await page.goto('http://127.0.0.1:4173/procurement-admin/workspace/index.html?pr=TEST-PR&tab=BidderList', { waitUntil: 'load', timeout: 30000 });
   await page.waitForFunction(() => {
     const frame = document.getElementById('bidderWorkspaceFrame');
@@ -68,8 +79,24 @@ try {
     viewBodyText: document.getElementById('viewBody')?.innerText?.trim()?.slice(0, 250) || '',
     readyState: document.readyState
   }));
-  console.log(JSON.stringify({ test: 'workspace-bidderlist', state, pageErrors: errors, localFailures }, null, 2));
+  const supplierInput = bidderFrame.locator('input.vendor-select').first();
+  await supplierInput.focus();
+  const suggestion = bidderFrame.locator('#vendorCompanySuggestionPopup [data-vendor-index="0"]');
+  await suggestion.waitFor({ state: 'visible', timeout: 5000 });
+  const suggestionText = await suggestion.innerText();
+  await suggestion.click();
+  await bidderFrame.waitForTimeout(250);
+  const pickerState = await bidderFrame.evaluate(() => ({
+    suggestionVisibleOnFocus: true,
+    firstSuggestion: document.querySelector('#vendorCompanySuggestionPopup [data-vendor-index]')?.innerText || '',
+    selectedValue: document.querySelector('input.vendor-select')?.value || '',
+    popupHiddenAfterSelect: document.getElementById('vendorCompanySuggestionPopup')?.hidden ?? true,
+    vendorCount: typeof VENDOR_COMPANIES !== 'undefined' ? VENDOR_COMPANIES.length : -1,
+    firstRowValue: typeof DATA !== 'undefined' ? DATA.structured.BidderList.rows[0]?.['Name of Invited Supplier'] : ''
+  }));
+  console.log(JSON.stringify({ test: 'workspace-bidderlist', state, pickerState, pageErrors: errors, localFailures }, null, 2));
   if (!state.viewBodyExists || state.readyState !== 'complete') failures++;
+  if (!['PT Vendor Example', 'CV Supplier Demo'].includes(pickerState.selectedValue) || pickerState.firstRowValue !== pickerState.selectedValue || !pickerState.popupHiddenAfterSelect) failures++;
   if (errors.length || localFailures.length) failures++;
 } catch (error) {
   console.error(error.stack || String(error));

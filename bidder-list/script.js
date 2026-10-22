@@ -3202,7 +3202,104 @@ async function loadCurrentUserProfile() {
 // Panggil sedini mungkin supaya sudah siap saat draft pertama kali dibuat.
 loadCurrentUserProfile();
 let VENDOR_COMPANIES = [];
-let vendorSourceLabel = 'Fallback dari sheet FIND';
+let vendorSourceLabel = 'Google Sheet (Company)';
+let ACTIVE_VENDOR_PICKER_INPUT = null;
+
+function ensureVendorSuggestionPopup() {
+  let popup = document.getElementById('vendorCompanySuggestionPopup');
+  if (popup) return popup;
+
+  popup = document.createElement('div');
+  popup.id = 'vendorCompanySuggestionPopup';
+  popup.className = 'vendor-suggestion-popup';
+  popup.hidden = true;
+  popup.setAttribute('role', 'listbox');
+  popup.addEventListener('mousedown', event => event.preventDefault());
+  document.body.appendChild(popup);
+
+  // Close on viewport resize; scrolling caused by clicking a suggestion must
+  // not clear the active input before the option click is processed.
+  window.addEventListener('resize', () => hideVendorSuggestions());
+  return popup;
+}
+
+function hideVendorSuggestions() {
+  const popup = document.getElementById('vendorCompanySuggestionPopup');
+  if (popup) popup.hidden = true;
+  // Keep the last input reference briefly: blur can fire while a suggestion
+  // is being clicked, and clearing this reference would swallow the selection.
+}
+
+function hideVendorSuggestionsDelayed() {
+  window.setTimeout(() => {
+    const popup = document.getElementById('vendorCompanySuggestionPopup');
+    if (popup && !popup.matches(':hover')) hideVendorSuggestions();
+  }, 160);
+}
+
+function selectVendorSuggestion(option) {
+  const vendor = VENDOR_COMPANIES[Number(option?.dataset?.vendorIndex)];
+  const input = ACTIVE_VENDOR_PICKER_INPUT || document.querySelector('.vendor-select:focus');
+  if (!vendor || !input?.isConnected) return;
+  const rowIndex = Number(input.dataset.row);
+  hideVendorSuggestions();
+  applySupplierName(rowIndex, vendor.companyName, true);
+}
+
+function showVendorSuggestions(inputEl) {
+  if (!inputEl || !inputEl.isConnected) return;
+  ACTIVE_VENDOR_PICKER_INPUT = inputEl;
+  const popup = ensureVendorSuggestionPopup();
+  const rect = inputEl.getBoundingClientRect();
+  const width = Math.min(Math.max(rect.width, 260), Math.max(220, window.innerWidth - 16));
+  const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+  const spaceBelow = window.innerHeight - rect.bottom - 12;
+  const showAbove = spaceBelow < 190 && rect.top > spaceBelow;
+  const maxHeight = Math.max(120, Math.min(280, (showAbove ? rect.top : spaceBelow) - 8));
+
+  popup.style.width = width + 'px';
+  popup.style.left = left + 'px';
+  popup.style.maxHeight = maxHeight + 'px';
+  popup.style.top = showAbove
+    ? Math.max(8, rect.top - Math.min(280, popup.scrollHeight || 280) - 4) + 'px'
+    : Math.min(window.innerHeight - 80, rect.bottom + 4) + 'px';
+
+  const query = normalizeTextKey(inputEl.value);
+  if (!VENDOR_COMPANIES.length) {
+    popup.innerHTML = '<div class="vendor-suggestion-empty">Daftar perusahaan belum termuat dari tab Company. Periksa koneksi/login lalu muat ulang Workspace.</div>';
+  } else {
+    const matches = VENDOR_COMPANIES
+      .map((vendor, index) => ({ vendor, index }))
+      .filter(({ vendor }) => !query || normalizeTextKey(vendor.companyName).includes(query))
+      .slice(0, 100);
+
+    popup.innerHTML = matches.length
+      ? matches.map(({ vendor, index }) =>
+          '<button type="button" class="vendor-suggestion-option" role="option" data-vendor-index="' + index + '" onclick="selectVendorSuggestion(this)">' +
+            '<span class="vendor-suggestion-name">' + escapeHtml(vendor.companyName) + '</span>' +
+            (vendor.noCompany ? '<span class="vendor-suggestion-code">' + escapeHtml(vendor.noCompany) + '</span>' : '') +
+          '</button>'
+        ).join('')
+      : '<div class="vendor-suggestion-empty">Tidak ada perusahaan yang cocok. Nama tetap dapat diisi manual.</div>';
+  }
+
+  popup.hidden = false;
+}
+
+function handleVendorPickerKeydown(event, inputEl) {
+  if (event.key === 'Escape') {
+    hideVendorSuggestions();
+    return;
+  }
+  if (event.key === 'ArrowDown') {
+    const popup = document.getElementById('vendorCompanySuggestionPopup');
+    const first = popup?.querySelector('[data-vendor-index]');
+    if (first) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+}
 
 const PROCUREMENT_DOCUMENT_VIEW_CONFIG = {
   BIDDERLIST: { label: 'BidderList', view: 'BidderList', folderName: '02. Bidderlist & Quotation' },
@@ -3630,7 +3727,16 @@ function updateVendorStatus(extraMessage='') {
 async function syncVendorCompanyFromGoogleSheet(showAlert = false) {
   try {
     const res = await fetch(`${GAS_URL}?sheet=Company`, { cache: 'no-store' });
-    const data = await res.json();
+    const raw = await res.text();
+    let data;
+    try {
+      data = JSON.parse(raw || '{}');
+    } catch (_) {
+      throw new Error('Respons server bukan JSON. Periksa URL Apps Script dan sesi login.');
+    }
+    if (!res.ok || data?.success === false) {
+      throw new Error(data?.message || `Gagal memuat Company (HTTP ${res.status}).`);
+    }
     const rows = Array.isArray(data.rows) ? data.rows : [];
     if (!rows.length) {
       updateVendorStatus('Tab Company di Google Sheet masih kosong');
@@ -3916,7 +4022,6 @@ function renderBidderSupplierTable(rows, path) {
   }
   if (!filtered.length) return out + '<p class="empty">Tidak ada data.</p>';
 
-  out += `<datalist id="vendorCompanyOptions">${VENDOR_COMPANIES.map(v => `<option value="${escapeHtml(v.companyName)}">`).join('')}</datalist>`;
   out += '<div class="table-wrap"><table><thead><tr>';
   headers.forEach(h => out += `<th>${escapeHtml(h)}</th>`);
   if (showCQSColumns) out += '<th>Pilih CQS</th><th>Alasan Tidak Masuk CQS</th>';
@@ -3928,7 +4033,7 @@ function renderBidderSupplierTable(rows, path) {
     headers.forEach(h => {
       const value = item.row[h] || '';
       if (h === 'Name of Invited Supplier') {
-        out += `<td><input class="vendor-select bidder-field-input" list="vendorCompanyOptions" data-row="${item.idx}" value="${escapeHtml(value)}" placeholder="Pilih atau ketik nama perusahaan" oninput="handleSupplierManualInput(this)" onchange="handleSupplierManualCommit(this)" autocomplete="off"></td>`;
+        out += `<td class="vendor-picker-cell"><input class="vendor-select bidder-field-input" data-row="${item.idx}" value="${escapeHtml(value)}" placeholder="Pilih atau ketik nama perusahaan" onfocus="showVendorSuggestions(this)" oninput="handleSupplierManualInput(this); showVendorSuggestions(this)" onchange="handleSupplierManualCommit(this)" onblur="hideVendorSuggestionsDelayed()" onkeydown="handleVendorPickerKeydown(event, this)" autocomplete="off" aria-haspopup="listbox" aria-expanded="false"></td>`;
       } else if (['Contact Person', 'No Telp', 'Email'].includes(h)) {
         out += `<td class="autofill-cell"><input class="bidder-field-input" data-row="${item.idx}" data-key="${escapeHtml(h)}" value="${escapeHtml(value)}" oninput="handleBidderManualField(this)" placeholder="Isi ${escapeHtml(h)}"></td>`;
       } else if (['No Company', 'Register Status'].includes(h)) {

@@ -2226,3 +2226,62 @@ body.workspace-mode .wrapper {
     max-width:none;
     height:100%;
 }
+
+/* Searchable supplier picker for the Procurement Workspace */
+.vendor-picker-cell {
+  position: relative;
+  overflow: visible;
+}
+.vendor-picker-cell .vendor-select {
+  width: 100%;
+  min-width: 180px;
+  box-sizing: border-box;
+}
+.vendor-suggestion-popup {
+  position: fixed;
+  z-index: 2147483000;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  border: 1px solid #93c5fd;
+  border-radius: 9px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, .22);
+  padding: 4px;
+}
+.vendor-suggestion-popup[hidden] {
+  display: none !important;
+}
+.vendor-suggestion-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: #fff;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.vendor-suggestion-option:hover,
+.vendor-suggestion-option:focus {
+  outline: none;
+  background: #e0f2fe;
+}
+.vendor-suggestion-name {
+  overflow-wrap: anywhere;
+}
+.vendor-suggestion-code {
+  flex: 0 0 auto;
+  color: #64748b;
+  font-size: 11px;
+}
+.vendor-suggestion-empty {
+  padding: 12px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
