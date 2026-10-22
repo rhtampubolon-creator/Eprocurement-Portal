@@ -1,0 +1,41 @@
+name: Workspace Hotfix Validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'bidder-list/script.js'
+      - '.github/workflows/workspace-hotfix-validation.yml'
+  push:
+    branches: ['hotfix/workspace-blank-syntax']
+    paths:
+      - 'bidder-list/script.js'
+      - '.github/workflows/workspace-hotfix-validation.yml'
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check all JavaScript files
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            node --check "$file"
+          done < <(find . -type f -name '*.js' -not -path './node_modules/*' -not -path './.git/*' -print0)
+      - name: Check Apps Script syntax
+        run: |
+          cp backend/Code.gs /tmp/backend-check.js
+          node --check /tmp/backend-check.js
+      - name: Install Playwright
+        run: npm install --no-save playwright
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test Workspace iframe initialization
+        run: node tools/workspace-smoke.mjs
