@@ -3227,8 +3227,8 @@ function ensureVendorSuggestionPopup() {
   });
   document.body.appendChild(popup);
 
-  // Keep the popup aligned with the input; close it when the table scrolls.
-  window.addEventListener('scroll', () => hideVendorSuggestions(), true);
+  // Close on viewport resize; scrolling caused by clicking a suggestion must
+  // not clear the active input before the option click is processed.
   window.addEventListener('resize', () => hideVendorSuggestions());
   return popup;
 }
