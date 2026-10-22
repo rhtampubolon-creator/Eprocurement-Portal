@@ -3202,7 +3202,8 @@ async function loadCurrentUserProfile() {
 // Panggil sedini mungkin supaya sudah siap saat draft pertama kali dibuat.
 loadCurrentUserProfile();
 let VENDOR_COMPANIES = [];
-let vendorSourceLabel = 'Google Sheet (Company)';
+let vendorSourceLabel = 'Vendor Management';
+let vendorLoadError = '';
 let ACTIVE_VENDOR_PICKER_INPUT = null;
 
 function ensureVendorSuggestionPopup() {
@@ -3266,7 +3267,10 @@ function showVendorSuggestions(inputEl) {
 
   const query = normalizeTextKey(inputEl.value);
   if (!VENDOR_COMPANIES.length) {
-    popup.innerHTML = '<div class="vendor-suggestion-empty">Daftar perusahaan belum termuat dari tab Company. Periksa koneksi/login lalu muat ulang Workspace.</div>';
+    const message = vendorLoadError
+      ? 'Gagal memuat daftar Vendor Management: ' + vendorLoadError
+      : 'Daftar perusahaan dari Vendor Management sedang dimuat. Klik muat ulang Workspace jika daftar tetap kosong.';
+    popup.innerHTML = '<div class="vendor-suggestion-empty">' + escapeHtml(message) + '</div>';
   } else {
     const matches = VENDOR_COMPANIES
       .map((vendor, index) => ({ vendor, index }))
@@ -3726,46 +3730,52 @@ function updateVendorStatus(extraMessage='') {
 
 async function syncVendorCompanyFromGoogleSheet(showAlert = false) {
   try {
-    const res = await fetch(`${GAS_URL}?sheet=Company`, { cache: 'no-store' });
+    // Use the authenticated READ_SHEET action used by the rest of the app.
+    // Avoid a raw ?sheet=Company GET in the embedded Procurement Workspace.
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'READ_SHEET', sheet: 'Company' }),
+      cache: 'no-store'
+    });
     const raw = await res.text();
     let data;
     try {
       data = JSON.parse(raw || '{}');
     } catch (_) {
-      throw new Error('Respons server bukan JSON. Periksa URL Apps Script dan sesi login.');
+      throw new Error('Respons server bukan JSON. Periksa deployment Apps Script dan sesi login.');
     }
     if (!res.ok || data?.success === false) {
-      throw new Error(data?.message || `Gagal memuat Company (HTTP ${res.status}).`);
+      throw new Error(data?.message || ('Gagal membaca Vendor Management (HTTP ' + res.status + ').'));
     }
     const rows = Array.isArray(data.rows) ? data.rows : [];
     if (!rows.length) {
-      updateVendorStatus('Tab Company di Google Sheet masih kosong');
-      if (showAlert) alert('Data Company di Google Sheet masih kosong.');
+      vendorLoadError = 'data perusahaan kosong atau akun tidak memiliki akses baca.';
+      updateVendorStatus(vendorLoadError);
+      if (showAlert) alert('Daftar Vendor Management kosong atau tidak dapat diakses.');
       return false;
     }
-    setVendorCompanies(rows, 'Google Sheet (tab Company)');
-    if (showAlert) alert(`Berhasil sync ${VENDOR_COMPANIES.length} vendor langsung dari Google Sheet (tab Company).`);
+    vendorLoadError = '';
+    setVendorCompanies(rows, 'Vendor Management');
+    if (showAlert) alert('Berhasil memuat ' + VENDOR_COMPANIES.length + ' perusahaan dari Vendor Management.');
     return true;
   } catch (error) {
-    console.warn('Gagal sync Company dari Google Sheet:', error);
-    if (showAlert) alert('Gagal mengambil data dari Google Sheet (tab Company).\n\n' + error.message);
+    vendorLoadError = String(error?.message || error || 'Kesalahan tidak diketahui');
+    console.warn('Gagal memuat daftar Vendor Management:', error);
+    updateVendorStatus(vendorLoadError);
+    if (showAlert) alert('Gagal memuat daftar Vendor Management.\n\n' + vendorLoadError);
     return false;
   }
 }
 
 async function initVendorCompanyData() {
-    const liveOk =
-    await syncVendorCompanyFromGoogleSheet(false);
-
-    if (liveOk) return;
-
-    VENDOR_COMPANIES = [];
-    vendorSourceLabel = 'Google Sheet (Company)';
-
-    updateVendorStatus();
-    updateCQSNavigationStatus();
+  const liveOk = await syncVendorCompanyFromGoogleSheet(false);
+  if (liveOk) return;
+  VENDOR_COMPANIES = [];
+  vendorSourceLabel = 'Vendor Management';
+  updateVendorStatus(vendorLoadError);
+  updateCQSNavigationStatus();
 }
-
 function findVendorByCompany(companyName) {
   const exactKey = normalizeCompanyMatchKey(companyName, false);
   if (!exactKey) return null;
