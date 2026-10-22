@@ -29,7 +29,7 @@ check('Contract does not see Vendor Management', !allowed('CONTRACT').includes('
 const procurementHtml = read('procurement-admin/index.html');
 check('Buyer Procurement has no duplicate Dashboard button', !procurementHtml.includes('id="btnDashboard"') && !/>\s*Dashboard\s*<\/button>/.test(procurementHtml));
 
-const common = read('core/core.js');
+const common = read('common.js');
 check('touch double-tap edit bridge', common.includes('dispatchRowGesture("dblclick"'));
 check('touch long-press context bridge', common.includes('dispatchRowGesture("contextmenu"'));
 check('touch supports native touch and pen', common.includes('addEventListener("touchstart"') && common.includes("pointerType || '').toLowerCase() !== 'pen'"));
@@ -43,7 +43,7 @@ check('Buyer Contract keeps Export action available', /actionDropdown\) actionDr
 const vendorScript = read('vendor-company/script.js');
 check('Buyer Vendor keeps Export action available', /actionDropdown\) actionDropdown\.style\.display = ""/.test(vendorScript));
 
-const backend = read('backend/Code.gs');
+const backend = read('codegs.js');
 check('Buyer backend contract view', /BUYER:\s*\[[\s\S]*?"contract\.view"/.test(backend));
 check('Buyer backend company/vendor view', /BUYER:\s*\[[\s\S]*?"company\.view"/.test(backend));
 
@@ -74,8 +74,8 @@ for (const rel of ['index.html','procurement-admin/index.html','detail-contract/
   const html = read(rel);
   check(`${rel} viewport`, /name=["']viewport["']/.test(html));
   if (rel !== 'index.html') {
-    const expectedCoreScript = /core\/core\.js/;
-    check(`${rel} loads consolidated core and touch support`, expectedCoreScript.test(html));
+    const expectedCommonVersion = /common\.js\?v=20260810-contract-dashboard-v28/;
+    check(`${rel} loads common touch support`, expectedCommonVersion.test(html));
   }
 }
 
