@@ -54,7 +54,7 @@ try {
     let navigationTiming = null;
     let title = '';
     try {
-      const response = await page.goto(new URL(path, origin.replace(/\\/+$/, '') + '/').href, { waitUntil: 'load', timeout: 45000 });
+      const response = await page.goto(new URL(path, origin.replace(/\/+$/, '') + '/').href, { waitUntil: 'load', timeout: 45000 });
       status = response?.status() ?? null;
       await page.waitForTimeout(800);
       title = await page.title();
