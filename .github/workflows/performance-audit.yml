@@ -1,6 +1,10 @@
 name: Performance Audit Guardrails
 
 on:
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
+    branches: [main]
   pull_request:
     branches: [main]
     paths:
@@ -25,6 +29,7 @@ permissions:
 
 jobs:
   audit:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     name: Static performance and safety checks
     runs-on: ubuntu-latest
     timeout-minutes: 10
