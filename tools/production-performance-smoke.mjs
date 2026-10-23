@@ -2,10 +2,10 @@ import { chromium } from 'playwright';
 
 const origin = process.env.PRODUCTION_BASE_URL || 'https://rhtampubolon-creator.github.io/Eprocurement-Portal';
 const paths = [
-  '/',
-  '/dashboard/',
-  '/bidder-list/',
-  '/procurement-admin/workspace/index.html?pr=PERF-SMOKE&tab=BidderList'
+  '',
+  'dashboard/',
+  'bidder-list/',
+  'procurement-admin/workspace/index.html?pr=PERF-SMOKE&tab=BidderList'
 ];
 const browser = await chromium.launch({ headless: true });
 const results = [];
@@ -54,7 +54,7 @@ try {
     let navigationTiming = null;
     let title = '';
     try {
-      const response = await page.goto(new URL(path, origin).href, { waitUntil: 'load', timeout: 45000 });
+      const response = await page.goto(new URL(path, origin.replace(/\\/+$/, '') + '/').href, { waitUntil: 'load', timeout: 45000 });
       status = response?.status() ?? null;
       await page.waitForTimeout(800);
       title = await page.title();
