@@ -115,6 +115,7 @@ try {
     readyState: document.readyState,
     chartLibraryAvailable: typeof Chart === 'function',
     canvasCount: document.querySelectorAll('canvas').length,
+    unrenderedIcons: document.querySelectorAll('i[data-lucide]').length,
     chartsCreated: typeof Chart === 'function' ? Object.keys(Chart.instances || {}).length : 0
   }));
 
@@ -122,7 +123,7 @@ try {
   if (!state.viewBodyExists || state.readyState !== 'complete') failures++;
   if (!['PT Vendor Example', 'CV Supplier Demo'].includes(pickerState.selectedValue) || pickerState.firstRowValue !== pickerState.selectedValue || !pickerState.popupHiddenAfterSelect) failures++;
   if (!pickerState.jszipAvailable || !pickerState.flatpickrAvailable) failures++;
-  if (!dashboardState.chartLibraryAvailable || dashboardState.readyState !== 'complete' || dashboardState.canvasCount < 1) failures++;
+  if (!dashboardState.chartLibraryAvailable || dashboardState.readyState !== 'complete' || dashboardState.canvasCount < 1 || dashboardState.chartsCreated < 1 || dashboardState.unrenderedIcons > 0) failures++;
   if (errors.length || localFailures.length) failures++;
 } catch (error) {
   console.error(error.stack || String(error));
