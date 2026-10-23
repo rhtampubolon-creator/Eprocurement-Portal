@@ -116,7 +116,18 @@ try {
     chartLibraryAvailable: typeof Chart === 'function',
     canvasCount: document.querySelectorAll('canvas').length,
     unrenderedIcons: document.querySelectorAll('i[data-lucide]').length,
-    chartsCreated: typeof Chart === 'function' ? Object.keys(Chart.instances || {}).length : 0
+    chartsCreated: typeof Chart === 'function' ? Object.keys(Chart.instances || {}).length : 0,
+    navigationTiming: (() => {
+      const nav = performance.getEntriesByType('navigation')[0];
+      if (!nav) return null;
+      return {
+        responseStartMs: Math.round(nav.responseStart),
+        domInteractiveMs: Math.round(nav.domInteractive),
+        domContentLoadedMs: Math.round(nav.domContentLoadedEventEnd),
+        loadEventEndMs: Math.round(nav.loadEventEnd),
+        transferSizeBytes: nav.transferSize
+      };
+    })()
   }));
 
   console.log(JSON.stringify({ test: 'workspace-bidderlist-dashboard', state, pickerState, dashboardState, pageErrors: errors, localFailures }, null, 2));
