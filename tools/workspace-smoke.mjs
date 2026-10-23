@@ -103,11 +103,26 @@ try {
     selectedValue: document.querySelector('input.vendor-select')?.value || '',
     popupHiddenAfterSelect: document.getElementById('vendorCompanySuggestionPopup')?.hidden ?? true,
     vendorCount: typeof VENDOR_COMPANIES !== 'undefined' ? VENDOR_COMPANIES.length : -1,
+    jszipAvailable: typeof JSZip !== 'undefined' && typeof JSZip.loadAsync === 'function',
+    flatpickrAvailable: typeof flatpickr === 'function',
     firstRowValue: typeof DATA !== 'undefined' ? DATA.structured.BidderList.rows[0]?.['Name of Invited Supplier'] : ''
   }));
-  console.log(JSON.stringify({ test: 'workspace-bidderlist', state, pickerState, pageErrors: errors, localFailures }, null, 2));
+
+  // Verify deferred Chart.js is available before dashboard initialization uses it.
+  await page.goto('http://127.0.0.1:4173/dashboard/index.html', { waitUntil: 'load', timeout: 30000 });
+  await page.waitForTimeout(500);
+  const dashboardState = await page.evaluate(() => ({
+    readyState: document.readyState,
+    chartLibraryAvailable: typeof Chart === 'function',
+    canvasCount: document.querySelectorAll('canvas').length,
+    chartsCreated: typeof Chart === 'function' ? Object.keys(Chart.instances || {}).length : 0
+  }));
+
+  console.log(JSON.stringify({ test: 'workspace-bidderlist-dashboard', state, pickerState, dashboardState, pageErrors: errors, localFailures }, null, 2));
   if (!state.viewBodyExists || state.readyState !== 'complete') failures++;
   if (!['PT Vendor Example', 'CV Supplier Demo'].includes(pickerState.selectedValue) || pickerState.firstRowValue !== pickerState.selectedValue || !pickerState.popupHiddenAfterSelect) failures++;
+  if (!pickerState.jszipAvailable || !pickerState.flatpickrAvailable) failures++;
+  if (!dashboardState.chartLibraryAvailable || dashboardState.readyState !== 'complete' || dashboardState.canvasCount < 1) failures++;
   if (errors.length || localFailures.length) failures++;
 } catch (error) {
   console.error(error.stack || String(error));
