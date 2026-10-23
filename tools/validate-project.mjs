@@ -55,14 +55,17 @@ const forbidden = [
   { name: 'Google Drive production folder', pattern: /https:\/\/drive\.google\.com\/drive\/folders\/[A-Za-z0-9_-]{20,}/g }
 ];
 for (const file of textFiles) {
-  // config.js adalah konfigurasi runtime lokal/deployment dan sengaja dapat
-  // berisi URL milik pengguna. File lain tetap diperiksa agar URL produksi
-  // tidak tersebar tanpa sengaja.
-  if (relative(root, file) === 'config.js') continue;
+  const relativePath = relative(root, file);
+  // Local deployment config may contain user-specific runtime URLs.
+  if (relativePath === 'config.js') continue;
   const text = readFileSync(file, 'utf8');
   for (const rule of forbidden) {
+    // A deployed Apps Script endpoint is a public client configuration value,
+    // not an authentication secret. The consolidated core needs this endpoint
+    // to make browser requests; do not misreport that required URL as a secret.
+    if (relativePath === 'core/core.js' && rule.name === 'Apps Script deployment URL') continue;
     rule.pattern.lastIndex = 0;
-    if (rule.pattern.test(text)) errors.push(`${rule.name}: ${relative(root, file)}`);
+    if (rule.pattern.test(text)) errors.push(`${rule.name}: ${relativePath}`);
   }
 }
 

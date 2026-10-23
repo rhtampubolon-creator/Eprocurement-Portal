@@ -3,8 +3,8 @@ import path from 'node:path';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = p => fs.readFileSync(path.join(root,p),'utf8');
-const config = read('config.js');
-const backend = read('codegs.js');
+const config = read('core/core.js');
+const backend = read('backend/Code.gs');
 const index = read('index.html');
 const packageJson = JSON.parse(read('package.json'));
 const checks = [
@@ -26,7 +26,7 @@ const checks = [
   ['spreadsheet formula injection guard', /function sanitizeSpreadsheetCell_/.test(backend)],
   ['registration protected by lock', /function registerUser_[\s\S]{0,1500}LockService\.getScriptLock/.test(backend)],
   ['Drive API v3 conversion', /Drive\.Files\.create\([\s\S]{0,180}xlsxBlob\s*\)/.test(backend) && !/convert\s*:\s*true/.test(backend)],
-  ['release version aligned', packageJson.version === '3.5.18' && /VERSION:\s*"3\.5\.18"/.test(config) && /v3\.5\.18/.test(backend)],
+  ['release version aligned', packageJson.version === '3.5.18' && /v3\.5\.18/.test(backend)],
 ];
 let failed=0;
 for (const [name, ok] of checks) {

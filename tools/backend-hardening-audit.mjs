@@ -3,7 +3,7 @@ import vm from 'node:vm';
 import path from 'node:path';
 
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
-const backendSource = fs.readFileSync(path.join(root, 'codegs.js'), 'utf8');
+const backendSource = fs.readFileSync(path.join(root, 'backend', 'Code.gs'), 'utf8');
 const backendContext = {
   PropertiesService: {
     getScriptProperties() {
@@ -50,7 +50,7 @@ const health = JSON.parse(backendContext.doPost({
 }).text);
 if (!health.success || health.status !== 'ONLINE') throw new Error('POST health check failed.');
 
-const commonSource = fs.readFileSync(path.join(root, 'common.js'), 'utf8');
+const commonSource = fs.readFileSync(path.join(root, 'core', 'core.js'), 'utf8');
 const commonStart = commonSource.indexOf('(function installAuthenticatedFetch');
 const commonEnd = commonSource.indexOf('})();', commonStart) + 5;
 let capturedRequest = null;

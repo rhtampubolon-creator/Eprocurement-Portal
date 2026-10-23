@@ -9,6 +9,7 @@
     "security-audit": "node tools/security-audit.mjs",
     "hardening-audit": "node tools/backend-hardening-audit.mjs",
     "audit": "npm run validate && npm run security-audit && npm run hardening-audit && node tools/session-stability-audit.mjs",
+    "audit:performance": "node tools/performance-audit.mjs",
     "mobile-role-audit": "node tools/mobile-role-audit.mjs",
     "build:tailwind": "tailwindcss -i ./assets/tailwind-input.css -o ./assets/tailwind.min.css --minify",
     "build:lucide": "terser ./node_modules/lucide/dist/umd/lucide.js -c -m -o ./assets/lucide.min.js",

@@ -2,10 +2,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
-const common = read('common.js');
+const common = read('core/core.js');
 const main = read('script.js');
 const dashboard = read('dashboard/script.js');
-const backend = read('codegs.js');
+const backend = read('backend/Code.gs');
 const checks = [
   ['active token helper exists', common.includes('window.MSW_GET_AUTH_TOKEN = readActiveToken')],
   ['token pairs profile and storage', common.includes('sessionToken && sessionProfile') && common.includes('localToken && localProfile')],
