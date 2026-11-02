@@ -3797,15 +3797,36 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         throw new Error("No PR kosong.");
       }
 
+      // Ambil Description secara toleran terhadap variasi kapitalisasi,
+      // spasi, dan nama key dari form, cache, maupun Google Sheet.
+      const descriptionKey = Object.keys(row).find(key =>
+        normalizeImportHeader(key) === "description" &&
+        String(row[key] ?? "").trim() !== ""
+      );
+      const description = String(
+        row.Description ||
+        row.description ||
+        row.descriptionText ||
+        row["PR Description"] ||
+        (descriptionKey ? row[descriptionKey] : "") ||
+        ""
+      ).trim();
+
+      // Simpan kembali dengan key kanonis agar proses EDIT ke Google Sheet
+      // dan proses pembuatan folder menggunakan nilai Description yang sama.
+      if (description) row.Description = description;
+
+      if (!description) {
+        console.error("Description Procurement kosong. Key row:", Object.keys(row));
+        showToast("Description kosong. Folder tidak dibuat agar nama folder tidak hanya berisi No PR.", "error");
+        throw new Error("Description Procurement tidak ditemukan pada data row.");
+      }
+
       const payload = {
         action: "createFolder",
         createStructure: options.ensureStructure !== false,
         noPR: row.noPR,
-        // Ambil Description dari seluruh variasi key agar folder tidak dibuat
-        // hanya dengan No PR ketika data berasal dari form/cache lama.
-        description: String(
-          row.Description || row.description || row["Description"] || ""
-        ).trim(),
+        description: description,
         folderId: row.folderid || "",
         folderUrl: row.folderlink || "",
         rounds: getRoundsForFolderStructure(row),
