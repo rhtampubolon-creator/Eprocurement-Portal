@@ -3665,6 +3665,22 @@ function extractDriveFolderId_(value) {
 function resolveProcurementRootFolder_(payload, noPR, description, createIfMissing) {
   payload = payload || {};
   const configuredRootId = requiredScriptProperty_("PROCUREMENT_ROOT_FOLDER_ID");
+  const normalizedPR = String(noPR || "").trim().toLowerCase();
+  const normalizedDescription = String(description || "").trim();
+
+  // Pertahankan folder dan seluruh isinya. Jika folder lama hanya memakai
+  // No PR, lengkapi namanya dengan Description tanpa membuat folder baru.
+  function normalizeProcurementRootName_(folder) {
+    if (!folder || !noPR || !normalizedDescription) return folder;
+
+    const currentName = String(folder.getName() || "").trim();
+    if (currentName.toLowerCase() !== normalizedPR) return folder;
+
+    const completeName = String(noPR).trim() + " - " + normalizedDescription;
+    const safeName = completeName.substring(0, 180);
+    if (currentName !== safeName) folder.setName(safeName);
+    return folder;
+  }
 
   const suppliedFolderIds = [
     String(payload.folderId || "").trim(),
@@ -3678,26 +3694,25 @@ function resolveProcurementRootFolder_(payload, noPR, description, createIfMissi
       const candidate = DriveApp.getFolderById(suppliedFolderIds[index]);
       const matchingRoot = findProcurementRootFromCandidate_(candidate, noPR);
       if (matchingRoot && driveFolderIsWithinRoot_(matchingRoot, configuredRootId, 8)) {
-        return matchingRoot;
+        return normalizeProcurementRootName_(matchingRoot);
       }
     } catch (ignore) {}
   }
 
   const parent = DriveApp.getFolderById(configuredRootId);
-  const normalizedPR = String(noPR || "").toLowerCase();
 
   if (normalizedPR) {
     const folders = parent.getFolders();
 
     while (folders.hasNext()) {
       const candidate = folders.next();
-      const candidateName = candidate.getName().toLowerCase();
+      const candidateName = String(candidate.getName() || "").trim().toLowerCase();
 
       if (
         candidateName === normalizedPR ||
         candidateName.indexOf(normalizedPR + " - ") === 0
       ) {
-        return candidate;
+        return normalizeProcurementRootName_(candidate);
       }
     }
   }
@@ -3708,7 +3723,7 @@ function resolveProcurementRootFolder_(payload, noPR, description, createIfMissi
     throw new Error("No PR wajib diisi sebelum membuat folder.");
   }
 
-  const folderName = noPR + (description ? " - " + description : "");
+  const folderName = String(noPR).trim() + (normalizedDescription ? " - " + normalizedDescription : "");
   return parent.createFolder(folderName.substring(0, 180));
 }
 
