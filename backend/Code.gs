@@ -3668,17 +3668,20 @@ function resolveProcurementRootFolder_(payload, noPR, description, createIfMissi
   const normalizedPR = String(noPR || "").trim().toLowerCase();
   const normalizedDescription = String(description || "").trim();
 
-  // Pertahankan folder dan seluruh isinya. Jika folder lama hanya memakai
-  // No PR, lengkapi namanya dengan Description tanpa membuat folder baru.
+  // Pertahankan folder dan seluruh isinya. Setiap root folder yang sudah
+  // tervalidasi cocok dengan No PR akan diselaraskan ke nama No PR - Description.
+  // Ini juga memperbaiki folder lama yang pernah dibuat hanya dengan No PR
+  // atau memiliki Description lama.
   function normalizeProcurementRootName_(folder) {
     if (!folder || !noPR || !normalizedDescription) return folder;
 
     const currentName = String(folder.getName() || "").trim();
-    if (currentName.toLowerCase() !== normalizedPR) return folder;
-
     const completeName = String(noPR).trim() + " - " + normalizedDescription;
     const safeName = completeName.substring(0, 180);
-    if (currentName !== safeName) folder.setName(safeName);
+
+    if (currentName !== safeName) {
+      folder.setName(safeName);
+    }
     return folder;
   }
 
