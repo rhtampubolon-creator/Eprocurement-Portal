@@ -3237,7 +3237,7 @@ function listMasterTemplates_() {
 function ensureProcurementFolderStructure_(payload) {
   assertProcurementContextAccess_(payload, "write");
   const noPR = cleanFolderName_(payload.noPR);
-  const description = cleanFolderName_(payload.description || "");
+  const description = cleanFolderName_(payload.description || payload.Description || payload.descriptionText || "");
   const rootFolder = resolveProcurementRootFolder_(payload, noPR, description, true);
   const rounds = collectRoundsFromPayload_(payload);
   const folderMap = readOrEnsureStandardSubfolders_(rootFolder, rounds, true);
@@ -3256,7 +3256,7 @@ function ensureProcurementFolderStructure_(payload) {
 function getProcurementFolderStructure_(payload) {
   assertProcurementContextAccess_(payload, "read");
   const noPR = cleanFolderName_(payload.noPR);
-  const description = cleanFolderName_(payload.description || "");
+  const description = cleanFolderName_(payload.description || payload.Description || payload.descriptionText || "");
   const rootFolder = resolveProcurementRootFolder_(payload, noPR, description, false);
 
   if (!rootFolder) {
@@ -3299,7 +3299,7 @@ function uploadProcurementFile_(payload) {
   }
 
   const noPR = cleanFolderName_(payload.noPR);
-  const description = cleanFolderName_(payload.description || "");
+  const description = cleanFolderName_(payload.description || payload.Description || payload.descriptionText || "");
   const rootFolder = resolveProcurementRootFolder_(payload, noPR, description, true);
   const rounds = collectRoundsFromPayload_(payload);
   const folderMap = readOrEnsureStandardSubfolders_(rootFolder, rounds, true);
@@ -3439,7 +3439,7 @@ function getProcurementDocuments_(payload) {
   payload = payload || {};
   assertProcurementContextAccess_(payload, "read");
   const noPR = cleanFolderName_(payload.noPR);
-  const description = cleanFolderName_(payload.description || "");
+  const description = cleanFolderName_(payload.description || payload.Description || payload.descriptionText || "");
   const rootFolder = resolveProcurementRootFolder_(payload, noPR, description, false);
 
   if (!rootFolder) {
@@ -3507,7 +3507,7 @@ function listProcurementFiles_(payload) {
   } else {
     assertProcurementContextAccess_(payload, "read");
     const noPR = cleanFolderName_(payload.noPR);
-    const description = cleanFolderName_(payload.description || "");
+    const description = cleanFolderName_(payload.description || payload.Description || payload.descriptionText || "");
     if (!noPR) throw new Error("No PR wajib diisi untuk mengambil attachment PR/RFQ.");
 
     const rootFolder = resolveProcurementRootFolder_(payload, noPR, description, false);
@@ -5857,7 +5857,7 @@ function exportXlsxAsPdf_(payload) {
   // Simpan PDF ke folder yang sama dengan xlsx, kalau info folder disertakan.
   if (payload.noPR) {
     const noPR = cleanFolderName_(payload.noPR);
-    const description = cleanFolderName_(payload.description || "");
+    const description = cleanFolderName_(payload.description || payload.Description || payload.descriptionText || "");
     const rootFolder = resolveProcurementRootFolder_(payload, noPR, description, true);
     const rounds = collectRoundsFromPayload_(payload);
     const folderMap = readOrEnsureStandardSubfolders_(rootFolder, rounds, true);
@@ -6050,7 +6050,7 @@ function assertAllowedEmlAttachmentFile_(file, payload) {
     const procurementRoot = resolveProcurementRootFolder_(
       payload || {},
       noPR,
-      cleanFolderName_(payload.description || ""),
+      cleanFolderName_(payload.description || payload.Description || payload.descriptionText || ""),
       false
     );
     if (procurementRoot) allowedRootIds.push(procurementRoot.getId());
