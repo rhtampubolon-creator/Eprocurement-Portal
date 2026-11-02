@@ -3801,7 +3801,11 @@ if (!MSW_PROCUREMENT_MODULE_ALLOWED) {
         action: "createFolder",
         createStructure: options.ensureStructure !== false,
         noPR: row.noPR,
-        description: row.Description,
+        // Ambil Description dari seluruh variasi key agar folder tidak dibuat
+        // hanya dengan No PR ketika data berasal dari form/cache lama.
+        description: String(
+          row.Description || row.description || row["Description"] || ""
+        ).trim(),
         folderId: row.folderid || "",
         folderUrl: row.folderlink || "",
         rounds: getRoundsForFolderStructure(row),
