@@ -295,11 +295,24 @@ function parseUsdAmount(value) {
     const comma = text.lastIndexOf(",");
     const dot = text.lastIndexOf(".");
     if (comma >= 0 && dot >= 0) {
+        // 1.234,50 (ID) or 1,234.50 (EN)
         text = comma > dot
             ? text.replace(/\./g, "").replace(",", ".")
             : text.replace(/,/g, "");
+    } else if (dot >= 0) {
+        // In Indonesian UI, 5.122 and 1.234.567 use dots for thousands.
+        // A dot followed by 1-2 digits is retained as a decimal separator.
+        const groups = text.replace(/^-/, "").split(".");
+        if (groups.length > 1 && groups.slice(1).every(group => /^\d{3}$/.test(group))) {
+            text = text.replace(/\./g, "");
+        }
     } else if (comma >= 0) {
-        text = text.replace(/\./g, "").replace(",", ".");
+        const groups = text.replace(/^-/, "").split(",");
+        // A single comma with 1-2 digits is an Indonesian decimal separator.
+        // Commas grouped into threes are accepted as thousands (English import).
+        text = groups.length > 1 && groups.slice(1).every(group => /^\d{3}$/.test(group))
+            ? text.replace(/,/g, "")
+            : text.replace(",", ".");
     }
 
     const numeric = Number(text);
