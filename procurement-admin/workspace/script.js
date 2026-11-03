@@ -7,7 +7,14 @@ const prLabel = document.getElementById('workspacePr');
 const bidderTab = document.getElementById('workspaceBidderTab');
 
 const BIDDER_VIEWS = ['BidderList', 'RFQ', 'CQS', 'Multiple_Email'];
-prLabel.textContent = noPR || 'No PR belum tersedia';
+// Judul workspace adalah gabungan No PR dan Description; identitas PR tetap nomor saja.
+function updateWorkspacePrLabel(row) {
+  const pr = String(row?.noPR || row?.['No PR'] || noPR || '').trim();
+  const description = String(row?.Description || row?.description || '').replace(/\s+/g, ' ').trim();
+  prLabel.textContent = pr ? `${pr}${description ? ' - ' + description : ''}` : 'No PR belum tersedia';
+  prLabel.title = prLabel.textContent;
+}
+updateWorkspacePrLabel(null);
 
 function normalizeFlow(value) {
   return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, '');
@@ -26,6 +33,7 @@ function getProcurementRow() {
 }
 
 let procurementRow = getProcurementRow();
+updateWorkspacePrLabel(procurementRow);
 
 // Bridge untuk nested iframe: Form berada satu level di bawah Workspace,
 // sementara sumber row Procurement berada satu level di atas Workspace.
@@ -165,6 +173,7 @@ window.addEventListener('message', event => {
 
   if (event.data.action === 'PROCUREMENT_CONTEXT_UPDATED') {
     procurementRow = event.data.data || procurementRow || {};
+    updateWorkspacePrLabel(procurementRow);
     activeRound = String(event.data.round || procurementRow.roundpo || procurementRow['Round PR'] || procurementRow['Round PO'] || 'R0').toUpperCase();
     flowProcess = procurementRow.flowprocess || procurementRow['Flow Process'] || flowProcess;
     normalizedFlow = normalizeFlow(flowProcess);
@@ -192,6 +201,7 @@ window.addEventListener('message', event => {
 
   if (event.data.action === 'BIDDERLIST_PROCUREMENT_UPDATED') {
     procurementRow = { ...(procurementRow || {}), ...(event.data.data || {}) };
+    updateWorkspacePrLabel(procurementRow);
     activeRound = String(event.data.round || procurementRow.roundpo || procurementRow['Round PR'] || procurementRow['Round PO'] || activeRound || 'R0').toUpperCase();
     procurementFrame.contentWindow?.postMessage({
       action: 'MERGE_PROCUREMENT_WORKSPACE_DATA',
@@ -205,6 +215,10 @@ window.addEventListener('message', event => {
   }
 
   if (!['PROCUREMENT_SAVED', 'PROCUREMENT_CANCELLED'].includes(event.data.action)) return;
+  if (event.data.action === 'PROCUREMENT_SAVED' && event.data.data) {
+    procurementRow = { ...(procurementRow || {}), ...event.data.data };
+    updateWorkspacePrLabel(procurementRow);
+  }
   window.parent.postMessage({
     ...event.data,
     keepWorkspaceOpen: event.data.action === 'PROCUREMENT_SAVED'
